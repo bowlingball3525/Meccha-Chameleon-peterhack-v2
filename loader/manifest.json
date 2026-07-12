@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "baseUrl": "local",
+  "process": "PenguinHotel-Win64-Shipping.exe",
+  "injectDll": "peterhack.dll",
+  "files": [
+    "peterhack.dll",
+    "bridge/meccha-xenos-bridge.dll",
+    "bridge/mesh-profiles/paintman.mesh-profile-v2.json",
+    "bridge/mesh-profiles/paintman_cube.mesh-profile-v2.json"
+  ]
+}

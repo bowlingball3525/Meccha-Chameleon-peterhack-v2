@@ -1,0 +1,16 @@
+<Solution>
+
+  <Configurations>
+
+    <Platform Name="x64" />
+
+    <Platform Name="x86" />
+
+  </Configurations>
+
+  <Project Path="peterhack/peterhack.vcxproj" Id="ae472d23-80de-4a8e-8f57-e3a90ea14780" />
+
+  <Project Path="loader/peterhack-loader.vcxproj" Id="b8e4c1a2-3f7d-4c9e-a1b2-5d6e7f8091ab" />
+
+</Solution>
+

@@ -1,0 +1,1045 @@
+#include "includes.hpp"
+
+#if defined _M_X64
+typedef uint64_t uintx_t;
+#elif defined _M_IX86
+typedef uint32_t uintx_t;
+#endif
+
+typedef HRESULT(APIENTRY* Present12)(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT Flags);
+Present12 oPresent = NULL;
+
+typedef void(APIENTRY* ExecuteCommandLists)(ID3D12CommandQueue* queue, UINT NumCommandLists, ID3D12CommandList* ppCommandLists);
+ExecuteCommandLists oExecuteCommandLists = NULL;
+
+typedef HRESULT(APIENTRY* ResizeBuffers)(IDXGISwapChain3* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
+ResizeBuffers oResizeBuffers = NULL;
+
+typedef void(__fastcall* tProcessEvent)(SDK::UObject*, SDK::UFunction*, void*);
+tProcessEvent oProcessEvent = nullptr;
+
+namespace Process
+{
+	DWORD ID;
+	HANDLE Handle;
+	HWND Hwnd;
+	HMODULE Module;
+	WNDPROC WndProc;
+	int WindowWidth;
+	int WindowHeight;
+}
+
+static bool IsGameWindowFocused()
+{
+	const HWND fg = GetForegroundWindow();
+	return fg && Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg));
+}
+
+static void SyncMenuMousePosition(ImGuiIO& io)
+{
+	if (!Process::Hwnd)
+		return;
+
+	POINT pt{};
+	if (::GetCursorPos(&pt) && ::ScreenToClient(Process::Hwnd, &pt))
+		io.AddMousePosEvent(static_cast<float>(pt.x), static_cast<float>(pt.y));
+}
+
+static void ReleaseLocalMouseCapture()
+{
+	if (!Process::Hwnd)
+		return;
+
+	ClipCursor(nullptr);
+	if (::GetCapture() == Process::Hwnd)
+		::ReleaseCapture();
+}
+
+static void RestoreSystemMouseCursor()
+{
+	ReleaseLocalMouseCapture();
+
+	for (int i = 0; i < 8; ++i)
+	{
+		if (ShowCursor(TRUE) >= 0)
+			break;
+	}
+	SetCursor(LoadCursorW(nullptr, IDC_ARROW));
+}
+
+namespace DirectX12Interface
+{
+	ID3D12Device* Device = nullptr;
+	ID3D12DescriptorHeap* DescriptorHeapBackBuffers;
+	ID3D12DescriptorHeap* DescriptorHeapImGuiRender;
+	ID3D12GraphicsCommandList* CommandList;
+	ID3D12CommandQueue* CommandQueue;
+
+	struct _FrameContext
+	{
+		ID3D12CommandAllocator* CommandAllocator;
+		ID3D12Resource* Resource;
+		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle;
+		UINT64 FenceValue; // GPU fence value of the last submission that used this context's allocator
+	};
+
+	uintx_t BuffersCounts = -1;
+	_FrameContext* FrameContext;
+
+	// Single fence shared across frame contexts; each context records the value it was last
+	// signaled with so we can wait for the GPU to finish before reusing its allocator.
+	ID3D12Fence* Fence = nullptr;
+	HANDLE FenceEvent = nullptr;
+	UINT64 FenceLastSignaledValue = 0;
+
+	// ImGui 1.92+ uploads font + widget textures dynamically and needs many SRV slots.
+	// The legacy single-descriptor init corrupts color pickers/gradients on some GPUs,
+	// especially when large merged font atlases are built (CJK fonts present).
+	static constexpr UINT ImGuiSrvCapacity = 256;
+	UINT ImGuiSrvDescriptorSize = 0;
+	UINT ImGuiSrvAllocCount = 0;
+	std::vector<UINT> ImGuiSrvFreeIndices;
+	D3D12_CPU_DESCRIPTOR_HANDLE ImGuiSrvCpuStart{};
+	D3D12_GPU_DESCRIPTOR_HANDLE ImGuiSrvGpuStart{};
+
+	void ResetImGuiSrvAllocator()
+	{
+		ImGuiSrvAllocCount = 0;
+		ImGuiSrvFreeIndices.clear();
+	}
+
+	void ImGuiSrvDescriptorAlloc(ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu)
+	{
+		UINT index = UINT_MAX;
+		if (!ImGuiSrvFreeIndices.empty())
+		{
+			index = ImGuiSrvFreeIndices.back();
+			ImGuiSrvFreeIndices.pop_back();
+		}
+		else if (ImGuiSrvAllocCount < ImGuiSrvCapacity)
+		{
+			index = ImGuiSrvAllocCount++;
+		}
+
+		if (index == UINT_MAX)
+		{
+			*out_cpu = {};
+			*out_gpu = {};
+			PhLog("[ImGui] SRV descriptor heap exhausted\n");
+			return;
+		}
+
+		out_cpu->ptr = ImGuiSrvCpuStart.ptr + static_cast<SIZE_T>(index) * ImGuiSrvDescriptorSize;
+		out_gpu->ptr = ImGuiSrvGpuStart.ptr + static_cast<UINT64>(index) * ImGuiSrvDescriptorSize;
+	}
+
+	void ImGuiSrvDescriptorFree(ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE)
+	{
+		if (!ImGuiSrvDescriptorSize || !ImGuiSrvCpuStart.ptr || !cpu.ptr)
+			return;
+		const UINT index = static_cast<UINT>((cpu.ptr - ImGuiSrvCpuStart.ptr) / ImGuiSrvDescriptorSize);
+		if (index < ImGuiSrvCapacity)
+			ImGuiSrvFreeIndices.push_back(index);
+	}
+}
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	const bool hasImGui = ImGui::GetCurrentContext() && ImGui::GetIO().BackendPlatformUserData;
+	const bool menuOpen = cfg && cfg->bMenuOpen;
+	const bool imguiConsumed = hasImGui && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+
+	// While the menu is open, keep mouse input in ImGui only — don't pass movement,
+	// clicks, or raw input through to the game (camera look, etc.).
+	if (menuOpen && hasImGui)
+	{
+		switch (uMsg)
+		{
+		case WM_SETCURSOR:
+			if (LOWORD(lParam) == HTCLIENT)
+			{
+				::SetCursor(nullptr);
+				return TRUE;
+			}
+			break;
+		case WM_MOUSEMOVE:
+		case WM_NCMOUSEMOVE:
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+		case WM_MOUSEWHEEL:
+		case WM_MOUSEHWHEEL:
+		case WM_INPUT:
+			return 0;
+		}
+	}
+
+	if (imguiConsumed)
+		return true;
+
+	return CallWindowProc(Process::WndProc, hWnd, uMsg, wParam, lParam);
+}
+
+// The world scan (CheatManager::Init) - which both reads the actor list and applies our game-state
+// mutations inline - must run ONLY on the engine's game thread.
+// Using it let the scan race the real game thread's actor list and fault deep inside
+// GetAllActorsOfClass. We positively identify the game thread by the name UE gives it ("GameThread",
+// set during FEngineLoop::PreInit) and only run that work when the current TID matches - resolved
+// once in hkPresent via FindGameThreadId, then checked in hkProcessEvent.
+
+// Find the engine's game thread by its UE-assigned name ("GameThread"). This is a positive lookup -
+// no racing to latch whichever non-render thread happens to dispatch the first ProcessEvent - so it
+// can't mis-identify a worker thread as the game thread. The game thread is created once at engine
+// boot and lives for the whole process, so the TID we return here stays valid for the session.
+// Returns 0 if it can't be found yet (not named, or GetThreadDescription unavailable); the caller
+// retries on a later frame.
+static DWORD FindGameThreadId()
+{
+	// GetThreadDescription is Win10 1607+. Resolve it dynamically so we link on any toolset/target.
+	typedef HRESULT(WINAPI* PFN_GetThreadDescription)(HANDLE, PWSTR*);
+	static PFN_GetThreadDescription pGetThreadDescription =
+		reinterpret_cast<PFN_GetThreadDescription>(
+			GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetThreadDescription"));
+	if (!pGetThreadDescription)
+		return 0;
+
+	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+	if (snapshot == INVALID_HANDLE_VALUE)
+		return 0;
+
+	const DWORD pid = GetCurrentProcessId();
+	DWORD foundTid = 0;
+
+	THREADENTRY32 te{};
+	te.dwSize = sizeof(te);
+	if (Thread32First(snapshot, &te))
+	{
+		do
+		{
+			// Snapshot covers every process; keep only our own threads.
+			if (te.th32OwnerProcessID != pid)
+				continue;
+
+			HANDLE thread = OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, te.th32ThreadID);
+			if (!thread)
+				continue;
+
+			PWSTR desc = nullptr;
+			if (SUCCEEDED(pGetThreadDescription(thread, &desc)) && desc)
+			{
+				if (wcscmp(desc, L"GameThread") == 0)
+					foundTid = te.th32ThreadID;
+				LocalFree(desc);
+			}
+			CloseHandle(thread);
+		} while (foundTid == 0 && Thread32Next(snapshot, &te));
+	}
+
+	CloseHandle(snapshot);
+	return foundTid;
+}
+
+static void InitKickFunctionPointers()
+{
+	if (!g_fnKickLINK)
+		g_fnKickLINK = SDK::ABP_FirstPersonCharacter_LINK_C::StaticClass()->GetFunction("BP_FirstPersonCharacter_LINK_C", "Kick");
+
+	if (!g_fnKickOnline)
+		g_fnKickOnline = SDK::ABP_FirstPersonPlayerState_Online_C::StaticClass()->GetFunction("BP_FirstPersonPlayerState_Online_C", "Kick");
+
+	if (!g_fnClientWasKicked)
+		g_fnClientWasKicked = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientWasKicked");
+
+	if (!g_fnClientReturnToMainMenuWithTextReason)
+		g_fnClientReturnToMainMenuWithTextReason = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientReturnToMainMenuWithTextReason");
+
+	if (!g_fnOnRepBodyVisibility)
+		g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
+}
+
+static void RefreshKickFunctionPointersIfStale()
+{
+	if (!cfg || (!cfg->bPreventKick && !cfg->bForceCharacterVisibility))
+		return;
+
+	static ULONGLONG s_lastRefreshMs = 0;
+	const ULONGLONG now = GetTickCount64();
+	if (now - s_lastRefreshMs < 30000)
+		return;
+	s_lastRefreshMs = now;
+	InitKickFunctionPointers();
+}
+
+// Pointer-only exploit blocking — never call GetName() on the ProcessEvent hot path.
+static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction)
+{
+	if (!cfg || !pFunction)
+		return false;
+
+	if (!cfg->bForceCharacterVisibility && !cfg->bPreventKick)
+		return false;
+
+	if (cfg->bForceCharacterVisibility && pFunction == g_fnOnRepBodyVisibility &&
+		pObject && CheatManager::IsObjectValid(pObject) &&
+		pObject->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+	{
+		static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(pObject)->BodyVisibility = true;
+	}
+
+	if (cfg->bPreventKick &&
+		(pFunction == g_fnKickOnline || pFunction == g_fnKickLINK ||
+			pFunction == g_fnClientWasKicked || pFunction == g_fnClientReturnToMainMenuWithTextReason))
+	{
+		if (pFunction == g_fnClientReturnToMainMenuWithTextReason &&
+			g_allowSelfReturnToMenu.load(std::memory_order_acquire))
+		{
+			return false;
+		}
+
+		PhLog("[ProcessEvent] Prevented kick function\n");
+		return true;
+	}
+
+	return false;
+}
+
+static void TryRunGameThreadInit(CheatManager* mgr)
+{
+	__try
+	{
+		mgr->Init();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] Init fault — skipped frame\n");
+	}
+}
+
+static void TryApplyMenuInputLock(CheatManager* mgr, bool menuOpen)
+{
+	__try
+	{
+		mgr->ApplyMenuInputLock(menuOpen);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] menu input lock fault\n");
+	}
+}
+
+void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
+{
+	if (g_inGameThreadFlush)
+		return oProcessEvent(pObject, pFunction, pParms);
+
+	if (TryBlockExploitProcessEvent(pObject, pFunction))
+		return;
+
+	static thread_local DWORD s_routedGameTid = 0;
+	static thread_local bool s_onGameThread = false;
+	const DWORD gameTid = g_GameThreadId.load(std::memory_order_acquire);
+	if (gameTid != 0 && gameTid != s_routedGameTid)
+	{
+		s_routedGameTid = gameTid;
+		s_onGameThread = (GetCurrentThreadId() == gameTid);
+	}
+
+	if (!s_onGameThread)
+		return oProcessEvent(pObject, pFunction, pParms);
+
+	RefreshKickFunctionPointersIfStale();
+
+	if (!g_gatherRequested.load(std::memory_order_acquire))
+	{
+		static thread_local uint32_t s_idlePeCounter = 0;
+		if (cheat && (++s_idlePeCounter & 31) == 0 && g_menuInputLockRequested.exchange(false))
+		{
+			struct GatherGuard
+			{
+				GatherGuard() { g_inGameThreadFlush = true; }
+				~GatherGuard() { g_inGameThreadFlush = false; }
+			} gatherGuard;
+			TryApplyMenuInputLock(cheat, g_menuInputLockOpen.load());
+		}
+		return oProcessEvent(pObject, pFunction, pParms);
+	}
+
+	if (cheat && g_gatherRequested.exchange(false, std::memory_order_acq_rel))
+	{
+		struct GatherGuard
+		{
+			GatherGuard() { g_inGameThreadFlush = true; }
+			~GatherGuard() { g_inGameThreadFlush = false; }
+		} gatherGuard;
+		TryRunGameThreadInit(cheat);
+	}
+
+	static thread_local uint32_t s_gamePeCounter = 0;
+	if (cheat && (++s_gamePeCounter & 31) == 0 && g_menuInputLockRequested.exchange(false))
+	{
+		struct GatherGuard
+		{
+			GatherGuard() { g_inGameThreadFlush = true; }
+			~GatherGuard() { g_inGameThreadFlush = false; }
+		} gatherGuard;
+		TryApplyMenuInputLock(cheat, g_menuInputLockOpen.load());
+	}
+
+	return oProcessEvent(pObject, pFunction, pParms);
+}
+
+bool init = false;
+// Controls whether the hook is active. Set to false to disable the hook and restore the original Present() function.
+static std::atomic<bool> bRunning(true);
+// Guards Unload() so it runs exactly once - both the unload hotkey and
+// DLL_PROCESS_DETACH funnel through it, and tearing down twice would
+// double-disable MinHook and double-release the D3D12 resources.
+static std::atomic<bool> bUnloaded(false);
+
+HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT Flags)
+{
+	// Resolve the game thread by name, retrying each frame until found (it's named by the time we're
+	// injected, so this normally succeeds on frame 1). Once-per-frame keeps the thread-snapshot scan
+	// off the hot ProcessEvent path. Latched for the rest of the session via compare_exchange.
+	if (g_GameThreadId.load() == 0)
+	{
+		DWORD gameTid = FindGameThreadId();
+		if (gameTid != 0)
+		{
+			DWORD expected = 0;
+			if (g_GameThreadId.compare_exchange_strong(expected, gameTid))
+				PhLog("[hkPresent] Game thread TID: %lu\n", static_cast<unsigned long>(gameTid));
+		}
+	}
+
+	if (!bRunning)
+		return oPresent(pSwapChain, SyncInterval, Flags);
+	if (!init)
+	{
+		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D12Device), (void**)&DirectX12Interface::Device)))
+		{
+			// Texture uploads must go through the game's DIRECT queue; wait until the hook has captured it.
+			if (!DirectX12Interface::CommandQueue)
+				return oPresent(pSwapChain, SyncInterval, Flags);
+
+			IMGUI_CHECKVERSION();
+			ImGui::CreateContext();
+
+			ImGuiIO& io = ImGui::GetIO();
+			(void)io;
+			ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantTextInput || ImGui::GetIO().WantCaptureKeyboard;
+			io.IniFilename = NULL;
+			io.ConfigNavMoveSetMousePos = true;
+			io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+			// Load Unicode fonts so non-ASCII player names (Chinese, Arabic, Cyrillic, etc.) render correctly.
+			// Segoe UI ships on all Windows 10/11 and covers Latin, Cyrillic, Greek, Arabic, Hebrew, Thai, and more.
+			// CJK fonts are merged in when present; AddFontFromFileTTF silently returns nullptr if the file is missing.
+			{
+				ImFontConfig cfg;
+				cfg.OversampleH = 1;
+				cfg.OversampleV = 1;
+				// imgui 1.92+ logs/asserts when a font file is missing instead of silently
+				// returning nullptr. These fonts are best-effort (e.g. CJK files may not exist),
+				// so suppress the load error and rely on the return-value checks below.
+				cfg.Flags |= ImFontFlags_NoLoadError;
+
+				if (io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesDefault()))
+				{
+					cfg.MergeMode = true;
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesGreek());
+					static const ImWchar arabic_ranges[] = { 0x0600, 0x06FF, 0xFB50, 0xFDFF, 0xFE70, 0xFEFF, 0 };
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, arabic_ranges);
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 15.0f, &cfg, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\meiryo.ttc", 15.0f, &cfg, io.Fonts->GetGlyphRangesJapanese());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesKorean());
+				}
+			}
+
+			// Check if the font was loaded successfully
+			if (io.Fonts->Fonts.empty())
+			{
+				PhLog("Failed to load fonts. Falling back to default font.\n");
+				io.Fonts->AddFontDefault();
+			}
+
+			DXGI_SWAP_CHAIN_DESC Desc;
+			pSwapChain->GetDesc(&Desc);
+			Process::Hwnd = Desc.OutputWindow; // use the window the swapchain actually presents to, not GetForegroundWindow()'s guess
+			Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+			Desc.Windowed = ((GetWindowLongPtr(Process::Hwnd, GWL_STYLE) & WS_POPUP) != 0) ? false : true;
+
+			DirectX12Interface::BuffersCounts = Desc.BufferCount;
+			DirectX12Interface::FrameContext = new DirectX12Interface::_FrameContext[DirectX12Interface::BuffersCounts];
+
+			D3D12_DESCRIPTOR_HEAP_DESC DescriptorImGuiRender = {};
+			DescriptorImGuiRender.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			DescriptorImGuiRender.NumDescriptors = DirectX12Interface::ImGuiSrvCapacity;
+			DescriptorImGuiRender.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+			if (DirectX12Interface::Device->CreateDescriptorHeap(&DescriptorImGuiRender, IID_PPV_ARGS(&DirectX12Interface::DescriptorHeapImGuiRender)) != S_OK)
+				return oPresent(pSwapChain, SyncInterval, Flags);
+
+			DirectX12Interface::ImGuiSrvDescriptorSize = DirectX12Interface::Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			DirectX12Interface::ImGuiSrvCpuStart = DirectX12Interface::DescriptorHeapImGuiRender->GetCPUDescriptorHandleForHeapStart();
+			DirectX12Interface::ImGuiSrvGpuStart = DirectX12Interface::DescriptorHeapImGuiRender->GetGPUDescriptorHandleForHeapStart();
+			DirectX12Interface::ResetImGuiSrvAllocator();
+
+			// One command allocator per frame context. Sharing a single allocator and
+			// resetting it every frame corrupts state while the GPU is still executing the
+			// previous frame's commands; a per-context allocator gated by the fence below
+			// is only reset once the GPU is provably done with it.
+			for (size_t i = 0; i < DirectX12Interface::BuffersCounts; i++)
+			{
+				if (DirectX12Interface::Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&DirectX12Interface::FrameContext[i].CommandAllocator)) != S_OK)
+					return oPresent(pSwapChain, SyncInterval, Flags);
+				DirectX12Interface::FrameContext[i].FenceValue = 0;
+			}
+
+			if (DirectX12Interface::Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, DirectX12Interface::FrameContext[0].CommandAllocator, NULL, IID_PPV_ARGS(&DirectX12Interface::CommandList)) != S_OK ||
+				DirectX12Interface::CommandList->Close() != S_OK)
+				return oPresent(pSwapChain, SyncInterval, Flags);
+
+			// Fence + event survive resizes (init reruns), so guard creation to avoid leaking
+			// one per resize. FenceLastSignaledValue keeps counting across re-inits.
+			if (!DirectX12Interface::Fence)
+			{
+				if (DirectX12Interface::Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&DirectX12Interface::Fence)) != S_OK)
+					return oPresent(pSwapChain, SyncInterval, Flags);
+
+				DirectX12Interface::FenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+				if (!DirectX12Interface::FenceEvent)
+					return oPresent(pSwapChain, SyncInterval, Flags);
+			}
+
+			D3D12_DESCRIPTOR_HEAP_DESC DescriptorBackBuffers;
+			DescriptorBackBuffers.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+			DescriptorBackBuffers.NumDescriptors = DirectX12Interface::BuffersCounts;
+			DescriptorBackBuffers.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			DescriptorBackBuffers.NodeMask = 1;
+
+			if (DirectX12Interface::Device->CreateDescriptorHeap(&DescriptorBackBuffers, IID_PPV_ARGS(&DirectX12Interface::DescriptorHeapBackBuffers)) != S_OK)
+			{
+				return oPresent(pSwapChain, SyncInterval, Flags);
+			}
+
+			const auto RTVDescriptorSize = DirectX12Interface::Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = DirectX12Interface::DescriptorHeapBackBuffers->GetCPUDescriptorHandleForHeapStart();
+
+			for (size_t i = 0; i < DirectX12Interface::BuffersCounts; i++)
+			{
+				ID3D12Resource* pBackBuffer = nullptr;
+				DirectX12Interface::FrameContext[i].DescriptorHandle = RTVHandle;
+				pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+				DirectX12Interface::Device->CreateRenderTargetView(pBackBuffer, nullptr, RTVHandle);
+				DirectX12Interface::FrameContext[i].Resource = pBackBuffer;
+				RTVHandle.ptr += RTVDescriptorSize;
+			}
+
+			ImGui_ImplWin32_EnableDpiAwareness();
+			ImGui_ImplWin32_Init(Process::Hwnd);
+
+			ImGui_ImplDX12_InitInfo dx12Init{};
+			dx12Init.Device = DirectX12Interface::Device;
+			dx12Init.CommandQueue = DirectX12Interface::CommandQueue;
+			dx12Init.NumFramesInFlight = static_cast<int>(DirectX12Interface::BuffersCounts);
+			dx12Init.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+			dx12Init.SrvDescriptorHeap = DirectX12Interface::DescriptorHeapImGuiRender;
+			dx12Init.SrvDescriptorAllocFn = DirectX12Interface::ImGuiSrvDescriptorAlloc;
+			dx12Init.SrvDescriptorFreeFn = DirectX12Interface::ImGuiSrvDescriptorFree;
+			if (!ImGui_ImplDX12_Init(&dx12Init))
+				return oPresent(pSwapChain, SyncInterval, Flags);
+			ImGui_ImplDX12_CreateDeviceObjects();
+			// ImGui::GetIO().ImeWindowHandle = Process::Hwnd;
+			ImGui::GetMainViewport()->PlatformHandleRaw = Process::Hwnd;
+			// Only hook WndProc once - on resize init reruns, Process::WndProc already holds
+			// the original game proc. Hooking again would overwrite it with our own hook,
+			// causing CallWindowProc -> WndProc -> CallWindowProc infinite recursion.
+			if (!Process::WndProc)
+				Process::WndProc = (WNDPROC)SetWindowLongPtr(Process::Hwnd, GWLP_WNDPROC, (__int3264)(LONG_PTR)WndProc);
+
+			// Mark initialized only after every resource above was created - any failed step
+			// returns early and leaves init false, so the next frame retries cleanly instead
+			// of falling through to the render path with null D3D state.
+			init = true;
+		}
+	}
+
+	// Init hasn't completed (device not ready, or a create step failed this frame) - don't
+	// run the render path against half-built state.
+	if (!init)
+		return oPresent(pSwapChain, SyncInterval, Flags);
+
+	if (DirectX12Interface::CommandQueue == nullptr)
+		return oPresent(pSwapChain, SyncInterval, Flags);
+
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+	ImGui::Begin(("##scene"), nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
+
+	auto& io = ImGui::GetIO();
+	ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y), ImGuiCond_Always);
+
+	if (cheat && cheat->NeedsGameThreadTick())
+	{
+		// Game-thread scan + tool exploits (survivor/hunter toggles, kill, teleport, etc.).
+		g_gatherRequested.store(true);
+	}
+
+	if (cheat && (cfg->bMenuOpen || g_menuInputLockApplied.load(std::memory_order_acquire)))
+	{
+		g_menuInputLockOpen.store(cfg->bMenuOpen);
+		g_menuInputLockRequested.store(true);
+	}
+
+	if (cfg->bInitHooks && cheat)
+		cheat->RenderEsp();
+
+	// ignore hotkeys if the game window isn't focused, or if the user is typing in a text input (chat, console, etc.)
+	if (!cfg->bMenuOpen && (GetAsyncKeyState(cfg->iMagnetKey) & 1) && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput) // magnet toggle key (default G)
+		cfg->bMagnetEnabled = !cfg->bMagnetEnabled;
+
+	ImGui::End();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar(2);
+
+	if ((GetAsyncKeyState(VK_INSERT) & 1) && IsGameWindowFocused())
+		cfg->bMenuOpen = !cfg->bMenuOpen;
+
+	if (g_camo && !cfg->bMenuOpen)
+	{
+		static ULONGLONG s_lastCamoHotkeyTickMs = 0;
+		const ULONGLONG presentNow = GetTickCount64();
+		if (presentNow - s_lastCamoHotkeyTickMs >= 50)
+		{
+			s_lastCamoHotkeyTickMs = presentNow;
+			const bool inMatch = cheat ? cheat->inMatchCached.load(std::memory_order_acquire) : false;
+			g_camo->TickHotkeys(inMatch, cfg->bMenuOpen);
+		}
+	}
+
+	static bool prevMenuOpen = false;
+	ImGuiIO& menuIo = ImGui::GetIO();
+	menuIo.MouseDrawCursor = cfg->bMenuOpen;
+	menuIo.ConfigNavMoveSetMousePos = false;
+
+	if (cfg->bMenuOpen && !prevMenuOpen)
+	{
+		ReleaseLocalMouseCapture();
+		SyncMenuMousePosition(menuIo);
+	}
+
+	if (cfg->bMenuOpen)
+	{
+		if (!prevMenuOpen && g_camo)
+			g_camo->OnMenuOpened();
+		ImGui::StyleColorsDark();
+		gui->Init();
+	}
+
+	if (prevMenuOpen && !cfg->bMenuOpen)
+	{
+		RestoreSystemMouseCursor();
+		if (Process::Hwnd)
+			SetForegroundWindow(Process::Hwnd);
+		if (g_camo)
+			g_camo->ClearHotkeyEdges();
+		memset(menuIo.MouseDown, 0, sizeof(menuIo.MouseDown));
+		menuIo.MouseWheel = 0.0f;
+		menuIo.MouseWheelH = 0.0f;
+		menuIo.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+	}
+	prevMenuOpen = cfg->bMenuOpen;
+
+	ImGui::EndFrame();
+
+	DirectX12Interface::_FrameContext& CurrentFrameContext = DirectX12Interface::FrameContext[pSwapChain->GetCurrentBackBufferIndex()];
+
+	// Wait for the GPU to finish the last frame that used this context's allocator before
+	// resetting it — resetting an allocator with in-flight commands is undefined behaviour.
+	// Bounded wait so a wedged/removed GPU can't hard-hang the game's render thread.
+	if (DirectX12Interface::Fence->GetCompletedValue() < CurrentFrameContext.FenceValue)
+	{
+		DirectX12Interface::Fence->SetEventOnCompletion(CurrentFrameContext.FenceValue, DirectX12Interface::FenceEvent);
+		WaitForSingleObject(DirectX12Interface::FenceEvent, 2000);
+	}
+
+	CurrentFrameContext.CommandAllocator->Reset();
+
+	D3D12_RESOURCE_BARRIER Barrier;
+	Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	Barrier.Transition.pResource = CurrentFrameContext.Resource;
+	Barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+	DirectX12Interface::CommandList->Reset(CurrentFrameContext.CommandAllocator, nullptr);
+	DirectX12Interface::CommandList->ResourceBarrier(1, &Barrier);
+	DirectX12Interface::CommandList->OMSetRenderTargets(1, &CurrentFrameContext.DescriptorHandle, FALSE, nullptr);
+	DirectX12Interface::CommandList->SetDescriptorHeaps(1, &DirectX12Interface::DescriptorHeapImGuiRender);
+
+	ImGui::Render();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectX12Interface::CommandList);
+	Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	DirectX12Interface::CommandList->ResourceBarrier(1, &Barrier);
+	DirectX12Interface::CommandList->Close();
+	DirectX12Interface::CommandQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(&DirectX12Interface::CommandList));
+
+	// Signal the fence on the queue and record the value for this frame context, so next time
+	// we cycle back to it we know when the GPU has finished this frame's commands.
+	const UINT64 signalValue = ++DirectX12Interface::FenceLastSignaledValue;
+	DirectX12Interface::CommandQueue->Signal(DirectX12Interface::Fence, signalValue);
+	CurrentFrameContext.FenceValue = signalValue;
+
+	return oPresent(pSwapChain, SyncInterval, Flags);
+}
+
+void __stdcall hkExecuteCommandLists(ID3D12CommandQueue* queue, UINT NumCommandLists, ID3D12CommandList* ppCommandLists)
+{
+	// Only capture the DIRECT (graphics) queue — the game also runs copy/compute queues, and
+	// submitting our graphics command list to one of those would be an invalid submission and
+	// remove the device. When the device is already known, also require the queue to belong to
+	// it, so on a multi-adapter machine (iGPU + dGPU) we don't grab a DIRECT queue from the
+	// wrong device. (Best effort: ExecuteCommandLists often fires before Present sets Device,
+	// in which case we fall back to capturing the first DIRECT queue, as before.)
+	if (!DirectX12Interface::CommandQueue && queue && queue->GetDesc().Type == D3D12_COMMAND_LIST_TYPE_DIRECT)
+	{
+		bool sameDevice = true;
+		if (DirectX12Interface::Device)
+		{
+			ID3D12Device* queueDevice = nullptr;
+			if (SUCCEEDED(queue->GetDevice(IID_PPV_ARGS(&queueDevice))))
+			{
+				sameDevice = (queueDevice == DirectX12Interface::Device);
+				queueDevice->Release();
+			}
+		}
+
+		if (sameDevice)
+			DirectX12Interface::CommandQueue = queue;
+	}
+
+	return oExecuteCommandLists(queue, NumCommandLists, ppCommandLists);
+}
+
+// Wait until the GPU has finished every frame we've submitted, reusing the persistent render
+// fence, so the command list and per-frame allocators can be released without freeing memory
+// the GPU is still reading. Bounded so a wedged GPU can't hang teardown forever.
+static void WaitForGpuIdle()
+{
+	if (!DirectX12Interface::Fence || !DirectX12Interface::FenceEvent)
+		return;
+
+	const UINT64 value = DirectX12Interface::FenceLastSignaledValue;
+	if (value != 0 && DirectX12Interface::Fence->GetCompletedValue() < value)
+	{
+		DirectX12Interface::Fence->SetEventOnCompletion(value, DirectX12Interface::FenceEvent);
+		WaitForSingleObject(DirectX12Interface::FenceEvent, 1000);
+	}
+}
+
+HRESULT __stdcall hkResizeBuffers(IDXGISwapChain3* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
+{
+	if (!bRunning)
+		return oResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+
+	if (init)
+	{
+		// Make sure the GPU is done with our command list / allocators before freeing them.
+		WaitForGpuIdle();
+
+		// Backends must be shut down before the context is destroyed
+		ImGui_ImplDX12_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+
+		// The command list is recreated on the next hkPresent init, so drop the old one.
+		if (DirectX12Interface::CommandList)
+		{
+			DirectX12Interface::CommandList->Release();
+			DirectX12Interface::CommandList = nullptr;
+		}
+
+		// Release per-frame back buffer resources (DXGI requires all GetBuffer() references
+		// dropped before ResizeBuffers) and the per-frame command allocators, which hkPresent
+		// recreates after the resize.
+		for (size_t i = 0; i < DirectX12Interface::BuffersCounts; i++)
+		{
+			if (DirectX12Interface::FrameContext[i].Resource)
+			{
+				DirectX12Interface::FrameContext[i].Resource->Release();
+				DirectX12Interface::FrameContext[i].Resource = nullptr;
+			}
+			if (DirectX12Interface::FrameContext[i].CommandAllocator)
+			{
+				DirectX12Interface::FrameContext[i].CommandAllocator->Release();
+				DirectX12Interface::FrameContext[i].CommandAllocator = nullptr;
+			}
+		}
+		delete[] DirectX12Interface::FrameContext;
+		DirectX12Interface::FrameContext = nullptr;
+
+		if (DirectX12Interface::DescriptorHeapBackBuffers)
+		{
+			DirectX12Interface::DescriptorHeapBackBuffers->Release();
+			DirectX12Interface::DescriptorHeapBackBuffers = nullptr;
+		}
+
+		if (DirectX12Interface::DescriptorHeapImGuiRender)
+		{
+			DirectX12Interface::DescriptorHeapImGuiRender->Release();
+			DirectX12Interface::DescriptorHeapImGuiRender = nullptr;
+		}
+		DirectX12Interface::ResetImGuiSrvAllocator();
+
+		// Device is NOT tied to swap chain buffers and must not be released here
+		init = false;
+	}
+
+	return oResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+}
+
+void Unload()
+{
+	// Run the teardown exactly once, no matter how many paths call us.
+	bool expected = false;
+	if (!bUnloaded.compare_exchange_strong(expected, true))
+		return;
+
+	// Signal hooks to bail out immediately, then wait long enough for any call
+	// that is already mid-execution on the render thread to return before we
+	// start freeing shared state. MH_DisableHook only blocks future calls -
+	// it cannot stop one that is already inside hkPresent/hkResizeBuffers.
+	bRunning = false;
+	Sleep(100);
+
+	// Restore the original WndProc before this module is unmapped, otherwise the window
+	// keeps a dangling pointer into our WndProc and crashes on the next message.
+	if (Process::WndProc)
+		SetWindowLongPtr(Process::Hwnd, GWLP_WNDPROC, (__int3264)(LONG_PTR)Process::WndProc);
+
+	// MinHook
+	MH_DisableHook(MH_ALL_HOOKS);
+	MH_Uninitialize();
+
+	// ImGui + D3D12 resources
+	if (init)
+	{
+		// Make sure the GPU is done with our command list / allocators before freeing them.
+		WaitForGpuIdle();
+
+		ImGui_ImplDX12_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+
+		if (DirectX12Interface::CommandList)
+		{
+			DirectX12Interface::CommandList->Release();
+			DirectX12Interface::CommandList = nullptr;
+		}
+
+		// Release back buffer COM references so the game's ResizeBuffers can succeed
+		// after re-injection. hkPresent re-acquires these after every resize, so they
+		// must be explicitly released here — not doing so leaks the references. The
+		// per-frame command allocators are owned by us too and need releasing.
+		if (DirectX12Interface::FrameContext)
+		{
+			for (size_t i = 0; i < DirectX12Interface::BuffersCounts; i++)
+			{
+				if (DirectX12Interface::FrameContext[i].Resource)
+					DirectX12Interface::FrameContext[i].Resource->Release();
+				if (DirectX12Interface::FrameContext[i].CommandAllocator)
+					DirectX12Interface::FrameContext[i].CommandAllocator->Release();
+			}
+			delete[] DirectX12Interface::FrameContext;
+			DirectX12Interface::FrameContext = nullptr;
+		}
+
+		if (DirectX12Interface::DescriptorHeapBackBuffers)
+		{
+			DirectX12Interface::DescriptorHeapBackBuffers->Release();
+			DirectX12Interface::DescriptorHeapBackBuffers = nullptr;
+		}
+
+		if (DirectX12Interface::DescriptorHeapImGuiRender)
+		{
+			DirectX12Interface::DescriptorHeapImGuiRender->Release();
+			DirectX12Interface::DescriptorHeapImGuiRender = nullptr;
+		}
+		DirectX12Interface::ResetImGuiSrvAllocator();
+	}
+
+	// Fence + event persist across resizes (guarded creation), so release them once here.
+	if (DirectX12Interface::Fence)
+	{
+		DirectX12Interface::Fence->Release();
+		DirectX12Interface::Fence = nullptr;
+	}
+	if (DirectX12Interface::FenceEvent)
+	{
+		CloseHandle(DirectX12Interface::FenceEvent);
+		DirectX12Interface::FenceEvent = nullptr;
+	}
+
+	// misc
+	// Detach the CRT's stdio from the console before freeing it. While the
+	// freopen_s'd CONOUT$/CONIN$ handles stay open the console host keeps the
+	// window alive, so FreeConsole alone leaves it lingering after ejecting.
+	FILE* Dummy;
+	freopen_s(&Dummy, "NUL", "w", stdout);
+	freopen_s(&Dummy, "NUL", "w", stderr);
+	freopen_s(&Dummy, "NUL", "r", stdin);
+	FreeConsole();
+}
+
+void InitProcess(bool* WindowFocus)
+{
+	DWORD ForegroundWindowProcessID;
+	GetWindowThreadProcessId(GetForegroundWindow(), &ForegroundWindowProcessID);
+	if (GetCurrentProcessId() == ForegroundWindowProcessID)
+	{
+
+		Process::ID = GetCurrentProcessId();
+		Process::Handle = GetCurrentProcess();
+		Process::Hwnd = GetForegroundWindow();
+
+		RECT TempRect;
+		GetWindowRect(Process::Hwnd, &TempRect);
+		Process::WindowWidth = TempRect.right - TempRect.left;
+		Process::WindowHeight = TempRect.bottom - TempRect.top;
+
+		*WindowFocus = true;
+	}
+}
+
+DWORD MainThread(HMODULE Module)
+{
+	PhInitConsole();
+
+	_mkdir("C:\\peterhack");
+
+	// Initialize global instances
+	cfg = new Settings();
+	if (!cfg)
+		return 0;
+
+	cheat = new CheatManager();
+	if (!cheat)
+		return 0;
+
+	gui = new Menu();
+	if (!gui)
+		return 0;
+
+	g_camo = new CamoManager();
+	if (!g_camo)
+		return 0;
+	g_camo->settings.Load();
+
+	draw = new Drawings();
+	if (!draw)
+		return 0;
+
+	cfg->LoadSettings();
+
+	// Wait for the game window to be in focus before proceeding
+	bool WindowFocus = false;
+	while (WindowFocus == false)
+	{
+		InitProcess(&WindowFocus);
+		Sleep(100);
+	}
+
+	if (MH_Initialize() != MH_OK)
+	{
+		PhLog("Failed to initialize MinHook!\n");
+		return 1;
+	}
+
+	kiero::D3D12Output d3d12;
+	while (true)
+	{
+		auto err = kiero::locate<kiero::Implementation_D3D12>(nullptr, &d3d12);
+		if (err == kiero::Error_Nil)
+		{
+			PhLog("DirectX 12 interface located!\n");
+			break;
+		}
+		Sleep(100);
+	}
+
+	void* tExecuteCommandLists = d3d12.command_queue_methods[10];
+	void* tPresent = d3d12.swapchain_methods[8];
+	void* tResizeBuffers = d3d12.swapchain_methods[13];
+
+	if (MH_CreateHook(tExecuteCommandLists, hkExecuteCommandLists, (LPVOID*)&oExecuteCommandLists) != MH_OK)
+	{
+		PhLog("Failed to hook ExecuteCommandLists!\n");
+	}
+
+	if (MH_CreateHook(tPresent, hkPresent, (LPVOID*)&oPresent) != MH_OK)
+	{
+		PhLog("Failed to hook Present!\n");
+	}
+
+	if (MH_CreateHook(tResizeBuffers, hkResizeBuffers, (LPVOID*)&oResizeBuffers) != MH_OK)
+	{
+		PhLog("Failed to hook ResizeBuffers!\n");
+	}
+
+	void* tProcessEvent = reinterpret_cast<void*>(SDK::InSDKUtils::GetImageBase() + SDK::Offsets::ProcessEvent);
+	if (MH_CreateHook(tProcessEvent, hkProcessEvent, (LPVOID*)&oProcessEvent) != MH_OK)
+	{
+		PhLog("Failed to hook ProcessEvent!\n");
+	}
+
+	MH_EnableHook(MH_ALL_HOOKS);
+	InitKickFunctionPointers();
+
+	// poll for the END key to be pressed to unload the DLL
+	while (bRunning)
+	{
+		if ((GetAsyncKeyState(VK_END) & 1) && IsGameWindowFocused())
+			break;
+		Sleep(50);
+	}
+
+	Unload();
+	FreeLibraryAndExitThread(Process::Module, 0);
+
+	return 0;
+}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+{
+	switch (reason)
+	{
+	case DLL_PROCESS_ATTACH:
+		DisableThreadLibraryCalls(hModule);
+		Process::Module = hModule;
+		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, 0);
+		break;
+	case DLL_PROCESS_DETACH:
+		Unload();
+		break;
+	}
+
+	return TRUE;
+}
