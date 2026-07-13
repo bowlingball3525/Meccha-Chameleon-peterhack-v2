@@ -19,7 +19,7 @@ struct CamoSettings
 	char fillColorHex[8] = "#FFFFFF";
 	float fillMetallic = 1.0f;
 	float fillRoughness = 0.0f;
-	int startHotkey = 0x79;     // VK_F10 — F1 is often captured by the game/OS
+	int startHotkey = 0x70;     // VK_F1
 	int previewHotkey = 0x71;   // VK_F2
 	int unpreviewHotkey = 0x72; // VK_F3
 	int stopHotkey = 0x73;      // VK_F4

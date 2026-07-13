@@ -52,7 +52,7 @@ Close the game before building if you get `LNK1104: cannot open peterhack.dll` (
 
 | Key | Action |
 |-----|--------|
-| **INSERT** or **F1** | Open / close menu |
+| **INSERT** or **F10** | Open / close menu |
 | **END** | Unload peterhack (eject DLL) |
 
 Settings save to `C:\peterhack\settings.ini`. Camo settings save to `C:\peterhack\camo.cfg`.
@@ -105,12 +105,12 @@ Mesh-first-paint camo via in-process bridge. See [CAMOUFLAGE.md](CAMOUFLAGE.md) 
 
 1. Open menu → **Camouflage**.
 2. Check **Enable camo hotkeys** and **Save camo settings** (hotkeys are off by default).
-3. Enter a match; console prints: `Match entered — camo hotkeys armed in 3s`.
+3. Enter a match; console prints: `Match entered — camo hotkeys armed in 0.5s`.
 4. After 3 seconds in-match (game focused, menu closed):
 
 | Key | Action |
 |-----|--------|
-| **F10** | Start full paint |
+| **F1** | Start full paint |
 | **F2** | Preview |
 | **F3** | UnPreview |
 | **F4** | Stop (works during active paint) |

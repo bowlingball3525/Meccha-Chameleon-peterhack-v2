@@ -56,31 +56,26 @@ namespace
 		case VK_XBUTTON1:
 		case VK_XBUTTON2:
 		case VK_INSERT:
+		case VK_F10: // menu toggle
 			return true;
 		default:
 			return false;
 		}
 	}
 
-	SHORT s_hotkeyPrev[256]{};
+	bool HotkeyPressed(int vk)
+	{
+		if (vk <= 0 || vk >= 256 || IsBlockedCamoHotkey(vk))
+			return false;
+		// Use the "pressed since last call" bit so quick taps are not missed between frames.
+		return (GetAsyncKeyState(vk) & 1) != 0;
+	}
 
 	void PrimeHotkeyEdge(int vk)
 	{
-		if (IsBlockedCamoHotkey(vk))
+		if (vk <= 0 || vk >= 256 || IsBlockedCamoHotkey(vk))
 			return;
-		s_hotkeyPrev[vk] = GetAsyncKeyState(vk);
-	}
-
-	bool HotkeyPressed(int vk)
-	{
-		if (IsBlockedCamoHotkey(vk))
-			return false;
-
-		const SHORT state = GetAsyncKeyState(vk);
-		const bool down = (state & 0x8000) != 0;
-		const bool edge = down && !(s_hotkeyPrev[vk] & 0x8000);
-		s_hotkeyPrev[vk] = state;
-		return edge;
+		(void)GetAsyncKeyState(vk);
 	}
 
 	void ParseHexColor(const char* hex, int& r, int& g, int& b)
@@ -842,7 +837,10 @@ void CamoManager::ClearHotkeyEdges()
 
 void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 {
-	if (!IsGameFocused() || menuOpen)
+	if (menuOpen)
+		return;
+
+	if (!IsGameFocused())
 		return;
 
 	static bool s_wasInMatch = false;
@@ -851,8 +849,8 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	if (inMatch && !s_wasInMatch)
 	{
 		ClearHotkeyEdges();
-		s_hotkeyArmTickMs = now + 3000;
-		PhLog("[CAMO] Match entered — camo hotkeys armed in 3s (enable in Camo tab if needed)\n");
+		s_hotkeyArmTickMs = now + 500;
+		PhLog("[CAMO] Match entered — camo hotkeys armed in 0.5s (enable in Camo tab if needed)\n");
 		if (settings.hotkeysEnabled && bridgeState_.load() != CamoBridgeState::Ready)
 			StartBridgeLoadAsync();
 	}
@@ -864,11 +862,18 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	{
 		if (HotkeyPressed(settings.stopHotkey))
 			CancelActiveJob();
+		// Drain other bind edges so they don't fire the moment paint finishes.
+		(void)HotkeyPressed(settings.startHotkey);
+		(void)HotkeyPressed(settings.previewHotkey);
+		(void)HotkeyPressed(settings.unpreviewHotkey);
 		return;
 	}
 
 	if (!settings.hotkeysEnabled || !inMatch || now < s_hotkeyArmTickMs)
+	{
+		ClearHotkeyEdges();
 		return;
+	}
 
 	if (HotkeyPressed(settings.startHotkey))
 	{
@@ -879,6 +884,8 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 		RequestPaint(CamoJobKind::Preview);
 	else if (HotkeyPressed(settings.unpreviewHotkey))
 		RequestPaint(CamoJobKind::UnPreview);
+	else if (HotkeyPressed(settings.stopHotkey))
+		CancelActiveJob();
 }
 
 static bool RegionModeCombo(const char* label, int& mode)
@@ -956,12 +963,12 @@ void CamoManager::DrawMenu()
 	const bool busy = busy_.load();
 	ImGui::Checkbox("Enable camo hotkeys", &settings.hotkeysEnabled);
 	if (settings.hotkeysEnabled)
-		ImGui::TextDisabled("F10=start  F2=preview  F3=unpreview  F4=stop (3s after spawn)");
+		ImGui::TextDisabled("F1=start  F2=preview  F3=unpreview  F4=stop (in match, menu closed)");
 	else
 		ImGui::TextDisabled("Hotkeys off — use buttons below, or enable above");
 
 	ImGui::BeginDisabled(busy);
-	if (ImGui::Button("Start (F10)", ImVec2(120, 0)))
+	if (ImGui::Button("Start (F1)", ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Paint);
 	ImGui::SameLine();
 	if (ImGui::Button("Preview (F2)", ImVec2(120, 0)))

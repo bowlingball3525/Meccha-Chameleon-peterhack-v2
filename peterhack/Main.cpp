@@ -630,19 +630,13 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	ImGui::PopStyleVar(2);
 
 	if (IsGameWindowFocused() &&
-		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F1) & 1)))
+		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F10) & 1)))
 		cfg->bMenuOpen = !cfg->bMenuOpen;
 
 	if (g_camo && !cfg->bMenuOpen)
 	{
-		static ULONGLONG s_lastCamoHotkeyTickMs = 0;
-		const ULONGLONG presentNow = GetTickCount64();
-		if (presentNow - s_lastCamoHotkeyTickMs >= 50)
-		{
-			s_lastCamoHotkeyTickMs = presentNow;
-			const bool inMatch = cheat ? cheat->inMatchCached.load(std::memory_order_acquire) : false;
-			g_camo->TickHotkeys(inMatch, cfg->bMenuOpen);
-		}
+		const bool inMatch = cheat ? cheat->inMatchCached.load(std::memory_order_acquire) : false;
+		g_camo->TickHotkeys(inMatch, cfg->bMenuOpen);
 	}
 
 	static bool prevMenuOpen = false;

@@ -84,7 +84,7 @@ void CamoSettings::ApplyDefaults()
 	strcpy_s(fillColorHex, "#FFFFFF");
 	fillMetallic = 1.0f;
 	fillRoughness = 0.0f;
-	startHotkey = 0x79;
+	startHotkey = 0x70; // VK_F1
 	previewHotkey = 0x71;
 	unpreviewHotkey = 0x72;
 	stopHotkey = 0x73;
@@ -165,13 +165,25 @@ void CamoSettings::Load()
 		batchPacingMs = 500;
 
 	auto sanitizeHotkey = [](int& vk) {
-		if (vk == 0x01 || vk == 0x02 || vk == 0x04 || vk == 0x05 || vk == 0x06 || vk == 0x2D)
-			vk = 0x79;
+		// Mouse buttons and Insert/F10 (menu toggles) are reserved.
+		if (vk == 0x01 || vk == 0x02 || vk == 0x04 || vk == 0x05 || vk == 0x06 ||
+			vk == 0x2D || vk == 0x79)
+			vk = 0x70;
 	};
 	sanitizeHotkey(startHotkey);
 	sanitizeHotkey(previewHotkey);
 	sanitizeHotkey(unpreviewHotkey);
 	sanitizeHotkey(stopHotkey);
+
+	// F10 is now a menu key — migrate old paint binds off it.
+	if (startHotkey == 0x79) // VK_F10
+		startHotkey = 0x70; // VK_F1
+	if (previewHotkey == 0x79)
+		previewHotkey = 0x71;
+	if (unpreviewHotkey == 0x79)
+		unpreviewHotkey = 0x72;
+	if (stopHotkey == 0x79)
+		stopHotkey = 0x73;
 }
 
 void CamoSettings::Save() const
