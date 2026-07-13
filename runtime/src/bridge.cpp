@@ -7132,6 +7132,7 @@ namespace
         double weighted_world_units_per_uv{0.0};
         double raw_world_scale{0.0};
         double scale{0.0};
+        bool within_expected_window{false};
         int valid_triangles{0};
         int invalid_triangles{0};
         std::string failure{"not_run"};
@@ -7187,11 +7188,25 @@ namespace
         out.weighted_world_units_per_uv = weighted_sum / out.uv_area_sum;
         out.raw_world_scale = out.weighted_world_units_per_uv / out.mesh_bounds_diameter;
         out.scale = out.raw_world_scale * runtime_contract::PackedMeshAnchorCoverageSafetyFactor;
-        if (!std::isfinite(out.scale) || out.scale < 0.5 || out.scale > 6.0)
+        // The calibration ratio is self-consistent: the native packed preflight
+        // multiplies the wire radius by the exact same bounds diameter this
+        // divides by, so maps that inflate the skeletal bounds sphere (fixed
+        // skel bounds, map-specific bounds scaling) legitimately land far away
+        // from the developed-map expectation of ~3.2 and must still be
+        // accepted.  Only reject ratios so extreme they can only come from a
+        // garbage bounds read or a corrupt triangle cache; scales too large to
+        // encode are rejected downstream by the maximum_packed_radius_uv check
+        // with richer metadata.
+        if (!std::isfinite(out.scale) ||
+            out.scale < runtime_contract::PackedMeshRadiusScalePlausibleMin ||
+            out.scale > runtime_contract::PackedMeshRadiusScalePlausibleMax)
         {
             out.failure = "packed_radius_calibration_out_of_range";
             return out;
         }
+        out.within_expected_window =
+            out.scale >= runtime_contract::PackedMeshRadiusScaleExpectedWindowMin &&
+            out.scale <= runtime_contract::PackedMeshRadiusScaleExpectedWindowMax;
         out.ok = true;
         out.failure = "ok";
         return out;
@@ -12094,6 +12109,8 @@ namespace
                     std::to_string(packed_radius_calibration.weighted_world_units_per_uv);
         metadata += ",\"packed_mesh_radius_scale_raw_world\":" +
                     std::to_string(packed_radius_calibration.raw_world_scale);
+        metadata += ",\"packed_mesh_radius_scale_within_expected_window\":" +
+                    std::string(json_bool(packed_radius_calibration.within_expected_window));
         metadata += ",\"packed_mesh_radius_coverage_safety_factor\":" +
                     std::to_string(runtime_contract::PackedMeshAnchorCoverageSafetyFactor);
         metadata += ",\"packed_mesh_radius_scale_effective\":" +

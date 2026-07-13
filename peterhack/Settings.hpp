@@ -20,6 +20,9 @@ public:
 	bool bAntiDetection;
 	bool bMagnetEnabled;
 	int iMagnetKey;
+	bool bControllerBinds;
+	int iControllerMenuButton;
+	int iControllerMagnetButton;
 	bool bPreventKick;
 	bool bInfiniteBullets;
 	bool bNoDecoyCooldown;

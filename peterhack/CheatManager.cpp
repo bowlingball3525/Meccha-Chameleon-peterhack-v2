@@ -279,6 +279,7 @@ void CheatManager::ResetSessionState()
 	forcedVisibleActors.clear();
 	playerNameCache.clear();
 	killAllQueue.clear();
+	killAllNextMs_ = 0;
 	TeleportTarget = nullptr;
 	KillTarget = nullptr;
 	bKillAllSurvivorsRequested = false;
@@ -1182,6 +1183,8 @@ void CheatManager::KillSurvivor(SDK::APawn* myPlayer, SDK::AActor* actor)
 {
 	if (!myPlayer || !actor || myPlayer == actor || !IsHunter(myPlayer) || !IsSurvivor(actor) || IsDead(actor))
 		return;
+	if (actor->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass()))
+		return;
 
 	auto* hunter = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*>(myPlayer);
 	auto* survivor = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Survivor_C*>(actor);
@@ -1223,26 +1226,44 @@ void CheatManager::HandleKillAllSurvivors(
 	SDK::APawn* myPlayer,
 	const std::unordered_set<SDK::AActor*>& currentActors)
 {
-	// A fresh request seeds the pending set with everyone alive this frame. We
-	// then kill at most one per frame (below) instead of looping with Sleep() - a
-	// blocking loop here would stall the game thread for tens of ms per survivor,
-	// since this whole scan runs inside the engine's ProcessEvent.
+	auto isValidKillAllTarget = [&](SDK::AActor* actor) -> bool {
+		if (!actor || actor == myPlayer || !currentActors.count(actor) || !IsObjectValid(actor))
+			return false;
+		// Never target decoy/clone actors — only real survivor pawns.
+		if (actor->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass()))
+			return false;
+		if (!IsSurvivor(actor) || IsDead(actor))
+			return false;
+		return true;
+	};
+
+	// A fresh request seeds the pending set with living survivors only (no hunters,
+	// self, corpses, or clones). Kills are paced below so ProcessEvent isn't spammed.
 	if (bKillAllSurvivorsRequested)
 	{
 		bKillAllSurvivorsRequested = false;
-		killAllQueue = currentActors;
+		killAllQueue.clear();
+		for (SDK::AActor* actor : currentActors)
+		{
+			if (isValidKillAllTarget(actor))
+				killAllQueue.insert(actor);
+		}
+		killAllNextMs_ = 0;
+		PhLog("[KILL-ALL] Queued %zu survivors (clones ignored, %ums spacing)\n",
+			killAllQueue.size(), static_cast<unsigned>(kKillAllIntervalMs));
 	}
 
 	if (killAllQueue.empty())
 		return;
 
-	// Discard targets that no longer exist this frame, then kill the next one
-	// that's still present. KillSurvivor itself no-ops non-survivors /
-	// already-dead actors, so a stale pick is harmless.
+	const ULONGLONG now = GetTickCount64();
+	if (now < killAllNextMs_)
+		return;
+
 	for (auto it = killAllQueue.begin(); it != killAllQueue.end();)
 	{
 		SDK::AActor* actor = *it;
-		if (!currentActors.count(actor))
+		if (!isValidKillAllTarget(actor))
 		{
 			it = killAllQueue.erase(it);
 			continue;
@@ -1250,7 +1271,8 @@ void CheatManager::HandleKillAllSurvivors(
 
 		KillSurvivor(myPlayer, actor);
 		killAllQueue.erase(it);
-		break; // one per frame paces the kills without blocking the game thread
+		killAllNextMs_ = now + kKillAllIntervalMs;
+		break;
 	}
 }
 

@@ -42,6 +42,7 @@
 #include "SDK/BP_FirstPersonCharacter_cLeon_Character_Survivor_classes.hpp"
 #include "SDK/BP_cLeonDecoy_Base_classes.hpp"
 #include "skeleton.hpp"
+#include "GamepadInput.hpp"
 #include "CheatManager.hpp"
 #include "Menu.hpp"
 #include "Settings.hpp"

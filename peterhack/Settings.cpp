@@ -23,6 +23,9 @@ void Settings::InitializeSettings()
 	this->bAntiDetection = false;
 	this->bMagnetEnabled = false;
 	this->iMagnetKey = 0x47; // G
+	this->bControllerBinds = false;
+	this->iControllerMenuButton = Gamepad::kDefaultMenuButton;
+	this->iControllerMagnetButton = Gamepad::kDefaultMagnetButton;
 	this->bPreventKick = false;
 	this->bInfiniteBullets = false;
 	this->bNoDecoyCooldown = false;

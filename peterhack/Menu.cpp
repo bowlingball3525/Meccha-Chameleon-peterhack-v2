@@ -219,6 +219,54 @@ void Menu::Init()
 				}
 			}
 
+			ImGui::Separator();
+			ImGui::Text("Controller");
+			ImGui::Separator();
+			if (ImGui::Checkbox("Controller Binds", &cfg->bControllerBinds) && !cfg->bControllerBinds)
+				Gamepad::CancelCapture();
+			if (cfg->bControllerBinds)
+			{
+				if (!Gamepad::IsConnected())
+					ImGui::TextDisabled("No controller detected");
+
+				// Which bind is being captured: 0 = none, 1 = menu, 2 = magnet.
+				static int capturingPad = 0;
+				if (!Gamepad::CaptureActive())
+					capturingPad = 0;
+
+				auto padBindRow = [](const char* label, int& bind, int captureId, int& capturing)
+				{
+					ImGui::Text("%s:", label);
+					ImGui::SameLine();
+					ImGui::PushID(label);
+					const bool active = (capturing == captureId);
+					if (ImGui::Button(active ? "Press button..." : Gamepad::ButtonName(bind)))
+					{
+						Gamepad::BeginCapture();
+						capturing = captureId;
+					}
+					ImGui::PopID();
+					if (active)
+					{
+						int pressed = 0;
+						if (Gamepad::CapturePressed(pressed))
+						{
+							bind = pressed;
+							capturing = 0;
+						}
+						else if (GetAsyncKeyState(VK_ESCAPE) & 1) // ESC cancels
+						{
+							Gamepad::CancelCapture();
+							capturing = 0;
+						}
+					}
+				};
+
+				padBindRow("Menu Button", cfg->iControllerMenuButton, 1, capturingPad);
+				padBindRow("Magnet Button", cfg->iControllerMagnetButton, 2, capturingPad);
+			}
+
+			ImGui::Separator();
 			if (ImGui::Button("Kill All Survivors"))
 				cheat->RequestKillAllSurvivors();
 

@@ -172,6 +172,7 @@
     <ClCompile Include="CamoSettings.cpp" />
     <ClCompile Include="CheatManager.cpp" />
     <ClCompile Include="Drawings.cpp" />
+    <ClCompile Include="GamepadInput.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="direct_bridge_abi.hpp" />
     <ClInclude Include="CheatManager.hpp" />
     <ClInclude Include="Drawings.hpp" />
+    <ClInclude Include="GamepadInput.hpp" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx12.h" />

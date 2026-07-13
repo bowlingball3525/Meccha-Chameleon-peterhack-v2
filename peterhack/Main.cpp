@@ -621,8 +621,14 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	if (cfg->bInitHooks && cheat)
 		cheat->RenderEsp();
 
+	// Sample the controller once per frame; Pressed() below does edge detection off this poll.
+	if (cfg->bControllerBinds)
+		Gamepad::Poll();
+
 	// ignore hotkeys if the game window isn't focused, or if the user is typing in a text input (chat, console, etc.)
-	if (!cfg->bMenuOpen && (GetAsyncKeyState(cfg->iMagnetKey) & 1) && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput) // magnet toggle key (default G)
+	if (!cfg->bMenuOpen && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput &&
+		((GetAsyncKeyState(cfg->iMagnetKey) & 1) || // magnet toggle key (default G)
+		 (cfg->bControllerBinds && Gamepad::Pressed(cfg->iControllerMagnetButton))))
 		cfg->bMagnetEnabled = !cfg->bMagnetEnabled;
 
 	ImGui::End();
@@ -630,7 +636,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	ImGui::PopStyleVar(2);
 
 	if (IsGameWindowFocused() &&
-		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F10) & 1)))
+		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F10) & 1) ||
+		 (cfg->bControllerBinds && Gamepad::Pressed(cfg->iControllerMenuButton))))
 		cfg->bMenuOpen = !cfg->bMenuOpen;
 
 	if (g_camo && !cfg->bMenuOpen)

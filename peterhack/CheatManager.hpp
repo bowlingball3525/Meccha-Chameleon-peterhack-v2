@@ -107,7 +107,9 @@ private:
 	bool bKillAllSurvivorsRequested = false;
 	bool bChangeNameRequested = false;							// drained on the game thread in HandleChangeName
 	std::string pendingChangeName;									// the name to apply on the next scan when bChangeNameRequested is set
-	std::unordered_set<SDK::AActor*> killAllQueue; // pending "kill all" targets, drained one per frame so we never block the game thread
+	std::unordered_set<SDK::AActor*> killAllQueue; // pending "kill all" targets, drained one at a time with pacing
+	ULONGLONG killAllNextMs_ = 0;
+	static constexpr ULONGLONG kKillAllIntervalMs = 750;
 
 	bool bReturnToLobbyRequested = false;
 	bool menuLookInputLocked = false;

@@ -45,6 +45,17 @@ namespace runtime_contract
     // conservative factor (3.4/4.0 outperformed both 4.0 and per-anchor max).
     constexpr double PackedMeshAnchorCoverageSafetyFactor = 0.91;
     constexpr double PackedMeshAnchorExpectedRadiusCalibration = 3.5;
+    // The runtime radius calibration divides world-units-per-UV by the mesh
+    // bounds diameter that the native packed preflight also multiplies by, so
+    // the ratio stays correct even on maps that inflate the skeletal bounds
+    // sphere.  The expected window is the range observed on the maps the
+    // pipeline was developed against and is reported as metadata only; the
+    // plausible window is a pure garbage-read guard and the only range that
+    // hard-fails a paint.
+    constexpr double PackedMeshRadiusScaleExpectedWindowMin = 0.5;
+    constexpr double PackedMeshRadiusScaleExpectedWindowMax = 6.0;
+    constexpr double PackedMeshRadiusScalePlausibleMin = 1.0 / 64.0;
+    constexpr double PackedMeshRadiusScalePlausibleMax = 64.0;
     constexpr int PackedMeshAnchorSubdivisionLevelAuto = 0;
     constexpr float PackedMeshAnchorSubdivisionPixelSizeAuto = 0.0f;
     constexpr int PackedMeshAnchorTemplateResolutionAuto = 0;
