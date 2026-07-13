@@ -49,7 +49,7 @@ enum class EMediaTimeRangeBPType : uint8
 
 // Enum MediaAssets.EMediaSoundChannels
 // NumValues: 0x0004
-enum class EMediaSoundChannels : uint8
+enum class EMediaSoundChannels : uint32
 {
 	Mono                                     = 0,
 	Stereo                                   = 1,

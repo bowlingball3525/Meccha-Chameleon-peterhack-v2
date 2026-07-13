@@ -78,8 +78,8 @@ public:
 	TArray<class UWBP_BodySelect_C*>              BodySelects;                                       // 0x0698(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
 
 public:
-	void SelectMapMain(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& MapData);
-	void SelectMap(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& MapData);
+	void SelectMapMain(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata);
+	void SelectMap(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata);
 	void RandomStructUpdate(const struct FST_cLeonMapData& StructRef, bool RandomState, struct FST_cLeonMapData* ReturnItem);
 	void RandomStateChange(class UWBP_MapContentsWithRandom_C* SelfWidget, bool RandomState);
 	void OnClickWithClass(class UWBP_BodySelect_C* SelfObject, class UClass* BodyClass);

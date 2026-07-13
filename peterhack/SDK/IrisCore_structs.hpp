@@ -27,7 +27,7 @@ enum class EDataStreamSendStatus : uint8
 
 // Enum IrisCore.ENetObjectCountLimiterMode
 // NumValues: 0x0003
-enum class ENetObjectCountLimiterMode : uint8
+enum class ENetObjectCountLimiterMode : uint32
 {
 	RoundRobin                               = 0,
 	Fill                                     = 1,

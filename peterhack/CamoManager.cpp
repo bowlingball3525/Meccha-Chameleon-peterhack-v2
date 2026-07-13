@@ -11,6 +11,7 @@
 #include <cstring>
 #include <direct.h>
 #include <iostream>
+#include <mutex>
 #include <random>
 
 #pragma comment(lib, "Ws2_32.lib")
@@ -22,6 +23,18 @@ namespace
 	constexpr int kBridgePort = 47654;
 	const char* kBridgeDllName = "meccha-xenos-bridge.dll";
 	const char* kProcessName = "PenguinHotel-Win64-Shipping.exe";
+
+	std::once_flag g_wsaOnce;
+	bool g_wsaReady = false;
+
+	bool EnsureWinsockInitialized()
+	{
+		std::call_once(g_wsaOnce, []() {
+			WSADATA wsa{};
+			g_wsaReady = WSAStartup(MAKEWORD(2, 2), &wsa) == 0;
+		});
+		return g_wsaReady;
+	}
 
 	bool IsGameFocused()
 	{
@@ -287,16 +300,12 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 	if (port <= 0 || port > 65535)
 		return false;
 
-	WSADATA wsa{};
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	if (!EnsureWinsockInitialized())
 		return false;
 
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock == INVALID_SOCKET)
-	{
-		WSACleanup();
 		return false;
-	}
 
 	DWORD connectTimeout = static_cast<DWORD>(timeoutMs > 1500 ? 1500 : timeoutMs);
 	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&connectTimeout), sizeof(connectTimeout));
@@ -310,7 +319,6 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 	if (connect(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
 		closesocket(sock);
-		WSACleanup();
 		return false;
 	}
 
@@ -351,14 +359,12 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 		if (!sendLine(BuildHelloJson()) || !recvLine(helloResponse))
 		{
 			closesocket(sock);
-			WSACleanup();
 			return false;
 		}
 		if (helloResponse.find("\"success\":true") == std::string::npos ||
 			helloResponse.find("\"stage\":\"hello\"") == std::string::npos)
 		{
 			closesocket(sock);
-			WSACleanup();
 			return false;
 		}
 	}
@@ -366,19 +372,16 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 	if (!sendLine(requestJson))
 	{
 		closesocket(sock);
-		WSACleanup();
 		return false;
 	}
 
 	if (!recvLine(responseOut))
 	{
 		closesocket(sock);
-		WSACleanup();
 		return false;
 	}
 
 	closesocket(sock);
-	WSACleanup();
 	return true;
 }
 
@@ -471,11 +474,18 @@ bool CamoManager::EnsureBridgeListenerStarted()
 
 	bridgeUsesHello_.store(true);
 
+	if (PingBridge(600))
+	{
+		if (bridgePort_.load() <= 0)
+			bridgePort_.store(kBridgePort);
+		return true;
+	}
+
 	if (bridgePort_.load() > 0 && !PingBridge(400))
 	{
 		PhLog("[CAMO] Bridge ping failed — requesting shutdown before restart\n");
-		if (!RequestBridgeShutdown(8000))
-			PhLog("[CAMO] Bridge shutdown timed out — reloading bridge DLL\n");
+		if (!RequestBridgeShutdown(12000))
+			PhLog("[CAMO] Bridge shutdown timed out — retrying start\n");
 		ClearBridgeIdentity();
 		if (!BridgeModuleLoaded())
 		{
@@ -483,7 +493,8 @@ bool CamoManager::EnsureBridgeListenerStarted()
 			if (GetFileAttributesW(dllPath.c_str()) != INVALID_FILE_ATTRIBUTES)
 				LoadLibraryW(dllPath.c_str());
 		}
-		Sleep(250);
+		for (int attempt = 0; attempt < 80 && PingBridge(200); ++attempt)
+			Sleep(125);
 	}
 
 	BridgeStartBlockV1 block{};
@@ -529,6 +540,8 @@ bool CamoManager::EnsureBridgeListenerStarted()
 
 bool CamoManager::EnsureBridge()
 {
+	std::lock_guard<std::mutex> bridgeLock(bridgeOpMutex_);
+
 	const bool onGameThread = g_GameThreadId.load() != 0 && GetCurrentThreadId() == g_GameThreadId.load();
 	const ULONGLONG now = GetTickCount64();
 
@@ -790,8 +803,29 @@ void CamoManager::RequestPaint(CamoJobKind kind)
 
 void CamoManager::CancelActiveJob()
 {
-	if (busy_.load())
-		StartWorker(CamoJobKind::Stop);
+	if (!busy_.load())
+		return;
+
+	// Do not go through StartWorker — it refuses work while busy, which made Stop a no-op.
+	SetStatus("Stopping camouflage...");
+	std::thread([this]() {
+		std::string resp;
+		if (TcpRequest("{\"type\":\"cancel_paint\"}", resp, 5000))
+			SetStatus("Paint stop requested");
+		else
+			SetError("Stop request failed — bridge not responding");
+	}).detach();
+}
+
+void CamoManager::OnSessionReset()
+{
+	CancelActiveJob();
+	ClearHotkeyEdges();
+}
+
+void CamoManager::OnMatchLeft()
+{
+	OnSessionReset();
 }
 
 void CamoManager::ClearHotkeyEdges()
@@ -823,7 +857,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 			StartBridgeLoadAsync();
 	}
 	if (!inMatch && s_wasInMatch)
-		ClearHotkeyEdges();
+		OnSessionReset();
 	s_wasInMatch = inMatch;
 
 	if (busy_.load())
@@ -909,7 +943,9 @@ void CamoManager::DrawMenu()
 	ImGui::Text("Fill color");
 	if (ImGui::BeginPopup("popup_fill_color"))
 	{
-		if (ImGui::ColorPicker3("##fill_color_pick", fillRgb, ImGuiColorEditFlags_NoSidePreview))
+		if (ImGui::ColorPicker3("##fill_color_pick", fillRgb,
+			ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_DisplayRGB |
+			ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_InputRGB))
 			FillColorFromFloat3(fillRgb, settings.fillColorHex, IM_ARRAYSIZE(settings.fillColorHex));
 		ImGui::EndPopup();
 	}
@@ -930,12 +966,13 @@ void CamoManager::DrawMenu()
 	ImGui::SameLine();
 	if (ImGui::Button("Preview (F2)", ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Preview);
-	ImGui::EndDisabled();
-
-	ImGui::BeginDisabled(busy);
+	ImGui::SameLine();
 	if (ImGui::Button("UnPreview (F3)", ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::UnPreview);
-	ImGui::SameLine();
+	ImGui::EndDisabled();
+
+	// Stop must stay clickable while a paint/preview job is running.
+	ImGui::BeginDisabled(!busy);
 	if (ImGui::Button("Stop (F4)", ImVec2(120, 0)))
 		CancelActiveJob();
 	ImGui::EndDisabled();

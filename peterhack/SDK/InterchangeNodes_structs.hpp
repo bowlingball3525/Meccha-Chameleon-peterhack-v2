@@ -15,7 +15,7 @@ SDK_NAMESPACE_START
 
 // Enum InterchangeNodes.EInterchangePropertyTracks
 // NumValues: 0x0142
-enum class EInterchangePropertyTracks : uint64
+enum class EInterchangePropertyTracks : uint32
 {
 	AffectDistanceFieldLighting              = 0,
 	AffectDynamicIndirectLighting            = 1,

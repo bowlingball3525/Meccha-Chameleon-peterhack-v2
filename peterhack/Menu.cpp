@@ -1,5 +1,13 @@
 #include "includes.hpp"
 
+namespace
+{
+	constexpr ImGuiColorEditFlags kColorPickerPopupFlags =
+		ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_AlphaBar |
+		ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueBar |
+		ImGuiColorEditFlags_InputRGB;
+}
+
 // Human-readable name for a virtual-key code, falling back to hex for unknown keys.
 static const char* KeyName(int vk)
 {
@@ -104,7 +112,7 @@ void Menu::Init()
 			ImGui::Text("Visible");
 			if (ImGui::BeginPopup("popup_colVisible"))
 			{
-				ImGui::ColorPicker4("##pick", cfg->colVisible);
+				ImGui::ColorPicker4("##pick", cfg->colVisible, kColorPickerPopupFlags);
 				ImGui::EndPopup();
 			}
 
@@ -114,7 +122,7 @@ void Menu::Init()
 			ImGui::Text("Not Visible");
 			if (ImGui::BeginPopup("popup_colNotVisible"))
 			{
-				ImGui::ColorPicker4("##pick", cfg->colNotVisible);
+				ImGui::ColorPicker4("##pick", cfg->colNotVisible, kColorPickerPopupFlags);
 				ImGui::EndPopup();
 			}
 
@@ -124,7 +132,7 @@ void Menu::Init()
 			ImGui::Text("Lines");
 			if (ImGui::BeginPopup("popup_colLines"))
 			{
-				ImGui::ColorPicker4("##pick", cfg->colLines);
+				ImGui::ColorPicker4("##pick", cfg->colLines, kColorPickerPopupFlags);
 				ImGui::EndPopup();
 			}
 
@@ -134,7 +142,7 @@ void Menu::Init()
 			ImGui::Text("Decoy");
 			if (ImGui::BeginPopup("popup_colDecoy"))
 			{
-				ImGui::ColorPicker4("##pick", cfg->colDecoy);
+				ImGui::ColorPicker4("##pick", cfg->colDecoy, kColorPickerPopupFlags);
 				ImGui::EndPopup();
 			}
 
@@ -363,7 +371,7 @@ void Menu::Init()
 	ImGui::SameLine();
 	float checkboxW = ImGui::CalcTextSize("Enable").x + ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - checkboxW - ImGui::GetStyle().WindowPadding.x);
-	ImGui::Checkbox("ESP overlay", &cfg->bInitHooks);
+	ImGui::Checkbox("Enable", &cfg->bInitHooks);
 
 	ImGui::End();
 }

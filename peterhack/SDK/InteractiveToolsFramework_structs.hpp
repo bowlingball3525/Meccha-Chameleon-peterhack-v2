@@ -29,7 +29,7 @@ enum class EGizmoElementState : uint8
 
 // Enum InteractiveToolsFramework.EGizmoElementInteractionState
 // NumValues: 0x0004
-enum class EGizmoElementInteractionState : uint8
+enum class EGizmoElementInteractionState : uint32
 {
 	None                                     = 0,
 	Hovering                                 = 1,
@@ -39,7 +39,7 @@ enum class EGizmoElementInteractionState : uint8
 
 // Enum InteractiveToolsFramework.EGizmoElementViewDependentType
 // NumValues: 0x0004
-enum class EGizmoElementViewDependentType : uint8
+enum class EGizmoElementViewDependentType : uint32
 {
 	None                                     = 0,
 	Axis                                     = 1,
@@ -49,7 +49,7 @@ enum class EGizmoElementViewDependentType : uint8
 
 // Enum InteractiveToolsFramework.EGizmoElementViewAlignType
 // NumValues: 0x0006
-enum class EGizmoElementViewAlignType : uint8
+enum class EGizmoElementViewAlignType : uint32
 {
 	None                                     = 0,
 	PointOnly                                = 1,
@@ -61,7 +61,7 @@ enum class EGizmoElementViewAlignType : uint8
 
 // Enum InteractiveToolsFramework.EGizmoElementPartialType
 // NumValues: 0x0004
-enum class EGizmoElementPartialType : uint8
+enum class EGizmoElementPartialType : uint32
 {
 	None                                     = 0,
 	Partial                                  = 1,
@@ -145,7 +145,7 @@ enum class EViewInteractionState : uint8
 
 // Enum InteractiveToolsFramework.EGizmoElementArrowHeadType
 // NumValues: 0x0003
-enum class EGizmoElementArrowHeadType : uint8
+enum class EGizmoElementArrowHeadType : uint32
 {
 	Cone                                     = 0,
 	Cube                                     = 1,
@@ -186,7 +186,7 @@ enum class EInputCaptureState : uint8
 
 // Enum InteractiveToolsFramework.EInputDevices
 // NumValues: 0x0009
-enum class EInputDevices : uint16
+enum class EInputDevices : uint32
 {
 	None                                     = 0,
 	Keyboard                                 = 1,

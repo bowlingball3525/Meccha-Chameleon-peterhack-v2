@@ -31,7 +31,7 @@ enum class EPoseSearchAssetSamplerSpace : uint8
 
 // Enum PoseSearch.EPoseSearchMode
 // NumValues: 0x0005
-enum class EPoseSearchMode : uint8
+enum class EPoseSearchMode : uint32
 {
 	BruteForce                               = 0,
 	PCAKDTree                                = 1,

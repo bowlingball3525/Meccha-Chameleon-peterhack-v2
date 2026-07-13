@@ -12,10 +12,10 @@
 
 #include "Engine_structs.hpp"
 #include "Mover_structs.hpp"
-#include "ST_ItemCoreDatas_structs.hpp"
 #include "CoreUObject_structs.hpp"
 #include "EnhancedInput_structs.hpp"
 #include "UINavigation_structs.hpp"
+#include "ST_ItemCoreDatas_structs.hpp"
 #include "PenguinHotel_structs.hpp"
 #include "InputCore_structs.hpp"
 
@@ -1080,8 +1080,8 @@ DUMPER7_ASSERTS_BP_FirstPersonCharacter_cLeon_Character_C_SelectEmote;
 struct BP_FirstPersonCharacter_cLeon_Character_C_ChangeViewMode final
 {
 public:
-	class FName                                   ModeName_ChangeViewMode;                           // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          Quick_ChangeViewMode;                              // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class FName                                   ModeName;                                          // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          Quick;                                             // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_FirstPersonCharacter_cLeon_Character_C_ChangeViewMode;
 
@@ -1090,7 +1090,7 @@ DUMPER7_ASSERTS_BP_FirstPersonCharacter_cLeon_Character_C_ChangeViewMode;
 struct BP_FirstPersonCharacter_cLeon_Character_C_ReceiveTick final
 {
 public:
-	float                                         DeltaSeconds_ReceiveTick;                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_FirstPersonCharacter_cLeon_Character_C_ReceiveTick;
 

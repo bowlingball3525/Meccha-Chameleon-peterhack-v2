@@ -30,7 +30,7 @@ enum class EOptimusPinMutability : uint8
 
 // Enum OptimusCore.EOptimusConstantType
 // NumValues: 0x0003
-enum class EOptimusConstantType : uint8
+enum class EOptimusConstantType : uint32
 {
 	Input                                    = 0,
 	Output                                   = 1,
@@ -102,7 +102,7 @@ enum class EOptimusSkinnedMeshExecDomain : uint8
 
 // Enum OptimusCore.EOptimusTerminalType
 // NumValues: 0x0004
-enum class EOptimusTerminalType : uint8
+enum class EOptimusTerminalType : uint32
 {
 	Unknown                                  = 0,
 	Entry                                    = 1,
@@ -112,7 +112,7 @@ enum class EOptimusTerminalType : uint8
 
 // Enum OptimusCore.EOptimusDataDomainType
 // NumValues: 0x0003
-enum class EOptimusDataDomainType : uint8
+enum class EOptimusDataDomainType : uint32
 {
 	Dimensional                              = 0,
 	Expression                               = 1,
@@ -146,7 +146,7 @@ enum class EOptimusDataTypeFlags : uint8
 
 // Enum OptimusCore.EOptimusDeformerStatus
 // NumValues: 0x0005
-enum class EOptimusDeformerStatus : uint8
+enum class EOptimusDeformerStatus : uint32
 {
 	Compiled                                 = 0,
 	CompiledWithWarnings                     = 1,
@@ -157,7 +157,7 @@ enum class EOptimusDeformerStatus : uint8
 
 // Enum OptimusCore.EOptimusExecutionDomainType
 // NumValues: 0x0003
-enum class EOptimusExecutionDomainType : uint8
+enum class EOptimusExecutionDomainType : uint32
 {
 	DomainName                               = 0,
 	Expression                               = 1,
@@ -166,7 +166,7 @@ enum class EOptimusExecutionDomainType : uint8
 
 // Enum OptimusCore.EOptimusNodeGraphType
 // NumValues: 0x0007
-enum class EOptimusNodeGraphType : uint8
+enum class EOptimusNodeGraphType : uint32
 {
 	Setup                                    = 0,
 	Update                                   = 1,

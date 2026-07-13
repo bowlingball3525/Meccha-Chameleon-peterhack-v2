@@ -26,7 +26,7 @@ enum class ESetParamResult : uint8
 
 // Enum MetasoundFrontend.EMetasoundFrontendVertexAccessType
 // NumValues: 0x0004
-enum class EMetasoundFrontendVertexAccessType : uint8
+enum class EMetasoundFrontendVertexAccessType : uint32
 {
 	Reference                                = 0,
 	Value                                    = 1,

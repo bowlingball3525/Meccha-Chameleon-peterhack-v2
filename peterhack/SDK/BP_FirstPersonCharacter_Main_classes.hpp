@@ -11,15 +11,15 @@
 #include "Basic.hpp"
 
 #include "CoreUObject_structs.hpp"
+#include "ENUM_ClassType_structs.hpp"
+#include "DeathType_structs.hpp"
 #include "Engine_structs.hpp"
 #include "PhysicsCore_structs.hpp"
 #include "Mover_structs.hpp"
 #include "MoverExamples_classes.hpp"
-#include "ENUM_HandType_structs.hpp"
 #include "ENUM_ItemBindType_structs.hpp"
-#include "ENUM_ClassType_structs.hpp"
+#include "ENUM_HandType_structs.hpp"
 #include "EN_DamageType_structs.hpp"
-#include "DeathType_structs.hpp"
 #include "EN_StanType_structs.hpp"
 
 
@@ -267,7 +267,7 @@ public:
 	void InteractGimmick_Client_(class UObject* ターゲット, class ABP_FirstPersonCharacter_Main_C* First_Person);
 	void InteractGimmick_Server_(class UObject* ターゲット, class ABP_FirstPersonCharacter_Main_C* First_Person);
 	void AimEvent(bool State);
-	void ReceiveTick(float DeltaSeconds_ReceiveTick);
+	void ReceiveTick(float DeltaSeconds);
 	void CameraPitch(double ViewPitch_0);
 	void ShotEvent(bool State);
 	void DashStateChage(bool State);

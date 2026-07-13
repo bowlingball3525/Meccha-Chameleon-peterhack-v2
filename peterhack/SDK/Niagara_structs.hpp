@@ -536,7 +536,7 @@ enum class ENiagaraStatelessFeatureMask : uint8
 
 // Enum Niagara.ENiagaraDistributionMode
 // NumValues: 0x000A
-enum class ENiagaraDistributionMode : uint8
+enum class ENiagaraDistributionMode : uint32
 {
 	Binding                                  = 0,
 	Expression                               = 1,
@@ -552,7 +552,7 @@ enum class ENiagaraDistributionMode : uint8
 
 // Enum Niagara.ENSM_VelocityType
 // NumValues: 0x0004
-enum class ENSM_VelocityType : uint8
+enum class ENSM_VelocityType : uint32
 {
 	Linear                                   = 0,
 	FromPoint                                = 1,
@@ -562,7 +562,7 @@ enum class ENSM_VelocityType : uint8
 
 // Enum Niagara.ENSMInitialMeshOrientationMode
 // NumValues: 0x0004
-enum class ENSMInitialMeshOrientationMode : uint8
+enum class ENSMInitialMeshOrientationMode : uint32
 {
 	None                                     = 0,
 	Random                                   = 1,
@@ -594,7 +594,7 @@ enum class ENSM_SurfaceExpansionMode : uint8
 
 // Enum Niagara.ENSMSubUVAnimation_Mode
 // NumValues: 0x0005
-enum class ENSMSubUVAnimation_Mode : uint8
+enum class ENSMSubUVAnimation_Mode : uint32
 {
 	DirectSet                                = 0,
 	InfiniteLoop                             = 1,
@@ -605,7 +605,7 @@ enum class ENSMSubUVAnimation_Mode : uint8
 
 // Enum Niagara.ENiagaraStatelessSpawnInfoType
 // NumValues: 0x0003
-enum class ENiagaraStatelessSpawnInfoType : uint8
+enum class ENiagaraStatelessSpawnInfoType : uint32
 {
 	Burst                                    = 0,
 	Rate                                     = 1,
@@ -752,7 +752,7 @@ enum class ENDIObjectPropertyReaderSourceMode : uint8
 
 // Enum Niagara.ENiagaraSystemSpawnSectionStartBehavior
 // NumValues: 0x0002
-enum class ENiagaraSystemSpawnSectionStartBehavior : uint8
+enum class ENiagaraSystemSpawnSectionStartBehavior : uint32
 {
 	Activate                                 = 0,
 	ENiagaraSystemSpawnSectionStartBehavior_MAX = 1,
@@ -760,7 +760,7 @@ enum class ENiagaraSystemSpawnSectionStartBehavior : uint8
 
 // Enum Niagara.ENiagaraSystemSpawnSectionEvaluateBehavior
 // NumValues: 0x0003
-enum class ENiagaraSystemSpawnSectionEvaluateBehavior : uint8
+enum class ENiagaraSystemSpawnSectionEvaluateBehavior : uint32
 {
 	ActivateIfInactive                       = 0,
 	None                                     = 1,
@@ -769,7 +769,7 @@ enum class ENiagaraSystemSpawnSectionEvaluateBehavior : uint8
 
 // Enum Niagara.ENiagaraSystemSpawnSectionEndBehavior
 // NumValues: 0x0004
-enum class ENiagaraSystemSpawnSectionEndBehavior : uint8
+enum class ENiagaraSystemSpawnSectionEndBehavior : uint32
 {
 	SetSystemInactive                        = 0,
 	Deactivate                               = 1,
@@ -795,7 +795,7 @@ enum class ENiagaraCompilationState : uint8
 
 // Enum Niagara.ENiagaraBakerViewMode
 // NumValues: 0x0009
-enum class ENiagaraBakerViewMode : uint8
+enum class ENiagaraBakerViewMode : uint32
 {
 	Perspective                              = 0,
 	OrthoFront                               = 1,
@@ -829,7 +829,7 @@ enum class ENiagartaDataChannelReadResult : uint8
 
 // Enum Niagara.ENiagaraDataInterfaceEmitterBindingMode
 // NumValues: 0x0003
-enum class ENiagaraDataInterfaceEmitterBindingMode : uint8
+enum class ENiagaraDataInterfaceEmitterBindingMode : uint32
 {
 	Self                                     = 0,
 	Other                                    = 1,
@@ -857,7 +857,7 @@ enum class ENDILandscape_SourceMode : uint8
 
 // Enum Niagara.ESetResolutionMethod
 // NumValues: 0x0004
-enum class ESetResolutionMethod : uint8
+enum class ESetResolutionMethod : uint32
 {
 	Independent                              = 0,
 	MaxAxis                                  = 1,
@@ -920,7 +920,7 @@ enum class ENiagaraDebugHudVAlign : uint8
 
 // Enum Niagara.ENiagaraDebugHudFont
 // NumValues: 0x0003
-enum class ENiagaraDebugHudFont : uint8
+enum class ENiagaraDebugHudFont : uint32
 {
 	Small                                    = 0,
 	Normal                                   = 1,
@@ -929,7 +929,7 @@ enum class ENiagaraDebugHudFont : uint8
 
 // Enum Niagara.ENiagaraDebugHudVerbosity
 // NumValues: 0x0004
-enum class ENiagaraDebugHudVerbosity : uint8
+enum class ENiagaraDebugHudVerbosity : uint32
 {
 	None                                     = 0,
 	Basic                                    = 1,
@@ -939,7 +939,7 @@ enum class ENiagaraDebugHudVerbosity : uint8
 
 // Enum Niagara.ENiagaraDebugHUDOverviewMode
 // NumValues: 0x0006
-enum class ENiagaraDebugHUDOverviewMode : uint8
+enum class ENiagaraDebugHUDOverviewMode : uint32
 {
 	Overview                                 = 0,
 	Scalability                              = 1,
@@ -951,7 +951,7 @@ enum class ENiagaraDebugHUDOverviewMode : uint8
 
 // Enum Niagara.ENiagaraDebugHUDPerfGraphMode
 // NumValues: 0x0004
-enum class ENiagaraDebugHUDPerfGraphMode : uint8
+enum class ENiagaraDebugHUDPerfGraphMode : uint32
 {
 	GameThread                               = 0,
 	RenderThread                             = 1,
@@ -961,7 +961,7 @@ enum class ENiagaraDebugHUDPerfGraphMode : uint8
 
 // Enum Niagara.ENiagaraDebugHUDPerfSampleMode
 // NumValues: 0x0003
-enum class ENiagaraDebugHUDPerfSampleMode : uint8
+enum class ENiagaraDebugHUDPerfSampleMode : uint32
 {
 	FrameTotal                               = 0,
 	PerInstanceAverage                       = 1,
@@ -970,7 +970,7 @@ enum class ENiagaraDebugHUDPerfSampleMode : uint8
 
 // Enum Niagara.ENiagaraDebugHUDPerfUnits
 // NumValues: 0x0003
-enum class ENiagaraDebugHUDPerfUnits : uint8
+enum class ENiagaraDebugHUDPerfUnits : uint32
 {
 	Microseconds                             = 0,
 	Milliseconds                             = 1,
@@ -979,7 +979,7 @@ enum class ENiagaraDebugHUDPerfUnits : uint8
 
 // Enum Niagara.ENiagaraDebugHUDDOverviewSort
 // NumValues: 0x0007
-enum class ENiagaraDebugHUDDOverviewSort : uint8
+enum class ENiagaraDebugHUDDOverviewSort : uint32
 {
 	Name                                     = 0,
 	NumberRegistered                         = 1,
@@ -992,7 +992,7 @@ enum class ENiagaraDebugHUDDOverviewSort : uint8
 
 // Enum Niagara.ENiagaraCullReaction
 // NumValues: 0x0006
-enum class ENiagaraCullReaction : uint8
+enum class ENiagaraCullReaction : uint32
 {
 	Deactivate                               = 0,
 	DeactivateImmediate                      = 1,
@@ -1004,7 +1004,7 @@ enum class ENiagaraCullReaction : uint8
 
 // Enum Niagara.ENiagaraScalabilityUpdateFrequency
 // NumValues: 0x0006
-enum class ENiagaraScalabilityUpdateFrequency : uint8
+enum class ENiagaraScalabilityUpdateFrequency : uint32
 {
 	SpawnOnly                                = 0,
 	Low                                      = 1,
@@ -1016,7 +1016,7 @@ enum class ENiagaraScalabilityUpdateFrequency : uint8
 
 // Enum Niagara.ENiagaraCullProxyMode
 // NumValues: 0x0003
-enum class ENiagaraCullProxyMode : uint8
+enum class ENiagaraCullProxyMode : uint32
 {
 	None                                     = 0,
 	Instanced_Rendered                       = 1,
@@ -1389,7 +1389,7 @@ enum class ENiagaraExecutionStateSource : uint8
 
 // Enum Niagara.ENiagaraExecutionState
 // NumValues: 0x0007
-enum class ENiagaraExecutionState : uint8
+enum class ENiagaraExecutionState : uint32
 {
 	Active                                   = 0,
 	Inactive                                 = 1,
@@ -1402,7 +1402,7 @@ enum class ENiagaraExecutionState : uint8
 
 // Enum Niagara.ENiagaraExecutionStateManagement
 // NumValues: 0x0007
-enum class ENiagaraExecutionStateManagement : uint8
+enum class ENiagaraExecutionStateManagement : uint32
 {
 	Awaken                                   = 0,
 	SleepAndLetParticlesFinish               = 1,
@@ -1415,7 +1415,7 @@ enum class ENiagaraExecutionStateManagement : uint8
 
 // Enum Niagara.ENiagaraCoordinateSpace
 // NumValues: 0x0004
-enum class ENiagaraCoordinateSpace : uint8
+enum class ENiagaraCoordinateSpace : uint32
 {
 	Simulation                               = 0,
 	World                                    = 1,
@@ -1455,7 +1455,7 @@ enum class ENiagaraValidationSeverity : uint8
 
 // Enum Niagara.ENiagaraVariantMode
 // NumValues: 0x0005
-enum class ENiagaraVariantMode : uint8
+enum class ENiagaraVariantMode : uint32
 {
 	None                                     = 0,
 	Object                                   = 1,

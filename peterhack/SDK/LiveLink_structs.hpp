@@ -18,7 +18,7 @@ SDK_NAMESPACE_START
 
 // Enum LiveLink.EBoneTransformResolution
 // NumValues: 0x0004
-enum class EBoneTransformResolution : uint8
+enum class EBoneTransformResolution : uint32
 {
 	KeepParent                               = 0,
 	KeepChild                                = 1,
@@ -28,7 +28,7 @@ enum class EBoneTransformResolution : uint8
 
 // Enum LiveLink.ELiveLinkTimecodeProviderEvaluationType
 // NumValues: 0x0004
-enum class ELiveLinkTimecodeProviderEvaluationType : uint8
+enum class ELiveLinkTimecodeProviderEvaluationType : uint32
 {
 	Lerp                                     = 0,
 	Nearest                                  = 1,

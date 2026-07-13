@@ -18,7 +18,7 @@ SDK_NAMESPACE_START
 
 // Enum DataflowCore.EDataflowImageResolution
 // NumValues: 0x000B
-enum class EDataflowImageResolution : uint16
+enum class EDataflowImageResolution : uint32
 {
 	Resolution16                             = 16,
 	Resolution32                             = 32,
@@ -46,7 +46,7 @@ enum class EDataflowImageChannel : uint8
 
 // Enum DataflowCore.EDataflowImageCombineResolutionOption
 // NumValues: 0x0004
-enum class EDataflowImageCombineResolutionOption : uint8
+enum class EDataflowImageCombineResolutionOption : uint32
 {
 	Lowest                                   = 0,
 	Highest                                  = 1,

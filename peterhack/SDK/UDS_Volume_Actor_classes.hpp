@@ -12,8 +12,8 @@
 
 #include "Engine_structs.hpp"
 #include "Engine_classes.hpp"
-#include "UDS_OcclusionShape_structs.hpp"
 #include "CoreUObject_structs.hpp"
+#include "UDS_OcclusionShape_structs.hpp"
 
 
 SDK_NAMESPACE_START

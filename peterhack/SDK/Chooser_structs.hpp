@@ -30,7 +30,7 @@ enum class EBoolColumnCellValue : uint8
 
 // Enum Chooser.EContextObjectDirection
 // NumValues: 0x0004
-enum class EContextObjectDirection : uint8
+enum class EContextObjectDirection : uint32
 {
 	Read                                     = 0,
 	Write                                    = 1,
@@ -40,7 +40,7 @@ enum class EContextObjectDirection : uint8
 
 // Enum Chooser.EEnumColumnCellValueComparison
 // NumValues: 0x0005
-enum class EEnumColumnCellValueComparison : uint8
+enum class EEnumColumnCellValueComparison : uint32
 {
 	MatchEqual                               = 0,
 	MatchNotEqual                            = 1,
@@ -60,7 +60,7 @@ enum class EGameplayTagMatchDirection : uint8
 
 // Enum Chooser.EObjectChooserResultType
 // NumValues: 0x0004
-enum class EObjectChooserResultType : uint8
+enum class EObjectChooserResultType : uint32
 {
 	ObjectResult                             = 0,
 	ClassResult                              = 1,
@@ -70,7 +70,7 @@ enum class EObjectChooserResultType : uint8
 
 // Enum Chooser.EObjectClassColumnCellValueComparison
 // NumValues: 0x0006
-enum class EObjectClassColumnCellValueComparison : uint8
+enum class EObjectClassColumnCellValueComparison : uint32
 {
 	Equal                                    = 0,
 	NotEqual                                 = 1,
@@ -82,7 +82,7 @@ enum class EObjectClassColumnCellValueComparison : uint8
 
 // Enum Chooser.EObjectColumnCellValueComparison
 // NumValues: 0x0005
-enum class EObjectColumnCellValueComparison : uint8
+enum class EObjectColumnCellValueComparison : uint32
 {
 	MatchEqual                               = 0,
 	MatchNotEqual                            = 1,
@@ -93,7 +93,7 @@ enum class EObjectColumnCellValueComparison : uint8
 
 // Enum Chooser.EChooserEvaluationFrequency
 // NumValues: 0x0005
-enum class EChooserEvaluationFrequency : uint8
+enum class EChooserEvaluationFrequency : uint32
 {
 	OnInitialUpdate                          = 0,
 	OnBecomeRelevant                         = 1,

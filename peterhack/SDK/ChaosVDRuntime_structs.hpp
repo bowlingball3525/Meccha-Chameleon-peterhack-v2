@@ -27,7 +27,7 @@ enum class EChaosVDAABBTreeNodeFlags : uint8
 
 // Enum ChaosVDRuntime.EChaosVDAccelerationStructureType
 // NumValues: 0x0006
-enum class EChaosVDAccelerationStructureType : uint8
+enum class EChaosVDAccelerationStructureType : uint32
 {
 	BoundingVolume                           = 0,
 	AABBTree                                 = 1,
@@ -39,7 +39,7 @@ enum class EChaosVDAccelerationStructureType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDContactShapesType
 // NumValues: 0x0019
-enum class EChaosVDContactShapesType : uint8
+enum class EChaosVDContactShapesType : uint32
 {
 	Unknown                                  = 0,
 	SphereSphere                             = 1,
@@ -141,7 +141,7 @@ enum class EChaosVDMidPhaseType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDCollisionTraceFlag
 // NumValues: 0x0005
-enum class EChaosVDCollisionTraceFlag : uint8
+enum class EChaosVDCollisionTraceFlag : uint32
 {
 	UseDefault                               = 0,
 	UseSimpleAndComplex                      = 1,
@@ -163,7 +163,7 @@ enum class EChaosVDCollisionShapeDataFlags : uint8
 
 // Enum ChaosVDRuntime.EChaosVDJointReSimType
 // NumValues: 0x0003
-enum class EChaosVDJointReSimType : uint8
+enum class EChaosVDJointReSimType : uint32
 {
 	FullResim                                = 0,
 	ResimAsFollower                          = 1,
@@ -172,7 +172,7 @@ enum class EChaosVDJointReSimType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDJointSyncType
 // NumValues: 0x0003
-enum class EChaosVDJointSyncType : uint8
+enum class EChaosVDJointSyncType : uint32
 {
 	InSync                                   = 0,
 	HardDesync                               = 1,
@@ -221,7 +221,7 @@ enum class EChaosVDJointSolverSettingsFlags : uint8
 
 // Enum ChaosVDRuntime.EChaosVDJointMotionType
 // NumValues: 0x0004
-enum class EChaosVDJointMotionType : uint8
+enum class EChaosVDJointMotionType : uint32
 {
 	Free                                     = 0,
 	Limited                                  = 1,
@@ -231,7 +231,7 @@ enum class EChaosVDJointMotionType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDJointForceMode
 // NumValues: 0x0003
-enum class EChaosVDJointForceMode : uint8
+enum class EChaosVDJointForceMode : uint32
 {
 	Acceleration                             = 0,
 	Force                                    = 1,
@@ -240,7 +240,7 @@ enum class EChaosVDJointForceMode : uint8
 
 // Enum ChaosVDRuntime.EChaosVDPlasticityType
 // NumValues: 0x0004
-enum class EChaosVDPlasticityType : uint8
+enum class EChaosVDPlasticityType : uint32
 {
 	Free                                     = 0,
 	Shrink                                   = 1,
@@ -313,7 +313,7 @@ enum class EChaosVDObjectStateType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDParticleContext
 // NumValues: 0x0004
-enum class EChaosVDParticleContext : uint8
+enum class EChaosVDParticleContext : uint32
 {
 	Invalid                                  = 0,
 	GameThread                               = 1,
@@ -323,7 +323,7 @@ enum class EChaosVDParticleContext : uint8
 
 // Enum ChaosVDRuntime.EChaosVDKinematicTargetMode
 // NumValues: 0x0005
-enum class EChaosVDKinematicTargetMode : uint8
+enum class EChaosVDKinematicTargetMode : uint32
 {
 	None                                     = 0,
 	Reset                                    = 1,
@@ -334,7 +334,7 @@ enum class EChaosVDKinematicTargetMode : uint8
 
 // Enum ChaosVDRuntime.EChaosVDSceneQueryType
 // NumValues: 0x0005
-enum class EChaosVDSceneQueryType : uint8
+enum class EChaosVDSceneQueryType : uint32
 {
 	Invalid                                  = 0,
 	Sweep                                    = 1,
@@ -345,7 +345,7 @@ enum class EChaosVDSceneQueryType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDSceneQueryMode
 // NumValues: 0x0005
-enum class EChaosVDSceneQueryMode : uint8
+enum class EChaosVDSceneQueryMode : uint32
 {
 	Single                                   = 0,
 	Multi                                    = 1,
@@ -398,7 +398,7 @@ enum class EChaosVDSQHitFlags : uint16
 
 // Enum ChaosVDRuntime.EChaosVDCollisionQueryHitType
 // NumValues: 0x0004
-enum class EChaosVDCollisionQueryHitType : uint8
+enum class EChaosVDCollisionQueryHitType : uint32
 {
 	None                                     = 0,
 	Touch                                    = 1,
@@ -408,7 +408,7 @@ enum class EChaosVDCollisionQueryHitType : uint8
 
 // Enum ChaosVDRuntime.EChaosVDSQVisitRejectReason
 // NumValues: 0x0007
-enum class EChaosVDSQVisitRejectReason : uint8
+enum class EChaosVDSQVisitRejectReason : uint32
 {
 	None                                     = 0,
 	NoHit                                    = 1,
@@ -421,7 +421,7 @@ enum class EChaosVDSQVisitRejectReason : uint8
 
 // Enum ChaosVDRuntime.EChaosVDSceneQueryVisitorType
 // NumValues: 0x0004
-enum class EChaosVDSceneQueryVisitorType : uint8
+enum class EChaosVDSceneQueryVisitorType : uint32
 {
 	Invalid                                  = 0,
 	BroadPhase                               = 1,

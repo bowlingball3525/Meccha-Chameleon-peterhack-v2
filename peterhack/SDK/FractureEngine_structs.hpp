@@ -15,7 +15,7 @@ SDK_NAMESPACE_START
 
 // Enum FractureEngine.EConvexHullSimplifyMethod
 // NumValues: 0x0003
-enum class EConvexHullSimplifyMethod : uint8
+enum class EConvexHullSimplifyMethod : uint32
 {
 	MeshQSlim                                = 0,
 	AngleTolerance                           = 1,

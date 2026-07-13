@@ -103,7 +103,7 @@ enum class ENavSystemOverridePolicy : uint8
 
 // Enum NavigationSystem.ESubdivisionLOD
 // NumValues: 0x0005
-enum class ESubdivisionLOD : uint8
+enum class ESubdivisionLOD : uint32
 {
 	Low                                      = 0,
 	Medium                                   = 1,

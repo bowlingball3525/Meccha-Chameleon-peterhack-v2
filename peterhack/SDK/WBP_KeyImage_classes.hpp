@@ -11,10 +11,10 @@
 #include "Basic.hpp"
 
 #include "Engine_structs.hpp"
-#include "UINavigation_structs.hpp"
 #include "ST_InputDeviceImage_structs.hpp"
 #include "UMG_structs.hpp"
 #include "UMG_classes.hpp"
+#include "UINavigation_structs.hpp"
 
 
 SDK_NAMESPACE_START

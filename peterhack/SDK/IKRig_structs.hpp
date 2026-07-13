@@ -138,7 +138,7 @@ enum class ERootMotionHeightSource : uint8
 
 // Enum IKRig.EWarpingDirectionSource
 // NumValues: 0x0004
-enum class EWarpingDirectionSource : uint8
+enum class EWarpingDirectionSource : uint32
 {
 	Goals                                    = 0,
 	Chain                                    = 1,
@@ -167,7 +167,7 @@ enum class ERetargetSourceOrTarget : uint8
 
 // Enum IKRig.EBasicAxis
 // NumValues: 0x0007
-enum class EBasicAxis : uint8
+enum class EBasicAxis : uint32
 {
 	X                                        = 0,
 	Y                                        = 1,

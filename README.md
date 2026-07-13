@@ -8,7 +8,7 @@ Internal overlay and tools for **Meccha Chameleon** (DirectX 12). Currently targ
 ## Quick start
 
 ```bat
-git clone https://github.com/bowlingball3525/MecchaChameleonpeterhackv2.git
+git clone https://github.com/bowlingball3525/Meccha-Chameleon-peterhack-v2.git
 cd peterhack
 build.bat
 "%USERPROFILE%\Desktop\peterhack\peterhack-loader.exe" --local --wait

@@ -20,9 +20,9 @@ SDK_NAMESPACE_START
 // (BlueprintCallable, BlueprintEvent)
 // Parameters:
 // class UWBP_MapContentsWithRandom_C*     SelfWidget                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-// const struct FST_cLeonMapData&          MapData                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 
-void UWBP_cLeonGameSettings_C::SelectMapMain(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& MapData)
+void UWBP_cLeonGameSettings_C::SelectMapMain(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)
 {
 	static class UFunction* Func = nullptr;
 
@@ -32,7 +32,7 @@ void UWBP_cLeonGameSettings_C::SelectMapMain(class UWBP_MapContentsWithRandom_C*
 	Params::WBP_cLeonGameSettings_C_SelectMapMain Parms{};
 
 	Parms.SelfWidget = SelfWidget;
-	Parms.MapData = std::move(MapData);
+	Parms.Mapdata = std::move(Mapdata);
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -42,9 +42,9 @@ void UWBP_cLeonGameSettings_C::SelectMapMain(class UWBP_MapContentsWithRandom_C*
 // (BlueprintCallable, BlueprintEvent)
 // Parameters:
 // class UWBP_MapContentsWithRandom_C*     SelfWidget                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-// const struct FST_cLeonMapData&          MapData                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 
-void UWBP_cLeonGameSettings_C::SelectMap(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& MapData)
+void UWBP_cLeonGameSettings_C::SelectMap(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)
 {
 	static class UFunction* Func = nullptr;
 
@@ -54,7 +54,7 @@ void UWBP_cLeonGameSettings_C::SelectMap(class UWBP_MapContentsWithRandom_C* Sel
 	Params::WBP_cLeonGameSettings_C_SelectMap Parms{};
 
 	Parms.SelfWidget = SelfWidget;
-	Parms.MapData = std::move(MapData);
+	Parms.Mapdata = std::move(Mapdata);
 
 	UObject::ProcessEvent(Func, &Parms);
 }

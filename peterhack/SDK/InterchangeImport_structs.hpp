@@ -36,7 +36,7 @@ enum class EMaterialXTextureSampleBlurFilter : uint8
 
 // Enum InterchangeImport.EMAterialXTextureSampleBlurKernel
 // NumValues: 0x0005
-enum class EMAterialXTextureSampleBlurKernel : uint8
+enum class EMAterialXTextureSampleBlurKernel : uint32
 {
 	Kernel1                                  = 0,
 	Kernel3                                  = 1,

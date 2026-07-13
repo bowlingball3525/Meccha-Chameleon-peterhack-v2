@@ -135,7 +135,7 @@ enum class EScrollWhenFocusChanges : uint8
 
 // Enum Slate.ECustomizedToolMenuVisibility
 // NumValues: 0x0004
-enum class ECustomizedToolMenuVisibility : uint8
+enum class ECustomizedToolMenuVisibility : uint32
 {
 	None                                     = 0,
 	Visible                                  = 1,

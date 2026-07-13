@@ -95,7 +95,7 @@ namespace DirectX12Interface
 	// ImGui 1.92+ uploads font + widget textures dynamically and needs many SRV slots.
 	// The legacy single-descriptor init corrupts color pickers/gradients on some GPUs,
 	// especially when large merged font atlases are built (CJK fonts present).
-	static constexpr UINT ImGuiSrvCapacity = 256;
+	static constexpr UINT ImGuiSrvCapacity = 512;
 	UINT ImGuiSrvDescriptorSize = 0;
 	UINT ImGuiSrvAllocCount = 0;
 	std::vector<UINT> ImGuiSrvFreeIndices;
@@ -262,6 +262,16 @@ static void InitKickFunctionPointers()
 	if (!g_fnOnRepBodyVisibility)
 		g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
 			"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
+}
+
+void ForceRefreshKickFunctionPointers()
+{
+	g_fnKickLINK = SDK::ABP_FirstPersonCharacter_LINK_C::StaticClass()->GetFunction("BP_FirstPersonCharacter_LINK_C", "Kick");
+	g_fnKickOnline = SDK::ABP_FirstPersonPlayerState_Online_C::StaticClass()->GetFunction("BP_FirstPersonPlayerState_Online_C", "Kick");
+	g_fnClientWasKicked = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientWasKicked");
+	g_fnClientReturnToMainMenuWithTextReason = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientReturnToMainMenuWithTextReason");
+	g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
 }
 
 static void RefreshKickFunctionPointersIfStale()
@@ -477,6 +487,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 			Process::Hwnd = Desc.OutputWindow; // use the window the swapchain actually presents to, not GetForegroundWindow()'s guess
 			Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 			Desc.Windowed = ((GetWindowLongPtr(Process::Hwnd, GWL_STYLE) & WS_POPUP) != 0) ? false : true;
+			const DXGI_FORMAT swapChainFormat = Desc.BufferDesc.Format;
 
 			DirectX12Interface::BuffersCounts = Desc.BufferCount;
 			DirectX12Interface::FrameContext = new DirectX12Interface::_FrameContext[DirectX12Interface::BuffersCounts];
@@ -552,7 +563,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 			dx12Init.Device = DirectX12Interface::Device;
 			dx12Init.CommandQueue = DirectX12Interface::CommandQueue;
 			dx12Init.NumFramesInFlight = static_cast<int>(DirectX12Interface::BuffersCounts);
-			dx12Init.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+			dx12Init.RTVFormat = swapChainFormat;
 			dx12Init.SrvDescriptorHeap = DirectX12Interface::DescriptorHeapImGuiRender;
 			dx12Init.SrvDescriptorAllocFn = DirectX12Interface::ImGuiSrvDescriptorAlloc;
 			dx12Init.SrvDescriptorFreeFn = DirectX12Interface::ImGuiSrvDescriptorFree;
@@ -648,7 +659,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	{
 		if (!prevMenuOpen && g_camo)
 			g_camo->OnMenuOpened();
-		ImGui::StyleColorsDark();
+		static bool menuStyleApplied = false;
+		if (!menuStyleApplied)
+		{
+			ImGui::StyleColorsDark();
+			menuStyleApplied = true;
+		}
 		gui->Init();
 	}
 

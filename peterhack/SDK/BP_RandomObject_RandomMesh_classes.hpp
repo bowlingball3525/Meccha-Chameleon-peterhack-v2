@@ -28,15 +28,15 @@ public:
 	struct FRandomStream                          Seed;                                              // 0x02E0(0x0008)(Edit, BlueprintVisible, Net, ZeroConstructor, RepNotify, NoDestructor)
 
 public:
-	void UserConstructionScript();
-	void SpawnSet();
-	void SetIndex(bool* Error);
-	void ReceiveBeginPlay();
-	void OnRep_Seed();
-	void OnRep_CurrentIndex();
-	void IndexUpdate();
-	void ExecuteUbergraph_BP_RandomObject_RandomMesh(int32 EntryPoint);
 	void CheckLoop();
+	void ExecuteUbergraph_BP_RandomObject_RandomMesh(int32 EntryPoint);
+	void IndexUpdate();
+	void OnRep_CurrentIndex();
+	void OnRep_Seed();
+	void ReceiveBeginPlay();
+	void SetIndex(bool* Error);
+	void SpawnSet();
+	void UserConstructionScript();
 
 public:
 	static class UClass* StaticClass()

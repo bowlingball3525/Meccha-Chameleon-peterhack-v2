@@ -10,22 +10,22 @@
 
 #include "Basic.hpp"
 
-#include "ENUM_HandType_structs.hpp"
 #include "ENUM_ItemBindType_structs.hpp"
-#include "ENUM_ClassType_structs.hpp"
+#include "FinishFilter_structs.hpp"
 #include "EnhancedInput_structs.hpp"
+#include "ENUM_ClassType_structs.hpp"
 #include "CoreUObject_structs.hpp"
 #include "ST_ItemCoreDatas_structs.hpp"
-#include "Engine_structs.hpp"
+#include "ENUM_HandType_structs.hpp"
 #include "EN_DamageType_structs.hpp"
-#include "FinishFilter_structs.hpp"
+#include "DeathType_structs.hpp"
+#include "Engine_structs.hpp"
 #include "Mover_structs.hpp"
 #include "PenguinHotel_structs.hpp"
 #include "UMG_structs.hpp"
 #include "InputCore_structs.hpp"
-#include "DeathType_structs.hpp"
-#include "EN_StanType_structs.hpp"
 #include "MovieScene_structs.hpp"
+#include "EN_StanType_structs.hpp"
 
 
 SDK_NAMESPACE_START
@@ -1263,7 +1263,7 @@ DUMPER7_ASSERTS_BP_FirstPersonCharacter_Main_C_AimEvent;
 struct BP_FirstPersonCharacter_Main_C_ReceiveTick final
 {
 public:
-	float                                         DeltaSeconds_ReceiveTick;                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_FirstPersonCharacter_Main_C_ReceiveTick;
 

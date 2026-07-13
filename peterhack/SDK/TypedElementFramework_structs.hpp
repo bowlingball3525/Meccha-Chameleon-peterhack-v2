@@ -18,7 +18,7 @@ SDK_NAMESPACE_START
 
 // Enum TypedElementFramework.ESCCModification
 // NumValues: 0x0005
-enum class ESCCModification : uint8
+enum class ESCCModification : uint32
 {
 	Modified                                 = 0,
 	Added                                    = 1,

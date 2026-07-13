@@ -19,7 +19,7 @@ SDK_NAMESPACE_START
 
 // Enum GameplayCameras.EBuiltInDoubleCameraVariable
 // NumValues: 0x0006
-enum class EBuiltInDoubleCameraVariable : uint8
+enum class EBuiltInDoubleCameraVariable : uint32
 {
 	None                                     = 0,
 	Yaw                                      = 1,
@@ -31,7 +31,7 @@ enum class EBuiltInDoubleCameraVariable : uint8
 
 // Enum GameplayCameras.EBuiltInVector2dCameraVariable
 // NumValues: 0x0003
-enum class EBuiltInVector2dCameraVariable : uint8
+enum class EBuiltInVector2dCameraVariable : uint32
 {
 	None                                     = 0,
 	YawPitch                                 = 1,
@@ -70,7 +70,7 @@ enum class ECameraBuildStatus : uint8
 
 // Enum GameplayCameras.ECameraContextDataType
 // NumValues: 0x0008
-enum class ECameraContextDataType : uint8
+enum class ECameraContextDataType : uint32
 {
 	Name                                     = 0,
 	String                                   = 1,
@@ -84,7 +84,7 @@ enum class ECameraContextDataType : uint8
 
 // Enum GameplayCameras.ECameraContextDataContainerType
 // NumValues: 0x0003
-enum class ECameraContextDataContainerType : uint8
+enum class ECameraContextDataContainerType : uint32
 {
 	None                                     = 0,
 	Array                                    = 1,
@@ -158,7 +158,7 @@ enum class ECameraVariableSetterBlendType : uint8
 
 // Enum GameplayCameras.ECameraVariableType
 // NumValues: 0x0010
-enum class ECameraVariableType : uint8
+enum class ECameraVariableType : uint32
 {
 	Boolean                                  = 0,
 	Integer32                                = 1,
@@ -180,7 +180,7 @@ enum class ECameraVariableType : uint8
 
 // Enum GameplayCameras.EGameplayCamerasViewRotationMode
 // NumValues: 0x0003
-enum class EGameplayCamerasViewRotationMode : uint8
+enum class EGameplayCamerasViewRotationMode : uint32
 {
 	None                                     = 0,
 	PreviewUpdate                            = 1,
@@ -189,7 +189,7 @@ enum class EGameplayCamerasViewRotationMode : uint8
 
 // Enum GameplayCameras.ECameraBlendStackType
 // NumValues: 0x0003
-enum class ECameraBlendStackType : uint8
+enum class ECameraBlendStackType : uint32
 {
 	IsolatedTransient                        = 0,
 	AdditivePersistent                       = 1,
@@ -198,7 +198,7 @@ enum class ECameraBlendStackType : uint8
 
 // Enum GameplayCameras.ECameraRigInitialOrientation
 // NumValues: 0x0006
-enum class ECameraRigInitialOrientation : uint8
+enum class ECameraRigInitialOrientation : uint32
 {
 	None                                     = 0,
 	ContextYawPitch                          = 1,
@@ -220,7 +220,7 @@ enum class EGameplayCameraComponentActivationMode : uint8
 
 // Enum GameplayCameras.ESmoothCameraBlendType
 // NumValues: 0x0003
-enum class ESmoothCameraBlendType : uint8
+enum class ESmoothCameraBlendType : uint32
 {
 	SmoothStep                               = 0,
 	SmootherStep                             = 1,
@@ -252,7 +252,7 @@ enum class ECollisionSafePositionOffsetSpace : uint8
 
 // Enum GameplayCameras.ECameraAutoRotateDirection
 // NumValues: 0x0004
-enum class ECameraAutoRotateDirection : uint8
+enum class ECameraAutoRotateDirection : uint32
 {
 	Facing                                   = 0,
 	Movement                                 = 1,

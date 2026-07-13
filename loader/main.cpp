@@ -26,6 +26,7 @@ namespace
 		bool localOnly = false;
 		bool injectOnly = false;
 		bool waitForProcess = false;
+		bool skipUpdateCheck = false;
 		fs::path manifestPath;
 		fs::path deployDir;
 		std::wstring processName = kDefaultProcess;
@@ -34,11 +35,26 @@ namespace
 
 	struct Manifest
 	{
+		std::string version;
 		std::string baseUrl;
+		std::string updateManifestUrl;
+		std::string releasePackage;
 		std::wstring processName = kDefaultProcess;
 		std::wstring injectDll = kDefaultInjectDll;
 		std::vector<std::string> files;
 	};
+
+	struct VersionParts
+	{
+		int major = 0;
+		int minor = 0;
+		int patch = 0;
+	};
+
+	std::optional<std::vector<std::uint8_t>> HttpDownload(const std::wstring& url);
+	std::string JoinUrl(std::string_view base, std::string_view relative);
+	std::optional<Manifest> LoadManifest(const fs::path& path);
+	bool PrepareFiles(const Options& options, const Manifest& manifest);
 
 	std::wstring ToWide(std::string_view text)
 	{
@@ -135,8 +151,14 @@ namespace
 	std::optional<Manifest> ParseManifest(const std::string& json)
 	{
 		Manifest manifest;
+		if (auto version = ExtractJsonString(json, "version"))
+			manifest.version = *version;
 		if (auto baseUrl = ExtractJsonString(json, "baseUrl"))
 			manifest.baseUrl = *baseUrl;
+		if (auto updateUrl = ExtractJsonString(json, "updateManifestUrl"))
+			manifest.updateManifestUrl = *updateUrl;
+		if (auto releasePackage = ExtractJsonString(json, "releasePackage"))
+			manifest.releasePackage = *releasePackage;
 		if (auto process = ExtractJsonString(json, "process"))
 			manifest.processName = ToWide(*process);
 		if (auto injectDll = ExtractJsonString(json, "injectDll"))
@@ -173,6 +195,257 @@ namespace
 		if (manifest.files.empty())
 			return std::nullopt;
 		return manifest;
+	}
+
+	bool WriteFileUtf8(const fs::path& path, const std::string& text)
+	{
+		std::error_code ec;
+		fs::create_directories(path.parent_path(), ec);
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		if (!out)
+			return false;
+		out.write(text.data(), static_cast<std::streamsize>(text.size()));
+		return out.good();
+	}
+
+	VersionParts ParseVersionParts(std::string_view versionText)
+	{
+		VersionParts parts;
+		if (!versionText.empty() && (versionText.front() == 'v' || versionText.front() == 'V'))
+			versionText.remove_prefix(1);
+
+		auto readInt = [&versionText](int& out) -> bool {
+			out = 0;
+			if (versionText.empty() || versionText.front() < '0' || versionText.front() > '9')
+				return false;
+			int value = 0;
+			while (!versionText.empty() && versionText.front() >= '0' && versionText.front() <= '9')
+			{
+				value = value * 10 + (versionText.front() - '0');
+				versionText.remove_prefix(1);
+			}
+			out = value;
+			return true;
+		};
+
+		if (!readInt(parts.major))
+			return parts;
+		if (!versionText.empty() && versionText.front() == '.')
+			versionText.remove_prefix(1);
+		readInt(parts.minor);
+		if (!versionText.empty() && versionText.front() == '.')
+			versionText.remove_prefix(1);
+		readInt(parts.patch);
+		return parts;
+	}
+
+	int CompareVersions(std::string_view left, std::string_view right)
+	{
+		const VersionParts a = ParseVersionParts(left);
+		const VersionParts b = ParseVersionParts(right);
+		if (a.major != b.major)
+			return a.major < b.major ? -1 : 1;
+		if (a.minor != b.minor)
+			return a.minor < b.minor ? -1 : 1;
+		if (a.patch != b.patch)
+			return a.patch < b.patch ? -1 : 1;
+		return 0;
+	}
+
+	std::string DisplayVersion(std::string_view version)
+	{
+		if (version.empty())
+			return "0.0.0";
+		return std::string(version);
+	}
+
+	bool PromptYesNo(const std::wstring& prompt, bool defaultYes = true)
+	{
+		std::wcout << prompt;
+		if (defaultYes)
+			std::wcout << L" [Y/n]: ";
+		else
+			std::wcout << L" [y/N]: ";
+
+		std::wstring line;
+		std::getline(std::wcin, line);
+		if (line.empty())
+			return defaultYes;
+
+		if (line == L"y" || line == L"Y" || line == L"yes" || line == L"YES")
+			return true;
+		if (line == L"n" || line == L"N" || line == L"no" || line == L"NO")
+			return false;
+		return defaultYes;
+	}
+
+	std::optional<std::string> HttpDownloadText(const std::wstring& url)
+	{
+		const auto bytes = HttpDownload(url);
+		if (!bytes)
+			return std::nullopt;
+		return std::string(reinterpret_cast<const char*>(bytes->data()), bytes->size());
+	}
+
+	bool ExtractZipArchive(const fs::path& zipPath, const fs::path& destination)
+	{
+		std::error_code ec;
+		fs::create_directories(destination, ec);
+
+		std::wstring command = L"powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "
+			L"\"Expand-Archive -LiteralPath '" + zipPath.wstring() + L"' -DestinationPath '" +
+			destination.wstring() + L"' -Force\"";
+
+		STARTUPINFOW startupInfo{};
+		startupInfo.cb = sizeof(startupInfo);
+		PROCESS_INFORMATION processInfo{};
+
+		std::vector<wchar_t> commandBuffer(command.begin(), command.end());
+		commandBuffer.push_back(L'\0');
+
+		if (!CreateProcessW(nullptr, commandBuffer.data(), nullptr, nullptr, FALSE, CREATE_NO_WINDOW,
+				nullptr, nullptr, &startupInfo, &processInfo))
+		{
+			LogError(L"Failed to launch PowerShell for update extraction. win32=" + std::to_wstring(GetLastError()));
+			return false;
+		}
+
+		WaitForSingleObject(processInfo.hProcess, INFINITE);
+		DWORD exitCode = 1;
+		GetExitCodeProcess(processInfo.hProcess, &exitCode);
+		CloseHandle(processInfo.hProcess);
+		CloseHandle(processInfo.hThread);
+		return exitCode == 0;
+	}
+
+	bool SaveManifestCopy(const fs::path& manifestPath, const std::string& json)
+	{
+		if (!WriteFileUtf8(manifestPath, json))
+		{
+			LogError(L"Failed to write manifest: " + manifestPath.wstring());
+			return false;
+		}
+		return true;
+	}
+
+	bool DownloadReleasePackage(const Manifest& manifest, const fs::path& deployDir)
+	{
+		if (manifest.baseUrl.empty() || manifest.baseUrl == "local" || manifest.releasePackage.empty())
+			return false;
+
+		const std::string packageUrl = JoinUrl(manifest.baseUrl, manifest.releasePackage);
+		Log(L"[update] Downloading " + ToWide(packageUrl));
+
+		const auto bytes = HttpDownload(ToWide(packageUrl));
+		if (!bytes)
+		{
+			LogError(L"Update download failed.");
+			return false;
+		}
+
+		const fs::path zipPath = fs::temp_directory_path() / L"peterhack-update.zip";
+		if (!WriteFileBytes(zipPath, *bytes))
+		{
+			LogError(L"Failed to write update package.");
+			return false;
+		}
+
+		Log(L"[update] Extracting to " + deployDir.wstring());
+		if (!ExtractZipArchive(zipPath, deployDir))
+		{
+			LogError(L"Failed to extract update package.");
+			return false;
+		}
+
+		std::error_code ec;
+		fs::remove(zipPath, ec);
+		return true;
+	}
+
+	bool ApplyRemoteUpdate(const Options& options, const Manifest& remoteManifest, const std::string& remoteManifestJson)
+	{
+		const fs::path loaderDir = ExeDirectory();
+		const fs::path manifestPath = options.manifestPath.empty()
+			? loaderDir / L"manifest.json"
+			: options.manifestPath;
+
+		if (!remoteManifest.releasePackage.empty() &&
+			!remoteManifest.baseUrl.empty() &&
+			remoteManifest.baseUrl != "local")
+		{
+			if (!DownloadReleasePackage(remoteManifest, options.deployDir))
+				return false;
+
+			return SaveManifestCopy(manifestPath, remoteManifestJson);
+		}
+
+		Options downloadOptions = options;
+		downloadOptions.localOnly = false;
+		downloadOptions.injectOnly = false;
+		if (!PrepareFiles(downloadOptions, remoteManifest))
+			return false;
+
+		return SaveManifestCopy(manifestPath, remoteManifestJson);
+	}
+
+	bool CheckForUpdates(Options& options, Manifest& manifest)
+	{
+		if (options.skipUpdateCheck || options.injectOnly)
+			return true;
+
+		if (manifest.updateManifestUrl.empty())
+		{
+			Log(L"[update] No updateManifestUrl configured — skipping update check.");
+			return true;
+		}
+
+		Log(L"[update] Checking for updates...");
+		const auto remoteText = HttpDownloadText(ToWide(manifest.updateManifestUrl));
+		if (!remoteText)
+		{
+			Log(L"[update] Could not reach update server (offline or blocked). Continuing with local files.");
+			return true;
+		}
+
+		const auto remoteManifest = ParseManifest(*remoteText);
+		if (!remoteManifest || remoteManifest->version.empty())
+		{
+			Log(L"[update] Remote manifest unavailable or missing version. Continuing.");
+			return true;
+		}
+
+		const std::string localVersion = DisplayVersion(manifest.version);
+		const std::string remoteVersion = DisplayVersion(remoteManifest->version);
+		if (CompareVersions(localVersion, remoteVersion) >= 0)
+		{
+			Log(L"[update] Up to date (v" + ToWide(localVersion) + L").");
+			return true;
+		}
+
+		Log(L"[update] New release available: v" + ToWide(localVersion) + L" -> v" + ToWide(remoteVersion));
+		if (!remoteManifest->releasePackage.empty())
+			Log(L"[update] Package: " + ToWide(remoteManifest->releasePackage));
+
+		if (!PromptYesNo(L"Download and install the update before loading?", true))
+		{
+			Log(L"[update] Skipped by user. Continuing with current files.");
+			return true;
+		}
+
+		if (!ApplyRemoteUpdate(options, *remoteManifest, *remoteText))
+			return false;
+
+		const auto refreshed = LoadManifest(options.manifestPath);
+		if (!refreshed)
+		{
+			LogError(L"Update installed but manifest reload failed.");
+			return false;
+		}
+
+		manifest = *refreshed;
+		options.localOnly = false;
+		Log(L"[update] Installed v" + ToWide(manifest.version) + L".");
+		return true;
 	}
 
 	std::optional<Manifest> LoadManifest(const fs::path& path)
@@ -527,12 +800,17 @@ namespace
 			L"  --local         Use files next to the loader / deploy folder (no HTTP download)\n"
 			L"  --inject-only   Skip download/copy; require files already in deploy folder\n"
 			L"  --wait          Wait up to 5 minutes for the game process\n"
+			L"  --skip-update-check  Do not check GitHub for a newer release\n"
 			L"  --manifest <path>  Manifest JSON (default: manifest.json next to loader)\n"
 			L"  --deploy <dir>  Deploy folder (default: Desktop\\peterhack)\n"
 			L"  --help          Show this help\n\n"
 			L"Manifest baseUrl:\n"
 			L"  \"local\"  -> copy from loader directory\n"
 			L"  https://...  -> download each file listed in manifest.json\n"
+			L"\nUpdates:\n"
+			L"  Set \"version\" and \"updateManifestUrl\" in manifest.json.\n"
+			L"  On startup the loader fetches the remote manifest and prompts if a newer version exists.\n"
+			L"  Remote manifest should set baseUrl + releasePackage for zip updates.\n"
 			L"\nBridge files are deployed to <deploy>\\bridge\\ (where peterhack loads camo from).\n";
 	}
 
@@ -565,6 +843,11 @@ namespace
 				options.waitForProcess = true;
 				continue;
 			}
+			if (arg == L"--skip-update-check")
+			{
+				options.skipUpdateCheck = true;
+				continue;
+			}
 			if (arg == L"--manifest" && i + 1 < argc)
 			{
 				options.manifestPath = fs::path(argv[++i]);
@@ -585,7 +868,7 @@ namespace
 
 int wmain(int argc, wchar_t** argv)
 {
-	const auto options = ParseArgs(argc, argv);
+	auto options = ParseArgs(argc, argv);
 	if (!options)
 		return 1;
 	if (options->showHelp)
@@ -594,19 +877,24 @@ int wmain(int argc, wchar_t** argv)
 		return 0;
 	}
 
-	const auto manifest = LoadManifest(options->manifestPath);
-	if (!manifest)
+	const auto manifestLoaded = LoadManifest(options->manifestPath);
+	if (!manifestLoaded)
 	{
 		const std::wstring manifestLabel = options->manifestPath.wstring();
 		LogError(std::wstring(L"Failed to read manifest: ") + manifestLabel);
 		return 2;
 	}
 
+	Manifest manifest = *manifestLoaded;
+
 	Log(std::wstring(L"Deploy folder: ") + options->deployDir.wstring());
+	if (!CheckForUpdates(*options, manifest))
+		return 6;
+
 	if (!options->injectOnly)
 	{
 		Log(L"Preparing files...");
-		if (!PrepareFiles(*options, *manifest))
+		if (!PrepareFiles(*options, manifest))
 			return 3;
 		Log(L"Files ready.");
 	}
@@ -615,8 +903,8 @@ int wmain(int argc, wchar_t** argv)
 		return 3;
 	}
 
-	const std::wstring processName = !manifest->processName.empty() ? manifest->processName : options->processName;
-	const std::wstring injectDll = !manifest->injectDll.empty() ? manifest->injectDll : options->injectDll;
+	const std::wstring processName = !manifest.processName.empty() ? manifest.processName : options->processName;
+	const std::wstring injectDll = !manifest.injectDll.empty() ? manifest.injectDll : options->injectDll;
 	const fs::path dllPath = options->deployDir / injectDll;
 
 	DWORD pid = FindProcessId(processName);

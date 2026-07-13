@@ -10,12 +10,12 @@
 
 #include "Basic.hpp"
 
-#include "Engine_structs.hpp"
+#include "CoreUObject_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 #include "EN_cLeonMainGamePhase_structs.hpp"
 #include "SlateCore_structs.hpp"
 #include "UMG_structs.hpp"
-#include "ST_cLeonMapData_structs.hpp"
-#include "CoreUObject_structs.hpp"
+#include "Engine_structs.hpp"
 
 
 SDK_NAMESPACE_START
@@ -149,7 +149,7 @@ DUMPER7_ASSERTS_WBP_cLeonMain_C_NamePlateVisibilityChange;
 struct WBP_cLeonMain_C_MapDataUpdate final
 {
 public:
-	struct FST_cLeonMapData                       MapData;                                           // 0x0000(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+	struct FST_cLeonMapData                       Mapdata;                                           // 0x0000(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_cLeonMain_C_MapDataUpdate;
 
@@ -275,7 +275,7 @@ public:
 	ESlateVisibility                              Temp_byte_Variable_23;                             // 0x01B1(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_24;                             // 0x01B2(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	EN_cLeonMainGamePhase                         Temp_byte_Variable_25;                             // 0x01B3(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	TDelegate<void(const struct FST_cLeonMapData& MapData)> K2Node_CreateDelegate_OutputDelegate_12; // 0x01B4(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TDelegate<void(const struct FST_cLeonMapData& Mapdata)> K2Node_CreateDelegate_OutputDelegate_12; // 0x01B4(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_26;                             // 0x01C4(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_27;                             // 0x01C5(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_28;                             // 0x01C6(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)

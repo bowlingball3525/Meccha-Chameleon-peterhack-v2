@@ -822,7 +822,7 @@ enum class EAnimationCompressionFormat : uint8
 
 // Enum Engine.EAnimInstanceLocatorFragmentType
 // NumValues: 0x0003
-enum class EAnimInstanceLocatorFragmentType : uint8
+enum class EAnimInstanceLocatorFragmentType : uint32
 {
 	AnimInstance                             = 0,
 	PostProcessAnimInstance                  = 1,
@@ -1585,7 +1585,7 @@ enum class EViewStatusForScreenPercentage : uint8
 
 // Enum Engine.EScreenPercentageMode
 // NumValues: 0x0004
-enum class EScreenPercentageMode : uint8
+enum class EScreenPercentageMode : uint32
 {
 	Manual                                   = 0,
 	BasedOnDisplayResolution                 = 1,
@@ -1818,7 +1818,7 @@ enum class EFunctionInputType : uint8
 
 // Enum Engine.EPositionIncludedOffsets
 // NumValues: 0x0003
-enum class EPositionIncludedOffsets : uint8
+enum class EPositionIncludedOffsets : uint32
 {
 	IncludeOffsets                           = 0,
 	ExcludeOffsets                           = 1,
@@ -1827,7 +1827,7 @@ enum class EPositionIncludedOffsets : uint8
 
 // Enum Engine.ELocalPositionOrigin
 // NumValues: 0x0004
-enum class ELocalPositionOrigin : uint8
+enum class ELocalPositionOrigin : uint32
 {
 	Instance                                 = 0,
 	InstancePreSkinning                      = 1,
@@ -1859,7 +1859,7 @@ enum class ENoiseFunction : uint8
 
 // Enum Engine.EMaterialExpressionOperatorKind
 // NumValues: 0x003E
-enum class EMaterialExpressionOperatorKind : uint8
+enum class EMaterialExpressionOperatorKind : uint32
 {
 	BitwiseNot                               = 0,
 	Negate                                   = 1,
@@ -2167,7 +2167,7 @@ enum class EMaterialShaderFrequency : uint8
 
 // Enum Engine.EMaterialValueTypeBridge
 // NumValues: 0x0026
-enum class EMaterialValueTypeBridge : uint32
+enum class EMaterialValueTypeBridge : uint64
 {
 	Float1                                   = 1,
 	Float2                                   = 2,
@@ -3561,7 +3561,7 @@ enum class ESyncPointActivationRules : uint8
 
 // Enum Engine.ETextImportTestFlags
 // NumValues: 0x0008
-enum class ETextImportTestFlags : uint8
+enum class ETextImportTestFlags : uint32
 {
 	Default                                  = 0,
 	FlagA                                    = 1,
@@ -5207,7 +5207,7 @@ enum class EMirrorFindReplaceMethod : uint8
 
 // Enum Engine.ESkeletalMeshVertexAttributeDataType
 // NumValues: 0x0004
-enum class ESkeletalMeshVertexAttributeDataType : uint8
+enum class ESkeletalMeshVertexAttributeDataType : uint32
 {
 	Float                                    = 0,
 	HalfFloat                                = 1,
@@ -5310,7 +5310,7 @@ enum class EAudioBusChannels : uint8
 
 // Enum Engine.EVoiceSampleRate
 // NumValues: 0x0003
-enum class EVoiceSampleRate : uint16
+enum class EVoiceSampleRate : uint32
 {
 	Low16000Hz                               = 16000,
 	Normal24000Hz                            = 24000,
@@ -5719,7 +5719,7 @@ enum class ERotatorQuantization : uint8
 
 // Enum Engine.ETimecodeProviderSynchronizationState
 // NumValues: 0x0005
-enum class ETimecodeProviderSynchronizationState : uint8
+enum class ETimecodeProviderSynchronizationState : uint32
 {
 	Closed                                   = 0,
 	Error                                    = 1,
@@ -6636,7 +6636,7 @@ enum class EMaxConcurrentResolutionRule : uint8
 
 // Enum Engine.EConcurrencyVolumeScaleMode
 // NumValues: 0x0004
-enum class EConcurrencyVolumeScaleMode : uint8
+enum class EConcurrencyVolumeScaleMode : uint32
 {
 	Default                                  = 0,
 	Distance                                 = 1,

@@ -10,10 +10,10 @@
 
 #include "Basic.hpp"
 
-#include "EN_cLeonMainGamePhase_structs.hpp"
 #include "Engine_structs.hpp"
 #include "UMG_structs.hpp"
 #include "UMG_classes.hpp"
+#include "EN_cLeonMainGamePhase_structs.hpp"
 
 
 SDK_NAMESPACE_START
@@ -152,7 +152,7 @@ public:
 	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void PlayerNumUpdate(int32 Current, int32 max_0);
 	void NamePlateVisibilityChange(bool Visibility);
-	void MapDataUpdate(const struct FST_cLeonMapData& MapData);
+	void MapDataUpdate(const struct FST_cLeonMapData& Mapdata);
 	void IsHunter(bool Hunter);
 	void InitDecoyWidget(int32 Num);
 	void HunterNumChange(int32 HunterNum);

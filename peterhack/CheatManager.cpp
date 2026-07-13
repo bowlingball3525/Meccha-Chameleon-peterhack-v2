@@ -2,8 +2,11 @@
 
 #pragma warning(disable : 4244)
 
+#include <cmath>
+
 #include "SDK/PenguinHotel_classes.hpp"
 #include "SDK/PenguinHotel_parameters.hpp"
+#include "SDK/BP_SpectatePawn_cLeon_classes.hpp"
 #include "SDK/Engine_parameters.hpp"
 #include "SDK/UMG_classes.hpp"
 #include "SDK/UMG_parameters.hpp"
@@ -25,6 +28,13 @@
 // keeps ownership explicit rather than relying on it.
 namespace
 {
+	ImDrawList* OverlayDrawList()
+	{
+		if (ImDrawList* windowList = ImGui::GetWindowDrawList())
+			return windowList;
+		return ImGui::GetBackgroundDrawList();
+	}
+
 	void InvokeNativeProcessEvent(SDK::UObject* object, SDK::UFunction* function, void* parms)
 	{
 		if (!object || !function)
@@ -36,32 +46,280 @@ namespace
 		function->FunctionFlags = previousFlags;
 	}
 
-	void CallSetMaxDecoySpawnCount(SDK::URuntimePaintableComponent* paintable, int target)
+	void CallSetMaxDecoySpawnCount(SDK::URuntimePaintableComponent* paintable, int target, bool includeServerRpc)
 	{
-		if (!paintable)
+		if (!paintable || !CheatManager::IsObjectValid(paintable))
 			return;
 
-		static SDK::UFunction* fnSet = nullptr;
-		static SDK::UFunction* fnServerSet = nullptr;
-		if (!fnSet)
-			fnSet = paintable->Class->GetFunction("RuntimePaintableComponent", "SetMaxDecoySpawnCount");
-		if (!fnServerSet)
-			fnServerSet = paintable->Class->GetFunction("RuntimePaintableComponent", "ServerSetMaxDecoySpawnCount");
+		SDK::UFunction* fnSet = paintable->Class->GetFunction("RuntimePaintableComponent", "SetMaxDecoySpawnCount");
+		SDK::UFunction* fnServerSet = paintable->Class->GetFunction("RuntimePaintableComponent", "ServerSetMaxDecoySpawnCount");
 
-		if (fnSet)
+		__try
 		{
-			SDK::Params::RuntimePaintableComponent_SetMaxDecoySpawnCount parms{};
-			parms.NewMaxDecoySpawnCount = target;
-			InvokeNativeProcessEvent(paintable, fnSet, &parms);
+			if (fnSet)
+			{
+				SDK::Params::RuntimePaintableComponent_SetMaxDecoySpawnCount parms{};
+				parms.NewMaxDecoySpawnCount = target;
+				InvokeNativeProcessEvent(paintable, fnSet, &parms);
+			}
+
+			if (includeServerRpc && fnServerSet)
+			{
+				SDK::Params::RuntimePaintableComponent_ServerSetMaxDecoySpawnCount parms{};
+				parms.NewMaxDecoySpawnCount = target;
+				InvokeNativeProcessEvent(paintable, fnServerSet, &parms);
+			}
 		}
-
-		if (fnServerSet)
+		__except (EXCEPTION_EXECUTE_HANDLER)
 		{
-			SDK::Params::RuntimePaintableComponent_ServerSetMaxDecoySpawnCount parms{};
-			parms.NewMaxDecoySpawnCount = target;
-			InvokeNativeProcessEvent(paintable, fnServerSet, &parms);
+			PhLog("[EXPLOITS:DECOY-NUM] ProcessEvent fault — skipped RPC\n");
 		}
 	}
+}
+
+namespace
+{
+	bool SafeGetAllActorsOfClass(
+		SDK::UGameplayStatics* gStatics,
+		SDK::UWorld* world,
+		SDK::UClass* klass,
+		SDK::TArray<SDK::AActor*>* out)
+	{
+		if (!gStatics || !world || !klass || !out)
+			return false;
+
+		__try
+		{
+			gStatics->GetAllActorsOfClass(world, klass, out);
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			out->Clear();
+			PhLog("[peterhack] GetAllActorsOfClass fault — skipped frame\n");
+			return false;
+		}
+	}
+
+	bool SafeLineOfSightTo(SDK::APlayerController* pc, SDK::AActor* actor)
+	{
+		if (!pc || !actor || !CheatManager::IsObjectValid(pc) || !CheatManager::IsObjectValid(actor))
+			return false;
+
+		__try
+		{
+			return pc->LineOfSightTo(actor, SDK::FVector{}, false);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeProjectWorldLocationToScreen(SDK::APlayerController* pc, const SDK::FVector& world, SDK::FVector2D& out)
+	{
+		if (!pc || !CheatManager::IsObjectValid(pc))
+			return false;
+
+		__try
+		{
+			return pc->ProjectWorldLocationToScreen(world, &out, false);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeGetActorLocation(SDK::AActor* actor, SDK::FVector& out)
+	{
+		if (!actor || !CheatManager::IsObjectValid(actor))
+			return false;
+
+		__try
+		{
+			out = actor->K2_GetActorLocation();
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeIsAnySimulatingPhysics(SDK::USkinnedMeshComponent* mesh)
+	{
+		if (!mesh || !CheatManager::IsObjectValid(mesh))
+			return false;
+
+		__try
+		{
+			return mesh->IsAnySimulatingPhysics();
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool MeshReadyForSkeleton(SDK::USkinnedMeshComponent* mesh)
+	{
+		if (!mesh || !CheatManager::IsObjectValid(mesh))
+			return false;
+
+		__try
+		{
+			return mesh->GetNumBones() >= skeleton::None;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool IsScreenCoordValid(const SDK::FVector2D& p)
+	{
+		return std::isfinite(p.X) && std::isfinite(p.Y) &&
+			std::fabs(p.X) < 50000.0f && std::fabs(p.Y) < 50000.0f;
+	}
+
+	void SetSimpleScreenBox(CheatManager::EspEntry& entry, const SDK::FVector2D& screen)
+	{
+		entry.hasBox = true;
+		entry.boxMin = { screen.X - 25.0f, screen.Y - 50.0f };
+		entry.boxMax = { screen.X + 25.0f, screen.Y + 10.0f };
+	}
+
+	bool SafeGetBoneScreenPos(
+		SDK::USkinnedMeshComponent* mesh,
+		SDK::APlayerController* pc,
+		int boneIdx,
+		SDK::FVector2D& out)
+	{
+		if (!MeshReadyForSkeleton(mesh) || boneIdx < 0 || boneIdx >= skeleton::None)
+			return false;
+
+		__try
+		{
+			const SDK::FVector boneLoc = mesh->GetSocketLocation(mesh->GetBoneName(boneIdx));
+			return SafeProjectWorldLocationToScreen(pc, boneLoc, out) && IsScreenCoordValid(out);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeActorBeingDestroyed(SDK::AActor* actor)
+	{
+		if (!actor || !CheatManager::IsObjectValid(actor))
+			return true;
+
+		__try
+		{
+			return actor->IsActorBeingDestroyed();
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return true;
+		}
+	}
+
+	bool SafeSetControllerFov(SDK::APlayerController* pc, float fov)
+	{
+		if (!pc || !CheatManager::IsObjectValid(pc))
+			return false;
+
+		__try
+		{
+			pc->FOV(fov);
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeDecoyMeshVisible(SDK::ABP_cLeonDecoy_Base_C* decoy)
+	{
+		if (!decoy || !decoy->PoseableMesh || !CheatManager::IsObjectValid(decoy->PoseableMesh))
+			return false;
+
+		__try
+		{
+			return decoy->PoseableMesh->bVisible;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeLevelReadyForActorScan(SDK::ULevel* level)
+	{
+		if (!level || !CheatManager::IsObjectValid(reinterpret_cast<SDK::UObject*>(level)))
+			return false;
+
+		__try
+		{
+			(void)level->Actors.Num();
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+}
+
+void CheatManager::ResetSessionState()
+{
+	deadActors.clear();
+	forcedVisibleActors.clear();
+	playerNameCache.clear();
+	killAllQueue.clear();
+	TeleportTarget = nullptr;
+	KillTarget = nullptr;
+	bKillAllSurvivorsRequested = false;
+	bChangeNameRequested = false;
+	pendingChangeName.clear();
+	bReturnToLobbyRequested = false;
+	lastDecoyPaintable = nullptr;
+	lastDecoyCountApplied = -1;
+	lastDecoyCountConfigured = -1;
+	lastDecoyRpcTickMs = 0;
+	decoyPaintableReadyTickMs = 0;
+	decoyExploitsReadyAfterMs_ = 0;
+	pendingDecoyServerRpc_ = false;
+	lastSpawnedDecoyCount_ = -1;
+	decoyQuiesceUntilMs_ = 0;
+	menuLookInputLocked = false;
+	inMatchStableFrames_ = 0;
+	espScansCompleted_ = 0;
+	g_menuInputLockApplied.store(false, std::memory_order_release);
+
+	EspSnapshot empty;
+	{
+		std::lock_guard<std::mutex> lock(snapshotMutex);
+		pendingSnapshot = std::move(empty);
+	}
+	PlayerInfos.clear();
+
+	if (g_camo)
+		g_camo->OnSessionReset();
+}
+
+void CheatManager::ResetSpawnTransition()
+{
+	deadActors.clear();
+	forcedVisibleActors.clear();
+	playerNameCache.clear();
+	inMatchStableFrames_ = 0;
+	espScansCompleted_ = 0;
+
+	if (g_camo)
+		g_camo->ClearHotkeyEdges();
 }
 
 void CheatManager::Init()
@@ -71,6 +329,19 @@ void CheatManager::Init()
 	FrameContext ctx;
 	if (!ResolveContext(ctx))
 	{
+		if (lastWorld_ != nullptr)
+		{
+			ResetSessionState();
+			lastWorld_ = nullptr;
+			lastPersistentLevel_ = nullptr;
+			lastLocalPawn_ = nullptr;
+			wasInMatch_ = false;
+			wasSpectating_ = false;
+			inMatchStableFrames_ = 0;
+			espScansCompleted_ = 0;
+			worldStableAfterMs_ = 0;
+			PhLog("[peterhack] World unavailable — session reset\n");
+		}
 		inMatchCached.store(false, std::memory_order_release);
 		// Publish an empty snapshot so the overlay clears (rather than freezing on
 		// the last frame) while we have no valid world/player - main menu, loading
@@ -86,13 +357,85 @@ void CheatManager::Init()
 	snap.screenX = static_cast<float>(ctx.screenX);
 	snap.screenY = static_cast<float>(ctx.screenY);
 
-	inMatchCached.store(IsLocalPlayerInMatch(ctx.PlayerController), std::memory_order_release);
+	const bool inMatch = IsLocalPlayerInMatch(ctx.PlayerController);
+	const bool spectating = IsLocalPlayerSpectating(ctx.PlayerController);
+	SDK::ULevel* level = ctx.World ? ctx.World->PersistentLevel : nullptr;
+	const bool worldChanged = ctx.World != lastWorld_ || level != lastPersistentLevel_;
+	const bool pawnChanged = ctx.MyPlayer != lastLocalPawn_;
+	const bool leftMatch = wasInMatch_ && !inMatch;
+	const bool enteredMatch = !wasInMatch_ && inMatch;
+	const bool spectateEnded = wasSpectating_ && !spectating;
 
-	if (cfg->bFovChanger && IsObjectValid(ctx.PlayerController))
-		ctx.PlayerController->FOV(cfg->fFovValue);
+	if (worldChanged || leftMatch)
+	{
+		ResetSessionState();
+		ForceRefreshKickFunctionPointers();
+	}
+	else if (enteredMatch || pawnChanged || spectateEnded)
+	{
+		ResetSpawnTransition();
+	}
+
+	if (worldChanged || leftMatch || enteredMatch || pawnChanged || spectateEnded)
+	{
+		if (worldChanged)
+		{
+			lastWorld_ = ctx.World;
+			lastPersistentLevel_ = level;
+			PhLog("[peterhack] World changed — session reset (%ums grace)\n", static_cast<unsigned>(kJoinGraceMs));
+		}
+		else if (spectateEnded || enteredMatch)
+		{
+			PhLog("[peterhack] Spawned into match — spawn reset (%ums grace)\n", static_cast<unsigned>(kJoinGraceMs));
+		}
+		else if (pawnChanged)
+		{
+			PhLog("[peterhack] Local pawn changed — spawn reset (%ums grace)\n", static_cast<unsigned>(kJoinGraceMs));
+		}
+		else
+		{
+			PhLog("[peterhack] Left match — session reset\n");
+		}
+
+		if (worldChanged || enteredMatch || pawnChanged || spectateEnded)
+			worldStableAfterMs_ = GetTickCount64() + kJoinGraceMs;
+	}
+
+	lastLocalPawn_ = ctx.MyPlayer;
+	wasSpectating_ = spectating;
+	wasInMatch_ = inMatch;
+	inMatchCached.store(inMatch, std::memory_order_release);
+
+	const bool joinStable = GetTickCount64() >= worldStableAfterMs_;
+	if (inMatch && !spectating && joinStable)
+		++inMatchStableFrames_;
+	else
+		inMatchStableFrames_ = 0;
+
+	const bool levelReady = SafeLevelReadyForActorScan(level);
+	const bool matchReady = inMatch && !spectating && joinStable && levelReady &&
+		inMatchStableFrames_ >= kRequiredStableFrames;
+
+	if (matchReady && decoyExploitsReadyAfterMs_ == 0)
+		decoyExploitsReadyAfterMs_ = GetTickCount64() + kDecoyExploitDelayMs;
+
+	if (!matchReady)
+	{
+		if (cfg->bInitHooks)
+		{
+			std::lock_guard<std::mutex> lock(snapshotMutex);
+			pendingSnapshot = std::move(snap);
+		}
+		return;
+	}
+
+	if (cfg->bFovChanger)
+		SafeSetControllerFov(ctx.PlayerController, cfg->fFovValue);
+
+	const bool needActorScan = NeedsActorScan();
 
 	// Exploits-only path: skip the actor scan when ESP/magnet/kill tools don't need it.
-	if (!NeedsActorScan())
+	if (!needActorScan)
 	{
 		if (IsObjectValid(ctx.MyPlayer) &&
 			ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
@@ -104,28 +447,71 @@ void CheatManager::Init()
 
 		HandleChangeName(ctx.MyPlayer);
 		HandleReturnToMainLobby(ctx.PlayerController);
+
+		if (cfg->bInitHooks)
+		{
+			std::lock_guard<std::mutex> lock(snapshotMutex);
+			pendingSnapshot = std::move(snap);
+		}
 		return;
 	}
 
-	const auto MyLocation = ctx.MyPlayer->K2_GetActorLocation();
+	if (!IsObjectValid(ctx.MyPlayer) || !IsObjectValid(ctx.World) || !IsObjectValid(ctx.PlayerController))
+	{
+		if (cfg->bInitHooks)
+		{
+			std::lock_guard<std::mutex> lock(snapshotMutex);
+			pendingSnapshot = std::move(snap);
+		}
+		return;
+	}
+
+	SDK::FVector MyLocation{};
+	if (!SafeGetActorLocation(ctx.MyPlayer, MyLocation))
+	{
+		if (cfg->bInitHooks)
+		{
+			std::lock_guard<std::mutex> lock(snapshotMutex);
+			pendingSnapshot = std::move(snap);
+		}
+		return;
+	}
+
+	const bool espFullyWarm = IsEspFullyWarm();
 
 	// get players
 	SDK::TArray<SDK::AActor*> Players;
-	ctx.GStatics->GetAllActorsOfClass(ctx.World, SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass(), &Players);
+	if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass(), &Players))
+	{
+		if (cfg->bInitHooks)
+		{
+			std::lock_guard<std::mutex> lock(snapshotMutex);
+			pendingSnapshot = std::move(snap);
+		}
+		return;
+	}
 
 	// Decoys ride the same entries/draw path as players (role 3). They have no
 	// team, so Enemy Only never hides them - the toggle is the only gate.
 	if (cfg->bDecoys)
 	{
 		SDK::TArray<SDK::AActor*> Decoys;
-		ctx.GStatics->GetAllActorsOfClass(ctx.World, SDK::ABP_cLeonDecoy_Base_C::StaticClass(), &Decoys);
+		if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_cLeonDecoy_Base_C::StaticClass(), &Decoys))
+		{
+			if (cfg->bInitHooks)
+			{
+				std::lock_guard<std::mutex> lock(snapshotMutex);
+				pendingSnapshot = std::move(snap);
+			}
+			return;
+		}
 		for (int i = 0; i < Decoys.Num(); i++)
 		{
 			if (!Decoys.IsValidIndex(i))
 				continue;
 
 			SDK::AActor* actor = Decoys[i];
-			if (!actor || !IsObjectValid(actor))
+			if (!actor || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
 				continue;
 			auto* decoy = static_cast<SDK::ABP_cLeonDecoy_Base_C*>(actor);
 			if (!decoy)
@@ -134,12 +520,17 @@ void CheatManager::Init()
 			// Skip decoys whose body is hidden - the game toggles the PoseableMesh's
 			// visibility off when the decoy isn't actually showing, and an invisible
 			// decoy shouldn't draw in ESP.
-			if (!decoy->PoseableMesh || !IsObjectValid(decoy->PoseableMesh) || !decoy->PoseableMesh->bVisible)
+			if (!decoy->PoseableMesh || !IsObjectValid(decoy->PoseableMesh))
+				continue;
+			if (!SafeDecoyMeshVisible(decoy))
 				continue;
 
-			const auto Location = decoy->K2_GetActorLocation();
+			SDK::FVector Location{};
+			if (!SafeGetActorLocation(decoy, Location))
+				continue;
+
 			EspEntry entry;
-			BuildDecoyEntry(ctx.PlayerController, decoy, entry, Location, MyLocation);
+			BuildDecoyEntry(ctx.PlayerController, decoy, entry, Location, MyLocation, espFullyWarm);
 			snap.entries.push_back(std::move(entry));
 		}
 	}
@@ -155,7 +546,9 @@ void CheatManager::Init()
 			continue;
 
 		SDK::AActor* actor = Players[i];
-		if (!actor || !IsObjectValid(actor))
+		if (!actor || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
+			continue;
+		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
 			continue;
 		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
 		if (!baseClass)
@@ -168,16 +561,20 @@ void CheatManager::Init()
 		if (IsDead(actor))
 			continue;
 
-		const auto Location = baseClass->K2_GetActorLocation();
+		SDK::FVector Location{};
+		if (!SafeGetActorLocation(actor, Location))
+			continue;
+
 		const std::string PlayerName = ResolvePlayerName(actor, baseClass);
-		const bool IsVisible = ctx.PlayerController->LineOfSightTo(actor, { 0, 0, 0 }, false); // visible check
+		const bool IsVisible = espFullyWarm ? SafeLineOfSightTo(ctx.PlayerController, actor) : false;
 
 		if (actor == ctx.MyPlayer)
 			continue;
 
 		snap.players.push_back({ PlayerName, Location, actor, IsSurvivor(baseClass) });
 
-		UpdateForcedVisibility(actor, baseClass);
+		if (espFullyWarm)
+			UpdateForcedVisibility(actor, baseClass);
 
 		if (cfg->bDumpBones)
 		{
@@ -189,7 +586,7 @@ void CheatManager::Init()
 			continue;
 
 		EspEntry entry;
-		BuildEspEntry(ctx.PlayerController, baseClass, entry, PlayerName, Location, MyLocation, IsVisible);
+		BuildEspEntry(ctx.PlayerController, baseClass, entry, PlayerName, Location, MyLocation, IsVisible, espFullyWarm);
 		snap.entries.push_back(std::move(entry));
 	}
 
@@ -199,8 +596,9 @@ void CheatManager::Init()
 		auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(ctx.MyPlayer);
 		if (localChar && IsObjectValid(localChar))
 		{
-			ApplyLocalPlayerExploits(ctx, localChar);
-			if (cfg->bMagnetEnabled && IsHunter(localChar))
+			if (espFullyWarm)
+				ApplyLocalPlayerExploits(ctx, localChar);
+			if (espFullyWarm && cfg->bMagnetEnabled && IsHunter(localChar))
 				HandleMagnet(ctx.MyPlayer, ctx.MyPlayer, currentActors, MyLocation, Players, snap);
 		}
 	}
@@ -219,8 +617,15 @@ void CheatManager::Init()
 	HandleTeleport(ctx.MyPlayer, currentActors);
 	HandleKillTarget(ctx.MyPlayer, currentActors);
 	HandleKillAllSurvivors(ctx.MyPlayer, currentActors);
-	HandleChangeName(ctx.MyPlayer);
-	HandleReturnToMainLobby(ctx.PlayerController);
+	if (espFullyWarm)
+	{
+		HandleChangeName(ctx.MyPlayer);
+		HandleReturnToMainLobby(ctx.PlayerController);
+	}
+
+	++espScansCompleted_;
+	if (espScansCompleted_ == kEspWarmupScans)
+		PhLog("[peterhack] ESP full detail enabled\n");
 
 	// Publish the finished frame for the render thread to draw.
 	std::lock_guard<std::mutex> lock(snapshotMutex);
@@ -255,7 +660,7 @@ void CheatManager::RenderEsp()
 		const float textX = (drawSnapshot.screenX / 2.0f) - (textSize.x / 2.0f);
 		const float textY = drawSnapshot.screenY - 30.0f;
 
-		ImGui::GetForegroundDrawList()->AddText(ImVec2(textX, textY), colRed,
+		OverlayDrawList()->AddText(ImVec2(textX, textY), colRed,
 			magnetText);
 	}
 }
@@ -265,30 +670,30 @@ void CheatManager::RenderEsp()
 bool CheatManager::ResolveContext(FrameContext& ctx)
 {
 	SDK::UWorld* world = SDK::UWorld::GetWorld();
-	if (!world)
+	if (!world || !IsObjectValid(world))
 		return false;
 
 	SDK::UGameInstance* gameInstance = world->OwningGameInstance;
-	if (!gameInstance)
+	if (!gameInstance || !IsObjectValid(gameInstance))
 		return false;
 
 	if (gameInstance->LocalPlayers.Num() <= 0)
 		return false;
 	SDK::ULocalPlayer* localPlayer = gameInstance->LocalPlayers[0];
-	if (!localPlayer)
+	if (!localPlayer || !IsObjectValid(localPlayer))
 		return false;
 
 	if (!localPlayer->ViewportClient)
 		return false;
 
 	SDK::APlayerController* playerController = localPlayer->PlayerController;
-	if (!playerController)
+	if (!playerController || !IsObjectValid(playerController))
 		return false;
 
 	playerController->GetViewportSize(&ctx.screenX, &ctx.screenY);
 
 	SDK::APawn* myPlayer = playerController->K2_GetPawn();
-	if (!myPlayer)
+	if (!myPlayer || !IsObjectValid(myPlayer))
 		return false;
 
 	auto* gStatics = (SDK::UGameplayStatics*)SDK::UGameplayStatics::StaticClass();
@@ -357,14 +762,17 @@ void CheatManager::UpdateForcedVisibility(
 	{
 		if (IsObjectValid(baseClass))
 		{
-			// Resolve the function fresh from the object's current class at call time
-			// and invoke it directly, instead of the SDK wrapper's cached-once static
-			// which dangles after a round.
 			SDK::UFunction* fn = baseClass->Class->GetFunction("BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
 			if (fn)
 			{
-				baseClass->BodyVisibility = true;
-				baseClass->ProcessEvent(fn, nullptr);
+				__try
+				{
+					baseClass->BodyVisibility = true;
+					baseClass->ProcessEvent(fn, nullptr);
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER)
+				{
+				}
 			}
 		}
 		forcedVisibleActors.insert(actor);
@@ -376,8 +784,14 @@ void CheatManager::UpdateForcedVisibility(
 			SDK::UFunction* fn = baseClass->Class->GetFunction("BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
 			if (fn)
 			{
-				baseClass->BodyVisibility = false;
-				baseClass->ProcessEvent(fn, nullptr);
+				__try
+				{
+					baseClass->BodyVisibility = false;
+					baseClass->ProcessEvent(fn, nullptr);
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER)
+				{
+				}
 			}
 		}
 		forcedVisibleActors.erase(actor);
@@ -408,7 +822,7 @@ bool CheatManager::IsDead(SDK::AActor* actor)
 	if (!baseClass || !baseClass->Mesh)
 		return false;
 
-	if (baseClass->Mesh && IsObjectValid(baseClass->Mesh) && baseClass->Mesh->IsAnySimulatingPhysics())
+	if (baseClass->Mesh && IsObjectValid(baseClass->Mesh) && SafeIsAnySimulatingPhysics(baseClass->Mesh))
 		deadActors.insert(actor);
 	return deadActors.count(actor) > 0;
 }
@@ -467,16 +881,17 @@ void CheatManager::BuildSkeletonLines(
 	SDK::USkinnedMeshComponent* mesh,
 	std::vector<std::pair<SDK::FVector2D, SDK::FVector2D>>& out)
 {
-	if (!mesh || !IsObjectValid(mesh))
+	if (!MeshReadyForSkeleton(mesh))
 		return;
 
 	SDK::FVector2D BoneScreen, PrevBoneScreen;
 	for (const std::pair<int, int>& Connection : skeleton::Connections)
 	{
-		const auto BoneLoc1 = mesh->GetSocketLocation(mesh->GetBoneName(Connection.first));
-		const auto BoneLoc2 = mesh->GetSocketLocation(mesh->GetBoneName(Connection.second));
-		if (pc->ProjectWorldLocationToScreen(BoneLoc1, &BoneScreen, false) && pc->ProjectWorldLocationToScreen(BoneLoc2, &PrevBoneScreen, false))
+		if (SafeGetBoneScreenPos(mesh, pc, Connection.first, BoneScreen) &&
+			SafeGetBoneScreenPos(mesh, pc, Connection.second, PrevBoneScreen))
+		{
 			out.emplace_back(BoneScreen, PrevBoneScreen);
+		}
 	}
 }
 
@@ -489,13 +904,14 @@ bool CheatManager::ComputeBoundingBox(
 	SDK::FVector2D& BoxMin,
 	SDK::FVector2D& BoxMax)
 {
+	if (!MeshReadyForSkeleton(mesh))
+		return false;
+
 	bool bHasBox = false;
 	for (int BoneIdx = skeleton::amm; BoneIdx < skeleton::None; BoneIdx++)
 	{
-		const auto BoneLoc = mesh->GetSocketLocation(mesh->GetBoneName(BoneIdx));
-
 		SDK::FVector2D BoneScreenPos;
-		if (!pc->ProjectWorldLocationToScreen(BoneLoc, &BoneScreenPos, false))
+		if (!SafeGetBoneScreenPos(mesh, pc, BoneIdx, BoneScreenPos))
 			continue;
 
 		if (!bHasBox)
@@ -527,7 +943,8 @@ void CheatManager::BuildEspEntry(
 	const std::string& PlayerName,
 	SDK::FVector Location,
 	SDK::FVector MyLocation,
-	bool IsVisible)
+	bool IsVisible,
+	bool fullMeshDetail)
 {
 	entry.name = PlayerName;
 	entry.isVisible = IsVisible;
@@ -539,22 +956,27 @@ void CheatManager::BuildEspEntry(
 		entry.role = 0;
 	entry.distanceMeters = MyLocation.GetDistanceToInMeters(Location);
 
-	if (entry.role == 1 && IsObjectValid(baseClass))
+	if (entry.role == 1 && IsHunter(baseClass) && IsObjectValid(baseClass))
 		entry.ammo = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*>(baseClass)->CurrentBullet;
 
-	if (baseClass && baseClass->Mesh && IsObjectValid(baseClass->Mesh))
+	if (fullMeshDetail && baseClass && baseClass->Mesh && MeshReadyForSkeleton(baseClass->Mesh))
 	{
 		if (cfg->bSkeleton)
 			BuildSkeletonLines(pc, baseClass->Mesh, entry.skeletonLines);
 
 		entry.hasBox = ComputeBoundingBox(pc, baseClass->Mesh, entry.boxMin, entry.boxMax);
 	}
+	else
+	{
+		SDK::FVector2D screen;
+		if (SafeProjectWorldLocationToScreen(pc, Location, screen) && IsScreenCoordValid(screen))
+			SetSimpleScreenBox(entry, screen);
+	}
 
-	// snapline target: the player's world location projected to screen
 	if (cfg->bLines)
 	{
 		SDK::FVector2D Screen;
-		if (pc->ProjectWorldLocationToScreen(Location, &Screen, false))
+		if (SafeProjectWorldLocationToScreen(pc, Location, Screen) && IsScreenCoordValid(Screen))
 		{
 			entry.hasSnapline = true;
 			entry.snaplineScreen = Screen;
@@ -570,25 +992,32 @@ void CheatManager::BuildDecoyEntry(SDK::APlayerController* pc,
 	SDK::ABP_cLeonDecoy_Base_C* decoy,
 	EspEntry& entry,
 	SDK::FVector Location,
-	SDK::FVector MyLocation)
+	SDK::FVector MyLocation,
+	bool fullMeshDetail)
 {
 	entry.name = "Decoy";
 	entry.isVisible = true;
 	entry.role = 3;
 	entry.distanceMeters = MyLocation.GetDistanceToInMeters(Location);
 
-	if (decoy->PoseableMesh && IsObjectValid(decoy->PoseableMesh))
+	if (fullMeshDetail && decoy->PoseableMesh && MeshReadyForSkeleton(decoy->PoseableMesh))
 	{
 		if (cfg->bSkeleton)
 			BuildSkeletonLines(pc, decoy->PoseableMesh, entry.skeletonLines);
 
 		entry.hasBox = ComputeBoundingBox(pc, decoy->PoseableMesh, entry.boxMin, entry.boxMax);
 	}
+	else
+	{
+		SDK::FVector2D screen;
+		if (SafeProjectWorldLocationToScreen(pc, Location, screen) && IsScreenCoordValid(screen))
+			SetSimpleScreenBox(entry, screen);
+	}
 
 	if (cfg->bLines)
 	{
 		SDK::FVector2D Screen;
-		if (pc->ProjectWorldLocationToScreen(Location, &Screen, false))
+		if (SafeProjectWorldLocationToScreen(pc, Location, Screen) && IsScreenCoordValid(Screen))
 		{
 			entry.hasSnapline = true;
 			entry.snaplineScreen = Screen;
@@ -607,18 +1036,23 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 		: *(ImVec4*)cfg->colNotVisible);
 	const ImU32 colLine = ImGui::ColorConvertFloat4ToU32(*(ImVec4*)cfg->colLines);
 
-	// white color
 	const float fff[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	const ImU32 colWhite = ImGui::ColorConvertFloat4ToU32(*(ImVec4*)fff);
 
 	if (cfg->bSkeleton)
+	{
 		for (const auto& seg : entry.skeletonLines)
-			ImGui::GetForegroundDrawList()->AddLine(ImVec2(seg.first.X, seg.first.Y), ImVec2(seg.second.X, seg.second.Y), colEsp, 1.0f);
+		{
+			if (!IsScreenCoordValid(seg.first) || !IsScreenCoordValid(seg.second))
+				continue;
+			OverlayDrawList()->AddLine(ImVec2(seg.first.X, seg.first.Y), ImVec2(seg.second.X, seg.second.Y), colEsp, 1.0f);
+		}
+	}
 
-	if (entry.hasBox)
+	if (entry.hasBox && IsScreenCoordValid(entry.boxMin) && IsScreenCoordValid(entry.boxMax))
 	{
 		if (cfg->bNames)
-			ImGui::GetForegroundDrawList()->AddText(ImVec2(entry.boxMin.X, entry.boxMin.Y - 15), colEsp, entry.name.c_str());
+			OverlayDrawList()->AddText(ImVec2(entry.boxMin.X, entry.boxMin.Y - 15), colEsp, entry.name.c_str());
 
 		if (cfg->bRoles)
 		{
@@ -635,7 +1069,7 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 			if (roleText)
 			{
 				const float nameWidth = cfg->bNames ? ImGui::CalcTextSize(entry.name.c_str()).x + 5 : 0.0f;
-				ImGui::GetForegroundDrawList()->AddText(ImVec2(entry.boxMin.X + nameWidth, entry.boxMin.Y - 15), colWhite, roleText);
+				OverlayDrawList()->AddText(ImVec2(entry.boxMin.X + nameWidth, entry.boxMin.Y - 15), colWhite, roleText);
 			}
 		}
 
@@ -650,7 +1084,7 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 			// center the label just under the box
 			const ImVec2 TextSize = ImGui::CalcTextSize(DistanceText);
 			const float TextX = (entry.boxMin.X + entry.boxMax.X) * 0.5f - TextSize.x * 0.5f;
-			ImGui::GetForegroundDrawList()->AddText(ImVec2(TextX, entry.boxMax.Y + 2), colEsp, DistanceText);
+			OverlayDrawList()->AddText(ImVec2(TextX, entry.boxMax.Y + 2), colEsp, DistanceText);
 		}
 
 		// if (cfg->bHunterAmmo && entry.ammo >= 0)
@@ -662,17 +1096,15 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 		// 	const float TextX = (entry.boxMin.X + entry.boxMax.X) * 0.5f -
 		// TextSize.x * 0.5f; 	const float TextY = entry.boxMax.Y + 2 +
 		// (cfg->bDistance ? ImGui::GetTextLineHeight() : 0.0f);
-		// 	ImGui::GetForegroundDrawList()->AddText(ImVec2(TextX, TextY), colWhite,
+		// 	OverlayDrawList()->AddText(ImVec2(TextX, TextY), colWhite,
 		// AmmoText);
 		// }
 	}
 
-	// draw a snapline from the bottom-center of the screen to the player's world
-	// location
-	if (cfg->bLines && entry.hasSnapline)
+	if (cfg->bLines && entry.hasSnapline && IsScreenCoordValid(entry.snaplineScreen))
 	{
 		const auto& io = ImGui::GetIO();
-		ImGui::GetForegroundDrawList()->AddLine(ImVec2(static_cast<float>(io.DisplaySize.x / 2), static_cast<float>(io.DisplaySize.y)), ImVec2(entry.snaplineScreen.X, entry.snaplineScreen.Y), colLine, 0.7f);
+		OverlayDrawList()->AddLine(ImVec2(static_cast<float>(io.DisplaySize.x / 2), static_cast<float>(io.DisplaySize.y)), ImVec2(entry.snaplineScreen.X, entry.snaplineScreen.Y), colLine, 0.7f);
 	}
 }
 
@@ -997,16 +1429,43 @@ void CheatManager::ApplyMenuInputLock(bool menuOpen)
 	g_menuInputLockApplied.store(false, std::memory_order_release);
 }
 
+bool CheatManager::IsLocalPlayerSpectating(SDK::APlayerController* playerController)
+{
+	if (!playerController || !IsObjectValid(playerController))
+		return false;
+
+	__try
+	{
+		SDK::APawn* pawn = playerController->K2_GetPawn();
+		if (!pawn || !IsObjectValid(pawn))
+			return false;
+
+		return pawn->IsA(SDK::ABP_SpectatePawn_cLeon_C::StaticClass()) ||
+			pawn->IsA(SDK::ASpectatorPawn::StaticClass());
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return false;
+	}
+}
+
 bool CheatManager::IsLocalPlayerInMatch(SDK::APlayerController* playerController)
 {
 	if (!playerController || !IsObjectValid(playerController))
 		return false;
 
-	SDK::APawn* pawn = playerController->K2_GetPawn();
-	if (!pawn || !IsObjectValid(pawn))
-		return false;
+	__try
+	{
+		SDK::APawn* pawn = playerController->K2_GetPawn();
+		if (!pawn || !IsObjectValid(pawn))
+			return false;
 
-	return pawn->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass());
+		return pawn->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass());
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return false;
+	}
 }
 
 bool CheatManager::NeedsEspDraw() const
@@ -1053,30 +1512,56 @@ bool CheatManager::NeedsGameThreadTick() const
 
 void CheatManager::ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
 {
-	if (!character || !cfg->bNoDecoyCooldown)
+	if (!character || !cfg->bNoDecoyCooldown || !DecoyExploitsReady())
+		return;
+	if (GetTickCount64() < decoyQuiesceUntilMs_)
 		return;
 
-	int slotCount = character->DecoyCoolTimes.Num();
-	if (character->RuntimePaintable && IsObjectValid(character->RuntimePaintable))
+	__try
 	{
-		const int maxDecoys = character->RuntimePaintable->MaxDecoySpawnCount;
-		if (maxDecoys > slotCount)
-			slotCount = maxDecoys;
+		// Only refresh existing cooldown slots — never grow the TArray to match an
+		// inflated MaxDecoySpawnCount, which fights the game's decoy teardown path.
+		character->DecoyCoolTimeDefault = 0.0;
+		const int slotCount = character->DecoyCoolTimes.Num();
+		for (int j = 0; j < slotCount; ++j)
+		{
+			if (!character->DecoyCoolTimes.IsValidIndex(j))
+				continue;
+			character->DecoyCoolTimes[j] = 1.0;
+		}
 	}
-	if (slotCount <= 0)
-		slotCount = 3;
-
-	while (character->DecoyCoolTimes.Num() < slotCount)
-		character->DecoyCoolTimes.Add(0.0);
-
-	// UseDecoy checks DecoyCoolTimes[i] >= DecoyCoolTimeDefault — zero default makes any slot ready.
-	character->DecoyCoolTimeDefault = 0.0;
-	for (int j = 0; j < character->DecoyCoolTimes.Num(); j++)
+	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
-		if (!character->DecoyCoolTimes.IsValidIndex(j))
-			continue;
-		character->DecoyCoolTimes[j] = 1.0;
+		PhLog("[EXPLOITS:DECOY-NUM] NoDecoyCooldown fault — skipped frame\n");
 	}
+}
+
+void CheatManager::TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintable)
+{
+	if (!paintable || !IsObjectValid(paintable))
+		return;
+
+	int spawnedCount = -1;
+	__try
+	{
+		spawnedCount = paintable->SpawnedDecoyActors.Num();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return;
+	}
+
+	const ULONGLONG now = GetTickCount64();
+	if (lastSpawnedDecoyCount_ > 0 && spawnedCount >= 0 && spawnedCount < lastSpawnedDecoyCount_)
+	{
+		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
+		pendingDecoyServerRpc_ = false;
+		PhLog("[EXPLOITS:DECOY] clones cleared — pausing decoy writes for %ums\n",
+			static_cast<unsigned>(kDecoyQuiesceMs));
+	}
+
+	if (spawnedCount >= 0)
+		lastSpawnedDecoyCount_ = spawnedCount;
 }
 
 void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
@@ -1111,6 +1596,9 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 				survivor->OverlapCheckCapsules.Clear();
 		}
 
+		if (baseClass->RuntimePaintable && IsObjectValid(baseClass->RuntimePaintable))
+			TrackDecoyLifecycle(baseClass->RuntimePaintable);
+
 		if (cfg->bNoDecoyCooldown)
 			ApplyNoDecoyCooldown(baseClass);
 
@@ -1128,17 +1616,24 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 
 void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
 {
-	if (!cfg->bSetDecoyNum || !character)
+	if (!cfg->bSetDecoyNum || !character || !DecoyExploitsReady())
+		return;
+	if (GetTickCount64() < decoyQuiesceUntilMs_)
 		return;
 
-	if (g_camo && g_camo->IsBusy())
-		return;
+	if (g_camo)
+	{
+		const auto bridgeState = g_camo->BridgeState();
+		if (g_camo->IsBusy() || bridgeState == CamoBridgeState::Loading)
+			return;
+	}
 
 	SDK::URuntimePaintableComponent* paintable = character->RuntimePaintable;
 	if (!paintable || !IsObjectValid(paintable))
 	{
 		lastDecoyPaintable = nullptr;
 		decoyPaintableReadyTickMs = 0;
+		pendingDecoyServerRpc_ = false;
 		return;
 	}
 
@@ -1146,8 +1641,9 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 	if (paintable != lastDecoyPaintable)
 	{
 		lastDecoyPaintable = paintable;
-		decoyPaintableReadyTickMs = now + 500;
+		decoyPaintableReadyTickMs = now + 1500;
 		lastDecoyCountApplied = -1;
+		pendingDecoyServerRpc_ = false;
 	}
 	if (decoyPaintableReadyTickMs != 0 && now < decoyPaintableReadyTickMs)
 		return;
@@ -1162,25 +1658,40 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 	{
 		lastDecoyCountConfigured = target;
 		lastDecoyCountApplied = -1;
+		pendingDecoyServerRpc_ = false;
 	}
 
 	const int current = paintable->MaxDecoySpawnCount;
-	if (current == target && lastDecoyCountApplied == target && (now - lastDecoyRpcTickMs) < 3000)
+	if (current == target && lastDecoyCountApplied == target && !pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) < 3000)
 		return;
-	if (lastDecoyCountApplied == target && (now - lastDecoyRpcTickMs) < 1000)
+	if (lastDecoyCountApplied == target && !pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) < 1000)
 		return;
 
 	const int oldCount = current;
+	const bool sendServerRpc = pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) >= 1500;
+
 	if (current != target)
-		paintable->MaxDecoySpawnCount = target;
+	{
+		__try
+		{
+			paintable->MaxDecoySpawnCount = target;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			PhLog("[EXPLOITS:DECOY-NUM] field write fault — skipped\n");
+			return;
+		}
+	}
 
-	CallSetMaxDecoySpawnCount(paintable, target);
+	CallSetMaxDecoySpawnCount(paintable, target, sendServerRpc);
 
-	if (target != lastDecoyCountApplied)
-		PhLog("[EXPLOITS:DECOY-NUM] MaxDecoySpawnCount -> %d (was %d)\n", target, oldCount);
+	if (target != lastDecoyCountApplied || sendServerRpc)
+		PhLog("[EXPLOITS:DECOY-NUM] MaxDecoySpawnCount -> %d (was %d)%s\n",
+			target, oldCount, sendServerRpc ? " [server]" : "");
 
 	lastDecoyCountApplied = target;
 	lastDecoyRpcTickMs = now;
+	pendingDecoyServerRpc_ = !sendServerRpc;
 }
 
 void CheatManager::HandleReturnToMainLobby(SDK::APlayerController* playerController)

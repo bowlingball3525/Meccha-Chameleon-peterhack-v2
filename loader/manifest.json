@@ -1,6 +1,8 @@
 {
-  "version": 1,
-  "baseUrl": "local",
+  "version": "2.6.1",
+  "baseUrl": "https://github.com/bowlingball3525/Meccha-Chameleon-peterhack-v2/releases/download/v2.6.1",
+  "updateManifestUrl": "https://raw.githubusercontent.com/bowlingball3525/Meccha-Chameleon-peterhack-v2/main/loader/manifest.json",
+  "releasePackage": "peterhack-v2.6.1-win64.zip",
   "process": "PenguinHotel-Win64-Shipping.exe",
   "injectDll": "peterhack.dll",
   "files": [

@@ -37,7 +37,7 @@ enum class EWaveSpectrumType : uint8
 
 // Enum Water.EWaterExclusionMode
 // NumValues: 0x0003
-enum class EWaterExclusionMode : uint8
+enum class EWaterExclusionMode : uint32
 {
 	AddWaterBodiesListToExclusion            = 0,
 	RemoveWaterBodiesListFromExclusion       = 1,

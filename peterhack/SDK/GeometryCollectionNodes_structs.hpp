@@ -128,7 +128,7 @@ enum class ESetMaterialOperationTypeEnum : uint8
 
 // Enum GeometryCollectionNodes.ECollectionBakeTextureAttribute
 // NumValues: 0x000B
-enum class ECollectionBakeTextureAttribute : uint8
+enum class ECollectionBakeTextureAttribute : uint32
 {
 	None                                     = 0,
 	DistanceToExternal                       = 1,

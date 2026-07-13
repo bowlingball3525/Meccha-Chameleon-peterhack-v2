@@ -10,10 +10,10 @@
 
 #include "Basic.hpp"
 
+#include "ST_cLeonSurvivorVariation_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 #include "UMG_structs.hpp"
 #include "SlateCore_structs.hpp"
-#include "ST_cLeonMapData_structs.hpp"
-#include "ST_cLeonSurvivorVariation_structs.hpp"
 
 
 SDK_NAMESPACE_START
@@ -25,7 +25,7 @@ struct WBP_cLeonGameSettings_C_SelectMapMain final
 {
 public:
 	class UWBP_MapContentsWithRandom_C*           SelfWidget;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	struct FST_cLeonMapData                       MapData;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+	struct FST_cLeonMapData                       Mapdata;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_cLeonGameSettings_C_SelectMapMain;
 
@@ -35,7 +35,7 @@ struct WBP_cLeonGameSettings_C_SelectMap final
 {
 public:
 	class UWBP_MapContentsWithRandom_C*           SelfWidget;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	struct FST_cLeonMapData                       MapData;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+	struct FST_cLeonMapData                       Mapdata;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_cLeonGameSettings_C_SelectMap;
 
@@ -124,7 +124,7 @@ public:
 	bool                                          CallFunc_IsValid_ReturnValue_10;                   // 0x0060(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	bool                                          CallFunc_IsValid_ReturnValue_11;                   // 0x0061(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_62[0x2];                                       // 0x0062(0x0002)(Fixing Size After Last Property [ Dumper-7 ])
-	TDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& MapData)> K2Node_CreateDelegate_OutputDelegate_1; // 0x0064(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)> K2Node_CreateDelegate_OutputDelegate_1; // 0x0064(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	class FName                                   Temp_name_Variable;                                // 0x0074(0x0008)(ConstParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	TDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, bool RandomState)> K2Node_CreateDelegate_OutputDelegate_2; // 0x007C(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x008C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)

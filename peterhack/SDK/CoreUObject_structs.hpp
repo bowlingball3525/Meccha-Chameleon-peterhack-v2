@@ -171,7 +171,7 @@ enum class EVersePackageType : uint8
 
 // Enum CoreUObject.EVerseEnumFlags
 // NumValues: 0x0004
-enum class EVerseEnumFlags : uint8
+enum class EVerseEnumFlags : uint32
 {
 	None                                     = 0,
 	NativeBound                              = 1,
@@ -600,7 +600,7 @@ enum class EAppMsgType : uint8
 
 // Enum CoreUObject.EInputDeviceMappingPolicy
 // NumValues: 0x0006
-enum class EInputDeviceMappingPolicy : uint64
+enum class EInputDeviceMappingPolicy : uint32
 {
 	Invalid                                  = 18446744073709551615,
 	UseManagedPlatformLogin                  = 0,

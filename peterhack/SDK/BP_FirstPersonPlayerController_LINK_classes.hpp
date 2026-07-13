@@ -12,9 +12,9 @@
 
 #include "Engine_structs.hpp"
 #include "BP_FirstPersonPlayerController_classes.hpp"
-#include "PhysicsCore_structs.hpp"
-#include "EN_StanType_structs.hpp"
 #include "EN_DamageType_structs.hpp"
+#include "EN_StanType_structs.hpp"
+#include "PhysicsCore_structs.hpp"
 
 
 SDK_NAMESPACE_START

@@ -92,7 +92,7 @@ enum class EBlendListChildUpdateMode : uint8
 
 // Enum AnimGraphRuntime.EAnimFunctionCallSite
 // NumValues: 0x000D
-enum class EAnimFunctionCallSite : uint8
+enum class EAnimFunctionCallSite : uint32
 {
 	OnInitialize                             = 0,
 	OnUpdate                                 = 1,

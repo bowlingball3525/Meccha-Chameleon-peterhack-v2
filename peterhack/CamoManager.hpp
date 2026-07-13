@@ -71,7 +71,9 @@ public:
 
 	void OnMenuOpened();
 
+	void OnSessionReset();
 
+	void OnMatchLeft();
 
 	bool EnsureBridge();
 
@@ -112,6 +114,8 @@ private:
 	mutable std::mutex statusMutex_;
 
 	mutable std::mutex bridgeIdentityMutex_;
+
+	std::mutex bridgeOpMutex_;
 
 	std::string status_ = "Camo idle";
 

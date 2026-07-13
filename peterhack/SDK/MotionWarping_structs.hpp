@@ -66,7 +66,7 @@ enum class ESwitchOffConditionCompositeOp : uint8
 
 // Enum MotionWarping.EAttributeBasedRootMotionMode
 // NumValues: 0x0003
-enum class EAttributeBasedRootMotionMode : uint8
+enum class EAttributeBasedRootMotionMode : uint32
 {
 	ApplyDelta                               = 0,
 	ApplyVelocity                            = 1,

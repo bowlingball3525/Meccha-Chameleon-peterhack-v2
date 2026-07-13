@@ -85,3 +85,6 @@ inline SDK::UFunction* g_fnKickOnline = nullptr;
 inline SDK::UFunction* g_fnClientWasKicked = nullptr;
 inline SDK::UFunction* g_fnClientReturnToMainMenuWithTextReason = nullptr;
 inline SDK::UFunction* g_fnOnRepBodyVisibility = nullptr;
+
+// Re-resolve kick/visibility UFunction* after world/server changes (BP functions are recreated).
+void ForceRefreshKickFunctionPointers();

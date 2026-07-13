@@ -69,8 +69,8 @@ private:
 	// Game-thread builders: project the given actor's world state into a render-ready EspEntry.
 	void BuildSkeletonLines(SDK::APlayerController* pc, SDK::USkinnedMeshComponent* mesh, std::vector<std::pair<SDK::FVector2D, SDK::FVector2D>>& out);
 	bool ComputeBoundingBox(SDK::APlayerController* pc, SDK::USkinnedMeshComponent* mesh, SDK::FVector2D& BoxMin, SDK::FVector2D& BoxMax);
-	void BuildEspEntry(SDK::APlayerController* pc, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass, EspEntry& entry, const std::string& PlayerName, SDK::FVector Location, SDK::FVector MyLocation, bool IsVisible);
-	void BuildDecoyEntry(SDK::APlayerController* pc, SDK::ABP_cLeonDecoy_Base_C* decoy, EspEntry& entry, SDK::FVector Location, SDK::FVector MyLocation);
+	void BuildEspEntry(SDK::APlayerController* pc, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass, EspEntry& entry, const std::string& PlayerName, SDK::FVector Location, SDK::FVector MyLocation, bool IsVisible, bool fullMeshDetail);
+	void BuildDecoyEntry(SDK::APlayerController* pc, SDK::ABP_cLeonDecoy_Base_C* decoy, EspEntry& entry, SDK::FVector Location, SDK::FVector MyLocation, bool fullMeshDetail);
 	// Render-thread draw of a single prebuilt entry (ImGui only, no SDK/UObject access).
 	void DrawEntry(const EspEntry& entry);
 
@@ -83,7 +83,25 @@ private:
 	void ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
 	void ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
 	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
+	void TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintable);
 	void HandleReturnToMainLobby(SDK::APlayerController* playerController);
+	void ResetSessionState();
+	void ResetSpawnTransition();
+	SDK::UWorld* lastWorld_ = nullptr;
+	SDK::ULevel* lastPersistentLevel_ = nullptr;
+	SDK::APawn* lastLocalPawn_ = nullptr;
+	bool wasInMatch_ = false;
+	bool wasSpectating_ = false;
+	ULONGLONG worldStableAfterMs_ = 0;
+	int inMatchStableFrames_ = 0;
+	int espScansCompleted_ = 0;
+	static constexpr ULONGLONG kJoinGraceMs = 8000;
+	static constexpr int kRequiredStableFrames = 90;
+	static constexpr int kEspWarmupScans = 60;
+	static constexpr ULONGLONG kDecoyExploitDelayMs = 6000;
+	static constexpr ULONGLONG kDecoyQuiesceMs = 5000;
+	bool IsEspFullyWarm() const { return espScansCompleted_ >= kEspWarmupScans; }
+	bool DecoyExploitsReady() const { return decoyExploitsReadyAfterMs_ != 0 && GetTickCount64() >= decoyExploitsReadyAfterMs_; }
 	SDK::AActor* TeleportTarget = nullptr; // resolved by actor pointer, not list index, since the snapshot is rebuilt every frame
 	SDK::AActor* KillTarget = nullptr;		 // single-player kill request, resolved by actor pointer like TeleportTarget
 	bool bKillAllSurvivorsRequested = false;
@@ -98,6 +116,10 @@ private:
 	ULONGLONG lastDecoyRpcTickMs = 0;
 	SDK::URuntimePaintableComponent* lastDecoyPaintable = nullptr;
 	ULONGLONG decoyPaintableReadyTickMs = 0;
+	ULONGLONG decoyExploitsReadyAfterMs_ = 0;
+	bool pendingDecoyServerRpc_ = false;
+	int lastSpawnedDecoyCount_ = -1;
+	ULONGLONG decoyQuiesceUntilMs_ = 0;
 
 	// pendingSnapshot is written by the game thread (Init) and read by the render thread (RenderEsp)
 	// under this mutex. drawSnapshot is the render thread's private working copy so it can draw
@@ -132,6 +154,7 @@ public:
 	// the game thread, but an SDK call earlier in the same scan can destroy/GC an actor - calling into
 	// a freed UObject is exactly the null-pointer-deep-in-engine-code crash this guards against.
 	static bool IsObjectValid(SDK::UObject* Obj);
+	static bool IsLocalPlayerSpectating(SDK::APlayerController* playerController);
 	static 	bool IsLocalPlayerInMatch(SDK::APlayerController* playerController);
 	bool NeedsLocalExploits() const;
 	bool NeedsEspDraw() const;

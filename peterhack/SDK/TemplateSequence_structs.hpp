@@ -18,7 +18,7 @@ SDK_NAMESPACE_START
 
 // Enum TemplateSequence.ETemplateSectionPropertyScaleType
 // NumValues: 0x0004
-enum class ETemplateSectionPropertyScaleType : uint8
+enum class ETemplateSectionPropertyScaleType : uint32
 {
 	FloatProperty                            = 0,
 	TransformPropertyLocationOnly            = 1,
