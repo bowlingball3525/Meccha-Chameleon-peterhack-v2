@@ -629,7 +629,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	ImGui::PopStyleColor();
 	ImGui::PopStyleVar(2);
 
-	if ((GetAsyncKeyState(VK_INSERT) & 1) && IsGameWindowFocused())
+	if (IsGameWindowFocused() &&
+		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F1) & 1)))
 		cfg->bMenuOpen = !cfg->bMenuOpen;
 
 	if (g_camo && !cfg->bMenuOpen)

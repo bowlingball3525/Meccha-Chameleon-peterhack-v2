@@ -49,7 +49,7 @@ powershell -File scripts\setup-camo-bridge.ps1
 
 ## In-game
 
-1. Open menu (**INSERT**) → **Camouflage** tab (bridge preloads on first menu open).
+1. Open menu (**INSERT** or **F1**) → **Camouflage** tab (bridge preloads on first menu open).
 2. Enable **Enable camo hotkeys** → **Save camo settings** (off by default).
 3. In a match, wait 3 seconds after spawn for hotkeys to arm (see console).
 4. Hotkeys (menu closed, game focused):

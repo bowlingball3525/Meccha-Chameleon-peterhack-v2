@@ -52,7 +52,7 @@ Close the game before building if you get `LNK1104: cannot open peterhack.dll` (
 
 | Key | Action |
 |-----|--------|
-| **INSERT** | Open / close menu |
+| **INSERT** or **F1** | Open / close menu |
 | **END** | Unload peterhack (eject DLL) |
 
 Settings save to `C:\peterhack\settings.ini`. Camo settings save to `C:\peterhack\camo.cfg`.
