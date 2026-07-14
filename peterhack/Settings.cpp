@@ -24,8 +24,7 @@ void Settings::InitializeSettings()
 	this->bMagnetEnabled = false;
 	this->iMagnetKey = 0x47; // G
 	this->bControllerBinds = false;
-	this->iControllerMenuButton = Gamepad::kDefaultMenuButton;
-	this->iControllerMagnetButton = Gamepad::kDefaultMagnetButton;
+	this->iControllerMenuButton = Binds::MakePadBind(Gamepad::kDefaultMenuButton);
 	this->bPreventKick = false;
 	this->bInfiniteBullets = false;
 	this->bNoDecoyCooldown = false;
@@ -74,6 +73,11 @@ void Settings::LoadSettings()
 			// Never restore the transient command flag from disk - it is not a setting.
 			cfg->bMagnetEnabled = false;
 			cfg->bDumpBones = false;
+
+			if (!Binds::IsValidBind(cfg->iMagnetKey))
+				cfg->iMagnetKey = 0x47; // G
+			if (!Binds::IsValidBind(cfg->iControllerMenuButton))
+				cfg->iControllerMenuButton = Binds::MakePadBind(Gamepad::kDefaultMenuButton);
 		}
 		else
 		{

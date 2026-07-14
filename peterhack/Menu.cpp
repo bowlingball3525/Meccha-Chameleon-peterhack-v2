@@ -8,71 +8,6 @@ namespace
 		ImGuiColorEditFlags_InputRGB;
 }
 
-// Human-readable name for a virtual-key code, falling back to hex for unknown keys.
-static const char* KeyName(int vk)
-{
-	static char name[32];
-	switch (vk)
-	{
-	case VK_LBUTTON: return "Mouse Left";
-	case VK_RBUTTON: return "Mouse Right";
-	case VK_MBUTTON: return "Mouse Middle";
-	case VK_XBUTTON1: return "Mouse 4";
-	case VK_XBUTTON2: return "Mouse 5";
-	}
-
-	UINT sc = MapVirtualKeyA(vk, MAPVK_VK_TO_VSC);
-	switch (vk) // extended keys need the extended-scancode bit to name correctly
-	{
-	case VK_LEFT: case VK_UP: case VK_RIGHT: case VK_DOWN:
-	case VK_PRIOR: case VK_NEXT: case VK_END: case VK_HOME:
-	case VK_INSERT: case VK_DELETE: case VK_DIVIDE: case VK_NUMLOCK:
-		sc |= 0x100;
-		break;
-	}
-	if (sc && GetKeyNameTextA((LONG)(sc << 16), name, sizeof(name)) > 0)
-		return name;
-	snprintf(name, sizeof(name), "0x%02X", vk);
-	return name;
-}
-
-static void ClearBindKeyEdges()
-{
-	for (int vk = 0x01; vk <= 0x06; ++vk)
-		(void)GetAsyncKeyState(vk);
-	for (int vk = 0x08; vk <= 0xFE; ++vk)
-		(void)GetAsyncKeyState(vk);
-}
-
-static bool PollBindKeyPress(int& outVk)
-{
-	static const int kMouseKeys[] = { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, VK_XBUTTON1, VK_XBUTTON2 };
-	for (int vk : kMouseKeys)
-	{
-		if (GetAsyncKeyState(vk) & 1)
-		{
-			outVk = vk;
-			return true;
-		}
-	}
-
-	if (GetAsyncKeyState(VK_ESCAPE) & 1)
-	{
-		outVk = VK_ESCAPE;
-		return true;
-	}
-
-	for (int vk = 0x08; vk <= 0xFE; ++vk)
-	{
-		if (GetAsyncKeyState(vk) & 1)
-		{
-			outVk = vk;
-			return true;
-		}
-	}
-	return false;
-}
-
 void Menu::Init()
 {
 	ImGui::SetNextWindowSize({ 300, 480 }, ImGuiCond_Once);
@@ -197,73 +132,22 @@ void Menu::Init()
 			ImGui::Checkbox("No Gun Cooldown", &cfg->bNoGunCooldown);
 			ImGui::Checkbox("Infinite Bullets", &cfg->bInfiniteBullets);
 
-			// Magnet toggle key rebind: click the button, then press any key or mouse button (ESC cancels).
-			static bool bindingMagnet = false;
-			static ULONGLONG bindingMagnetReadyTick = 0;
-			ImGui::Text("Magnet Key:");
-			ImGui::SameLine();
-			if (ImGui::Button(bindingMagnet ? "Press key/mouse..." : KeyName(cfg->iMagnetKey)))
-			{
-				bindingMagnet = true;
-				bindingMagnetReadyTick = GetTickCount64() + 150;
-				ClearBindKeyEdges();
-			}
-			if (bindingMagnet && GetTickCount64() >= bindingMagnetReadyTick)
-			{
-				int pressedVk = 0;
-				if (PollBindKeyPress(pressedVk))
-				{
-					if (pressedVk != VK_ESCAPE)
-						cfg->iMagnetKey = pressedVk;
-					bindingMagnet = false;
-				}
-			}
+			// Magnet toggle rebind: click the button, then press any key, mouse
+			// button, or controller button (when Controller Binds is on).
+			Binds::RecorderRow("Magnet Key", cfg->iMagnetKey, cfg->bControllerBinds, true);
+			if (Binds::IsPadBind(cfg->iMagnetKey) && !cfg->bControllerBinds)
+				ImGui::TextDisabled("Magnet is pad-bound — enable Controller Binds below");
 
 			ImGui::Separator();
 			ImGui::Text("Controller");
 			ImGui::Separator();
 			if (ImGui::Checkbox("Controller Binds", &cfg->bControllerBinds) && !cfg->bControllerBinds)
-				Gamepad::CancelCapture();
+				Binds::CancelRecorder();
 			if (cfg->bControllerBinds)
 			{
 				if (!Gamepad::IsConnected())
 					ImGui::TextDisabled("No controller detected");
-
-				// Which bind is being captured: 0 = none, 1 = menu, 2 = magnet.
-				static int capturingPad = 0;
-				if (!Gamepad::CaptureActive())
-					capturingPad = 0;
-
-				auto padBindRow = [](const char* label, int& bind, int captureId, int& capturing)
-				{
-					ImGui::Text("%s:", label);
-					ImGui::SameLine();
-					ImGui::PushID(label);
-					const bool active = (capturing == captureId);
-					if (ImGui::Button(active ? "Press button..." : Gamepad::ButtonName(bind)))
-					{
-						Gamepad::BeginCapture();
-						capturing = captureId;
-					}
-					ImGui::PopID();
-					if (active)
-					{
-						int pressed = 0;
-						if (Gamepad::CapturePressed(pressed))
-						{
-							bind = pressed;
-							capturing = 0;
-						}
-						else if (GetAsyncKeyState(VK_ESCAPE) & 1) // ESC cancels
-						{
-							Gamepad::CancelCapture();
-							capturing = 0;
-						}
-					}
-				};
-
-				padBindRow("Menu Button", cfg->iControllerMenuButton, 1, capturingPad);
-				padBindRow("Magnet Button", cfg->iControllerMagnetButton, 2, capturingPad);
+				Binds::RecorderRow("Menu Button", cfg->iControllerMenuButton, true, false);
 			}
 
 			ImGui::Separator();

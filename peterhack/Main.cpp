@@ -485,6 +485,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 			DXGI_SWAP_CHAIN_DESC Desc;
 			pSwapChain->GetDesc(&Desc);
 			Process::Hwnd = Desc.OutputWindow; // use the window the swapchain actually presents to, not GetForegroundWindow()'s guess
+			Gamepad::SetWindow(Process::Hwnd); // DirectInput devices bind to the game window
 			Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 			Desc.Windowed = ((GetWindowLongPtr(Process::Hwnd, GWL_STYLE) & WS_POPUP) != 0) ? false : true;
 			const DXGI_FORMAT swapChainFormat = Desc.BufferDesc.Format;
@@ -621,14 +622,15 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	if (cfg->bInitHooks && cheat)
 		cheat->RenderEsp();
 
-	// Sample the controller once per frame; Pressed() below does edge detection off this poll.
-	if (cfg->bControllerBinds)
-		Gamepad::Poll();
+	// Sample the controller once per frame; every pad bind (menu, magnet, camo
+	// hotkeys, recorder capture) does edge detection off this single poll.
+	Gamepad::Poll(cfg->bControllerBinds);
+	Gamepad::SetReservedButton(Binds::IsPadBind(cfg->iControllerMenuButton)
+		? Binds::PadMask(cfg->iControllerMenuButton) : 0);
 
 	// ignore hotkeys if the game window isn't focused, or if the user is typing in a text input (chat, console, etc.)
 	if (!cfg->bMenuOpen && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput &&
-		((GetAsyncKeyState(cfg->iMagnetKey) & 1) || // magnet toggle key (default G)
-		 (cfg->bControllerBinds && Gamepad::Pressed(cfg->iControllerMagnetButton))))
+		Binds::Pressed(cfg->iMagnetKey)) // magnet toggle bind (default G)
 		cfg->bMagnetEnabled = !cfg->bMagnetEnabled;
 
 	ImGui::End();
@@ -637,7 +639,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 
 	if (IsGameWindowFocused() &&
 		((GetAsyncKeyState(VK_INSERT) & 1) || (GetAsyncKeyState(VK_F10) & 1) ||
-		 (cfg->bControllerBinds && Gamepad::Pressed(cfg->iControllerMenuButton))))
+		 Binds::Pressed(cfg->iControllerMenuButton, true)))
 		cfg->bMenuOpen = !cfg->bMenuOpen;
 
 	if (g_camo && !cfg->bMenuOpen)
@@ -675,6 +677,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		RestoreSystemMouseCursor();
 		if (Process::Hwnd)
 			SetForegroundWindow(Process::Hwnd);
+		Binds::CancelRecorder(); // abort any in-progress key/pad capture
 		if (g_camo)
 			g_camo->ClearHotkeyEdges();
 		memset(menuIo.MouseDown, 0, sizeof(menuIo.MouseDown));
@@ -852,6 +855,9 @@ void Unload()
 	// keeps a dangling pointer into our WndProc and crashes on the next message.
 	if (Process::WndProc)
 		SetWindowLongPtr(Process::Hwnd, GWLP_WNDPROC, (__int3264)(LONG_PTR)Process::WndProc);
+
+	// Release DirectInput controller devices before the module goes away.
+	Gamepad::Shutdown();
 
 	// MinHook
 	MH_DisableHook(MH_ALL_HOOKS);

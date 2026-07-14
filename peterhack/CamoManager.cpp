@@ -5,6 +5,8 @@
 
 #include "CamoManager.hpp"
 #include "Log.hpp"
+#include "GamepadInput.hpp"
+#include "Keybinds.hpp"
 #include "imgui/imgui.h"
 #include <Psapi.h>
 #include <cstdio>
@@ -63,19 +65,25 @@ namespace
 		}
 	}
 
-	bool HotkeyPressed(int vk)
+	bool HotkeyPressed(int bind)
 	{
-		if (vk <= 0 || vk >= 256 || IsBlockedCamoHotkey(vk))
+		// Controller binds: edge-detected off the per-frame Gamepad poll (inert
+		// while Controller Binds is off; the menu pad button is auto-blocked).
+		if (Binds::IsPadBind(bind))
+			return Gamepad::Pressed(Binds::PadMask(bind));
+		if (bind <= 0 || bind >= 256 || IsBlockedCamoHotkey(bind))
 			return false;
 		// Use the "pressed since last call" bit so quick taps are not missed between frames.
-		return (GetAsyncKeyState(vk) & 1) != 0;
+		return (GetAsyncKeyState(bind) & 1) != 0;
 	}
 
-	void PrimeHotkeyEdge(int vk)
+	void PrimeHotkeyEdge(int bind)
 	{
-		if (vk <= 0 || vk >= 256 || IsBlockedCamoHotkey(vk))
+		if (Binds::IsPadBind(bind))
+			return; // pad edges are per-frame, they don't latch and need no drain
+		if (bind <= 0 || bind >= 256 || IsBlockedCamoHotkey(bind))
 			return;
-		(void)GetAsyncKeyState(vk);
+		(void)GetAsyncKeyState(bind);
 	}
 
 	void ParseHexColor(const char* hex, int& r, int& g, int& b)
@@ -963,24 +971,41 @@ void CamoManager::DrawMenu()
 	const bool busy = busy_.load();
 	ImGui::Checkbox("Enable camo hotkeys", &settings.hotkeysEnabled);
 	if (settings.hotkeysEnabled)
-		ImGui::TextDisabled("F1=start  F2=preview  F3=unpreview  F4=stop (in match, menu closed)");
+	{
+		// Custom keybind recorder: click a bind, then press any key — or any
+		// controller button when Controller Binds is enabled in the Tools tab.
+		const bool padAllowed = Gamepad::IsEnabled();
+		Binds::RecorderRow("Start", settings.startHotkey, padAllowed, false);
+		Binds::RecorderRow("Preview", settings.previewHotkey, padAllowed, false);
+		Binds::RecorderRow("UnPreview", settings.unpreviewHotkey, padAllowed, false);
+		Binds::RecorderRow("Stop", settings.stopHotkey, padAllowed, false);
+		if (!padAllowed)
+			ImGui::TextDisabled("Enable Controller Binds (Tools tab) to record pad buttons");
+		ImGui::TextDisabled("Active in match with the menu closed");
+	}
 	else
 		ImGui::TextDisabled("Hotkeys off — use buttons below, or enable above");
 
+	char startLabel[48], previewLabel[48], unpreviewLabel[48], stopLabel[48];
+	snprintf(startLabel, sizeof(startLabel), "Start (%s)", Binds::BindName(settings.startHotkey));
+	snprintf(previewLabel, sizeof(previewLabel), "Preview (%s)", Binds::BindName(settings.previewHotkey));
+	snprintf(unpreviewLabel, sizeof(unpreviewLabel), "UnPreview (%s)", Binds::BindName(settings.unpreviewHotkey));
+	snprintf(stopLabel, sizeof(stopLabel), "Stop (%s)", Binds::BindName(settings.stopHotkey));
+
 	ImGui::BeginDisabled(busy);
-	if (ImGui::Button("Start (F1)", ImVec2(120, 0)))
+	if (ImGui::Button(startLabel, ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Paint);
 	ImGui::SameLine();
-	if (ImGui::Button("Preview (F2)", ImVec2(120, 0)))
+	if (ImGui::Button(previewLabel, ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Preview);
 	ImGui::SameLine();
-	if (ImGui::Button("UnPreview (F3)", ImVec2(120, 0)))
+	if (ImGui::Button(unpreviewLabel, ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::UnPreview);
 	ImGui::EndDisabled();
 
 	// Stop must stay clickable while a paint/preview job is running.
 	ImGui::BeginDisabled(!busy);
-	if (ImGui::Button("Stop (F4)", ImVec2(120, 0)))
+	if (ImGui::Button(stopLabel, ImVec2(120, 0)))
 		CancelActiveJob();
 	ImGui::EndDisabled();
 

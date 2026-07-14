@@ -43,6 +43,7 @@
 #include "SDK/BP_cLeonDecoy_Base_classes.hpp"
 #include "skeleton.hpp"
 #include "GamepadInput.hpp"
+#include "Keybinds.hpp"
 #include "CheatManager.hpp"
 #include "Menu.hpp"
 #include "Settings.hpp"

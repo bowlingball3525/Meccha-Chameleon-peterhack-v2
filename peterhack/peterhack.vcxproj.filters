@@ -38,6 +38,9 @@
     <ClCompile Include="GamepadInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Keybinds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="kiero\kiero_intern.cpp">
       <Filter>kiero</Filter>
     </ClCompile>
@@ -116,6 +119,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GamepadInput.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Keybinds.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kiero\kiero_intern.hpp">

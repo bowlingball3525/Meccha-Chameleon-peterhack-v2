@@ -19,10 +19,9 @@ public:
 	bool bNoGunCooldown;
 	bool bAntiDetection;
 	bool bMagnetEnabled;
-	int iMagnetKey;
+	int iMagnetKey; // bind code: keyboard/mouse VK or controller button (Binds::)
 	bool bControllerBinds;
-	int iControllerMenuButton;
-	int iControllerMagnetButton;
+	int iControllerMenuButton; // bind code for opening the menu (default: pad Back/View)
 	bool bPreventKick;
 	bool bInfiniteBullets;
 	bool bNoDecoyCooldown;

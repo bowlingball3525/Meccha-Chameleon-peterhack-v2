@@ -7133,6 +7133,7 @@ namespace
         double raw_world_scale{0.0};
         double scale{0.0};
         bool within_expected_window{false};
+        bool used_fallback_scale{false};
         int valid_triangles{0};
         int invalid_triangles{0};
         std::string failure{"not_run"};
@@ -7188,25 +7189,32 @@ namespace
         out.weighted_world_units_per_uv = weighted_sum / out.uv_area_sum;
         out.raw_world_scale = out.weighted_world_units_per_uv / out.mesh_bounds_diameter;
         out.scale = out.raw_world_scale * runtime_contract::PackedMeshAnchorCoverageSafetyFactor;
+        out.within_expected_window =
+            std::isfinite(out.scale) &&
+            out.scale >= runtime_contract::PackedMeshRadiusScaleExpectedWindowMin &&
+            out.scale <= runtime_contract::PackedMeshRadiusScaleExpectedWindowMax;
+
         // The calibration ratio is self-consistent: the native packed preflight
-        // multiplies the wire radius by the exact same bounds diameter this
-        // divides by, so maps that inflate the skeletal bounds sphere (fixed
-        // skel bounds, map-specific bounds scaling) legitimately land far away
-        // from the developed-map expectation of ~3.2 and must still be
-        // accepted.  Only reject ratios so extreme they can only come from a
-        // garbage bounds read or a corrupt triangle cache; scales too large to
-        // encode are rejected downstream by the maximum_packed_radius_uv check
-        // with richer metadata.
+        // multiplies the wire radius by the same bounds diameter this divides
+        // by, so maps that inflate the skeletal bounds sphere legitimately land
+        // outside the developed-map window (~3.2) and must still be accepted.
+        //
+        // If the ratio is so extreme (or non-finite) that it can only come from
+        // a garbage bounds read or a corrupt triangle cache, DON'T fail the
+        // whole paint - fall back to the known-good expected calibration so the
+        // player still gets camo. The downstream maximum_packed_radius_uv guard
+        // still rejects anything that would actually be unsafe to encode.
         if (!std::isfinite(out.scale) ||
             out.scale < runtime_contract::PackedMeshRadiusScalePlausibleMin ||
             out.scale > runtime_contract::PackedMeshRadiusScalePlausibleMax)
         {
-            out.failure = "packed_radius_calibration_out_of_range";
+            out.used_fallback_scale = true;
+            out.scale = runtime_contract::PackedMeshAnchorExpectedRadiusCalibration *
+                        runtime_contract::PackedMeshAnchorCoverageSafetyFactor;
+            out.failure = "packed_radius_calibration_out_of_range_fallback";
+            out.ok = true;
             return out;
         }
-        out.within_expected_window =
-            out.scale >= runtime_contract::PackedMeshRadiusScaleExpectedWindowMin &&
-            out.scale <= runtime_contract::PackedMeshRadiusScaleExpectedWindowMax;
         out.ok = true;
         out.failure = "ok";
         return out;
@@ -12058,6 +12066,36 @@ namespace
                 ? mesh_first_resolve_packed_radius_calibration(selected_mesh.mesh,
                                                                runtime_triangle_cache.triangles)
                 : MeshFirstPackedRadiusCalibration{};
+        // Emit the calibration inputs/outputs BEFORE the failure gate so a
+        // rejected calibration reports the numbers that caused it (scale,
+        // bounds diameter, UV area, triangle counts). Without this a failure
+        // response carries no diagnostics and the cause can't be seen.
+        metadata += ",\"packed_mesh_radius_calibration_required\":" +
+                    std::string(json_bool(uniform_packed_radius_calibration_required));
+        metadata += ",\"packed_mesh_radius_calibration_ok\":" +
+                    std::string(json_bool(packed_radius_calibration.ok));
+        metadata += ",\"packed_mesh_radius_calibration_failure\":\"" +
+                    json_escape(packed_radius_calibration.failure) + "\"";
+        metadata += ",\"packed_mesh_bounds_sphere_radius\":" +
+                    std::to_string(packed_radius_calibration.mesh_sphere_radius);
+        metadata += ",\"packed_mesh_bounds_diameter\":" +
+                    std::to_string(packed_radius_calibration.mesh_bounds_diameter);
+        metadata += ",\"packed_mesh_radius_calibration_triangles\":" +
+                    std::to_string(packed_radius_calibration.valid_triangles);
+        metadata += ",\"packed_mesh_radius_calibration_invalid_triangles\":" +
+                    std::to_string(packed_radius_calibration.invalid_triangles);
+        metadata += ",\"packed_mesh_radius_calibration_uv_area\":" +
+                    std::to_string(packed_radius_calibration.uv_area_sum);
+        metadata += ",\"packed_mesh_world_units_per_uv_weighted\":" +
+                    std::to_string(packed_radius_calibration.weighted_world_units_per_uv);
+        metadata += ",\"packed_mesh_radius_scale_raw_world\":" +
+                    std::to_string(packed_radius_calibration.raw_world_scale);
+        metadata += ",\"packed_mesh_radius_scale_calibrated\":" +
+                    std::to_string(packed_radius_calibration.scale);
+        metadata += ",\"packed_mesh_radius_scale_within_expected_window\":" +
+                    std::string(json_bool(packed_radius_calibration.within_expected_window));
+        metadata += ",\"packed_mesh_radius_scale_used_fallback\":" +
+                    std::string(json_bool(packed_radius_calibration.used_fallback_scale));
         if (uniform_packed_radius_calibration_required && !packed_radius_calibration.ok)
         {
             return response_json(false,
@@ -12089,28 +12127,6 @@ namespace
                        : packed_radius_calibration.scale)
                 : 1.0;
         const double packed_wire_radius_scale = packed_mesh_radius_scale;
-        metadata += ",\"packed_mesh_radius_calibration_required\":" +
-                    std::string(json_bool(uniform_packed_radius_calibration_required));
-        metadata += ",\"packed_mesh_radius_calibration_ok\":" +
-                    std::string(json_bool(packed_radius_calibration.ok));
-        metadata += ",\"packed_mesh_radius_calibration_failure\":\"" +
-                    json_escape(packed_radius_calibration.failure) + "\"";
-        metadata += ",\"packed_mesh_bounds_sphere_radius\":" +
-                    std::to_string(packed_radius_calibration.mesh_sphere_radius);
-        metadata += ",\"packed_mesh_bounds_diameter\":" +
-                    std::to_string(packed_radius_calibration.mesh_bounds_diameter);
-        metadata += ",\"packed_mesh_radius_calibration_triangles\":" +
-                    std::to_string(packed_radius_calibration.valid_triangles);
-        metadata += ",\"packed_mesh_radius_calibration_invalid_triangles\":" +
-                    std::to_string(packed_radius_calibration.invalid_triangles);
-        metadata += ",\"packed_mesh_radius_calibration_uv_area\":" +
-                    std::to_string(packed_radius_calibration.uv_area_sum);
-        metadata += ",\"packed_mesh_world_units_per_uv_weighted\":" +
-                    std::to_string(packed_radius_calibration.weighted_world_units_per_uv);
-        metadata += ",\"packed_mesh_radius_scale_raw_world\":" +
-                    std::to_string(packed_radius_calibration.raw_world_scale);
-        metadata += ",\"packed_mesh_radius_scale_within_expected_window\":" +
-                    std::string(json_bool(packed_radius_calibration.within_expected_window));
         metadata += ",\"packed_mesh_radius_coverage_safety_factor\":" +
                     std::to_string(runtime_contract::PackedMeshAnchorCoverageSafetyFactor);
         metadata += ",\"packed_mesh_radius_scale_effective\":" +
@@ -14081,7 +14097,13 @@ namespace
         };
 
         auto active_context_still_matches = [&]() -> bool {
-            if (!live_uobject(job->component))
+            // Strong liveness (BeginDestroyed/FinishDestroyed/Garbage flags):
+            // at round end the level tears down while this job is still
+            // pacing strokes. Feeding a component that has entered
+            // destruction queues packed strokes the engine later decodes
+            // against already-released render/replication state - a null
+            // write inside the game's own tick that crashes the process.
+            if (!live_uobject_not_destroyed(job->component))
             {
                 finish_failed("mesh_paint_context_changed",
                               "Paint stopped because the game paint component is no longer available",
@@ -14094,6 +14116,14 @@ namespace
                 finish_failed("mesh_paint_context_changed",
                               "Paint stopped because the game paint component changed",
                               "paint_component_identity_changed");
+                return false;
+            }
+            if (job->server_packed_paint_batch_use_relay &&
+                !live_uobject_not_destroyed(job->relay_component))
+            {
+                finish_failed("mesh_paint_context_changed",
+                              "Paint stopped because the relay component is no longer available",
+                              "relay_component_unavailable");
                 return false;
             }
             if (!live_uobject(job->controller) || !job->k2_get_pawn_function)
@@ -16781,7 +16811,10 @@ namespace
             failure = "server_packed_paint_batch_unavailable_or_empty";
             return false;
         }
-        if (!live_uobject(component))
+        // Strong check: a component that has begun destruction (round end,
+        // level teardown) must not receive further batches - the engine
+        // decodes them later against freed render/replication state.
+        if (!live_uobject_not_destroyed(component))
         {
             failure = "paint_component_unavailable";
             return false;
@@ -16806,12 +16839,14 @@ namespace
             failure = "server_relay_packed_stroke_batch_unavailable_or_empty";
             return false;
         }
-        if (!live_uobject(relay_component))
+        // Strong checks: see sdk_call_server_packed_paint_batch - never RPC
+        // through objects that have begun destruction during level teardown.
+        if (!live_uobject_not_destroyed(relay_component))
         {
             failure = "relay_component_unavailable";
             return false;
         }
-        if (!live_uobject(paint_component))
+        if (!live_uobject_not_destroyed(paint_component))
         {
             failure = "paint_component_unavailable";
             return false;

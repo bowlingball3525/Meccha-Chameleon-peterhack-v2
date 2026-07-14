@@ -1,4 +1,5 @@
 #include "CamoSettings.hpp"
+#include "Keybinds.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -164,11 +165,18 @@ void CamoSettings::Load()
 	if (batchPacingMs > 500)
 		batchPacingMs = 500;
 
-	auto sanitizeHotkey = [](int& vk) {
+	auto sanitizeHotkey = [](int& bind) {
+		// Controller binds are validated as a whole (single known button bit).
+		if (Binds::IsPadBind(bind))
+		{
+			if (!Binds::IsValidBind(bind))
+				bind = 0x70;
+			return;
+		}
 		// Mouse buttons and Insert/F10 (menu toggles) are reserved.
-		if (vk == 0x01 || vk == 0x02 || vk == 0x04 || vk == 0x05 || vk == 0x06 ||
-			vk == 0x2D || vk == 0x79)
-			vk = 0x70;
+		if (bind == 0x01 || bind == 0x02 || bind == 0x04 || bind == 0x05 || bind == 0x06 ||
+			bind == 0x2D || bind == 0x79 || !Binds::IsValidBind(bind))
+			bind = 0x70;
 	};
 	sanitizeHotkey(startHotkey);
 	sanitizeHotkey(previewHotkey);
