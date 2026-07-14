@@ -29,6 +29,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx12.h"
+#include "IconsFontAwesome6.h"
+#include "Theme.hpp"
 
 #include "SDK/Engine_classes.hpp"
 #include "SDK/BP_FirstPersonCharacter_LINK_classes.hpp"

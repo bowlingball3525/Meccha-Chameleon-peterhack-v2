@@ -35,6 +35,55 @@ static bool IsGameWindowFocused()
 	return fg && Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg));
 }
 
+// Resolve a bundled asset (e.g. the icon font) that ships next to peterhack.dll.
+// Probes the module dir, its fonts/ subdir, the Desktop deploy folder, and
+// C:\peterhack. Returns a UTF-8 path (ImGui expects UTF-8), empty if not found.
+static std::string ResolveAssetPath(const wchar_t* filename)
+{
+	wchar_t modulePath[MAX_PATH]{};
+	HMODULE self = nullptr;
+	static int moduleAnchor = 0;
+	GetModuleHandleExW(
+		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		reinterpret_cast<LPCWSTR>(&moduleAnchor), &self);
+	if (!self)
+		self = GetModuleHandleW(L"peterhack.dll");
+	GetModuleFileNameW(self, modulePath, MAX_PATH);
+
+	std::wstring dir(modulePath);
+	const size_t slash = dir.find_last_of(L"\\/");
+	if (slash != std::wstring::npos)
+		dir.resize(slash);
+
+	std::wstring userProfile;
+	{
+		wchar_t up[MAX_PATH]{};
+		const DWORD n = GetEnvironmentVariableW(L"USERPROFILE", up, MAX_PATH);
+		if (n > 0 && n < MAX_PATH)
+			userProfile.assign(up, n);
+	}
+
+	const std::wstring fname(filename);
+	const std::wstring candidates[] = {
+		dir + L"\\fonts\\" + fname,
+		dir + L"\\" + fname,
+		userProfile + L"\\Desktop\\peterhack\\fonts\\" + fname,
+		L"C:\\peterhack\\fonts\\" + fname,
+	};
+	for (const auto& c : candidates)
+	{
+		if (GetFileAttributesW(c.c_str()) == INVALID_FILE_ATTRIBUTES)
+			continue;
+		const int need = WideCharToMultiByte(CP_UTF8, 0, c.c_str(), -1, nullptr, 0, nullptr, nullptr);
+		if (need <= 0)
+			continue;
+		std::string utf8(need - 1, '\0');
+		WideCharToMultiByte(CP_UTF8, 0, c.c_str(), -1, utf8.data(), need, nullptr, nullptr);
+		return utf8;
+	}
+	return {};
+}
+
 static void SyncMenuMousePosition(ImGuiIO& io)
 {
 	if (!Process::Hwnd)
@@ -462,16 +511,37 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 				// so suppress the load error and rely on the return-value checks below.
 				cfg.Flags |= ImFontFlags_NoLoadError;
 
-				if (io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesDefault()))
+				const float kFontSize = 16.0f;
+				if (io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", kFontSize, &cfg, io.Fonts->GetGlyphRangesDefault()))
 				{
 					cfg.MergeMode = true;
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesGreek());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", kFontSize, &cfg, io.Fonts->GetGlyphRangesCyrillic());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", kFontSize, &cfg, io.Fonts->GetGlyphRangesGreek());
 					static const ImWchar arabic_ranges[] = { 0x0600, 0x06FF, 0xFB50, 0xFDFF, 0xFE70, 0xFEFF, 0 };
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f, &cfg, arabic_ranges);
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 15.0f, &cfg, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\meiryo.ttc", 15.0f, &cfg, io.Fonts->GetGlyphRangesJapanese());
-					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", 15.0f, &cfg, io.Fonts->GetGlyphRangesKorean());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", kFontSize, &cfg, arabic_ranges);
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", kFontSize, &cfg, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\meiryo.ttc", kFontSize, &cfg, io.Fonts->GetGlyphRangesJapanese());
+					io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", kFontSize, &cfg, io.Fonts->GetGlyphRangesKorean());
+				}
+
+				// Merge Font Awesome 6 (solid) so tab/button labels can use icon glyphs.
+				// Ships alongside peterhack.dll in fonts\; skipped cleanly if missing.
+				const std::string faPath = ResolveAssetPath(L"fa-solid-900.ttf");
+				if (!faPath.empty())
+				{
+					static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+					ImFontConfig iconCfg;
+					iconCfg.MergeMode = true;
+					iconCfg.PixelSnapH = true;
+					iconCfg.Flags |= ImFontFlags_NoLoadError;
+					// Nudge glyphs down a touch so they sit on the text baseline.
+					iconCfg.GlyphOffset = ImVec2(0.0f, 1.0f);
+					iconCfg.GlyphMinAdvanceX = kFontSize; // keep icons monospaced-ish
+					io.Fonts->AddFontFromFileTTF(faPath.c_str(), kFontSize - 2.0f, &iconCfg, iconRanges);
+				}
+				else
+				{
+					PhLog("[UI] Font Awesome icon font not found; icons will show as boxes.\n");
 				}
 			}
 
@@ -666,7 +736,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		static bool menuStyleApplied = false;
 		if (!menuStyleApplied)
 		{
-			ImGui::StyleColorsDark();
+			Theme::ApplyDeepDark();
 			menuStyleApplied = true;
 		}
 		gui->Init();

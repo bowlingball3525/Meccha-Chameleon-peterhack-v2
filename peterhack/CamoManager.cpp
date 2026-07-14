@@ -932,7 +932,7 @@ void CamoManager::DrawMenu()
 
 	ImGui::Separator();
 	ImGui::SliderFloat("Brush 1 (texels)", &settings.brush1Texels, 10.0f, 30.0f, "%.0f");
-	ImGui::SliderFloat("Brush 2 (texels)", &settings.brush2Texels, 5.0f, 10.0f, "%.0f");
+	ImGui::SliderFloat("Brush 2 (texels)", &settings.brush2Texels, 2.0f, 10.0f, "%.0f");
 	ImGui::SliderInt("Batch size", &settings.batchLimit, 1, 20);
 	ImGui::SliderInt("Pacing (ms)", &settings.batchPacingMs, 50, 500);
 	ImGui::SliderFloat("Side UV", &settings.sideSourceMaxUv, 0.001f, 0.08f, "%.3f");
@@ -973,14 +973,14 @@ void CamoManager::DrawMenu()
 	if (settings.hotkeysEnabled)
 	{
 		// Custom keybind recorder: click a bind, then press any key — or any
-		// controller button when Controller Binds is enabled in the Tools tab.
+		// controller button when Controller Binds is enabled in the Misc tab.
 		const bool padAllowed = Gamepad::IsEnabled();
 		Binds::RecorderRow("Start", settings.startHotkey, padAllowed, false);
 		Binds::RecorderRow("Preview", settings.previewHotkey, padAllowed, false);
 		Binds::RecorderRow("UnPreview", settings.unpreviewHotkey, padAllowed, false);
 		Binds::RecorderRow("Stop", settings.stopHotkey, padAllowed, false);
 		if (!padAllowed)
-			ImGui::TextDisabled("Enable Controller Binds (Tools tab) to record pad buttons");
+			ImGui::TextDisabled("Enable Controller Binds (Misc tab) to record pad buttons");
 		ImGui::TextDisabled("Active in match with the menu closed");
 	}
 	else
@@ -992,15 +992,16 @@ void CamoManager::DrawMenu()
 	snprintf(unpreviewLabel, sizeof(unpreviewLabel), "UnPreview (%s)", Binds::BindName(settings.unpreviewHotkey));
 	snprintf(stopLabel, sizeof(stopLabel), "Stop (%s)", Binds::BindName(settings.stopHotkey));
 
+	// Left column: Start / Stop.  Right column: Preview / UnPreview
+	// (UnPreview sits directly below Preview).
 	ImGui::BeginDisabled(busy);
 	if (ImGui::Button(startLabel, ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Paint);
+	ImGui::EndDisabled();
 	ImGui::SameLine();
+	ImGui::BeginDisabled(busy);
 	if (ImGui::Button(previewLabel, ImVec2(120, 0)))
 		RequestPaint(CamoJobKind::Preview);
-	ImGui::SameLine();
-	if (ImGui::Button(unpreviewLabel, ImVec2(120, 0)))
-		RequestPaint(CamoJobKind::UnPreview);
 	ImGui::EndDisabled();
 
 	// Stop must stay clickable while a paint/preview job is running.
@@ -1008,7 +1009,9 @@ void CamoManager::DrawMenu()
 	if (ImGui::Button(stopLabel, ImVec2(120, 0)))
 		CancelActiveJob();
 	ImGui::EndDisabled();
-
-	if (ImGui::Button("Save camo settings"))
-		settings.Save();
+	ImGui::SameLine();
+	ImGui::BeginDisabled(busy);
+	if (ImGui::Button(unpreviewLabel, ImVec2(120, 0)))
+		RequestPaint(CamoJobKind::UnPreview);
+	ImGui::EndDisabled();
 }

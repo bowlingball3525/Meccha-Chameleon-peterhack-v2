@@ -279,6 +279,27 @@ namespace
 		return defaultYes;
 	}
 
+	// Yes/No prompt via a native Windows dialog so it works even when the loader
+	// is launched without an interactive console (e.g. double-clicked).
+	bool PromptYesNoDialog(const std::wstring& title, const std::wstring& message, bool defaultYes = true)
+	{
+		const UINT flags = MB_YESNO | MB_ICONQUESTION | MB_SETFOREGROUND | MB_TOPMOST |
+			(defaultYes ? MB_DEFBUTTON1 : MB_DEFBUTTON2);
+		return MessageBoxW(nullptr, message.c_str(), title.c_str(), flags) == IDYES;
+	}
+
+	void ShowInfoDialog(const std::wstring& title, const std::wstring& message)
+	{
+		MessageBoxW(nullptr, message.c_str(), title.c_str(),
+			MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
+	}
+
+	void ShowErrorDialog(const std::wstring& title, const std::wstring& message)
+	{
+		MessageBoxW(nullptr, message.c_str(), title.c_str(),
+			MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
+	}
+
 	std::optional<std::string> HttpDownloadText(const std::wstring& url)
 	{
 		const auto bytes = HttpDownload(url);
@@ -426,25 +447,40 @@ namespace
 		if (!remoteManifest->releasePackage.empty())
 			Log(L"[update] Package: " + ToWide(remoteManifest->releasePackage));
 
-		if (!PromptYesNo(L"Download and install the update before loading?", true))
+		const std::wstring updateMsg =
+			L"A new version of peterhack is available.\n\n"
+			L"Installed:  v" + ToWide(localVersion) + L"\n"
+			L"Available:  v" + ToWide(remoteVersion) + L"\n\n"
+			L"Download and install it now?";
+		if (!PromptYesNoDialog(L"peterhack Update", updateMsg, true))
 		{
 			Log(L"[update] Skipped by user. Continuing with current files.");
 			return true;
 		}
 
 		if (!ApplyRemoteUpdate(options, *remoteManifest, *remoteText))
+		{
+			ShowErrorDialog(L"peterhack Update",
+				L"The update failed to download or install.\n\n"
+				L"Continuing with your current version. Make sure the game is closed "
+				L"and you have an internet connection, then try again.");
 			return false;
+		}
 
 		const auto refreshed = LoadManifest(options.manifestPath);
 		if (!refreshed)
 		{
 			LogError(L"Update installed but manifest reload failed.");
+			ShowErrorDialog(L"peterhack Update",
+				L"The update was downloaded but the manifest could not be reloaded.");
 			return false;
 		}
 
 		manifest = *refreshed;
 		options.localOnly = false;
 		Log(L"[update] Installed v" + ToWide(manifest.version) + L".");
+		ShowInfoDialog(L"peterhack Update",
+			L"Updated to v" + ToWide(manifest.version) + L".\n\nThe loader will now continue and inject.");
 		return true;
 	}
 

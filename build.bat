@@ -30,6 +30,12 @@ if not defined MSBUILD (
 
 if not exist "%DEPLOY%" mkdir "%DEPLOY%"
 
+rem Copy UI assets (icon font) next to peterhack.dll.
+if exist "%~dp0peterhack\fonts\fa-solid-900.ttf" (
+    if not exist "%DEPLOY%\fonts" mkdir "%DEPLOY%\fonts"
+    copy /y "%~dp0peterhack\fonts\fa-solid-900.ttf" "%DEPLOY%\fonts\fa-solid-900.ttf" >nul
+)
+
 echo Using MSBuild: %MSBUILD%
 echo Target: %TARGET%  Config: %CONFIG%^|%PLATFORM%
 echo Deploy folder: %DEPLOY%

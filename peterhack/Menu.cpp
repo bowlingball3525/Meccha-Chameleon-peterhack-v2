@@ -10,7 +10,7 @@ namespace
 
 void Menu::Init()
 {
-	ImGui::SetNextWindowSize({ 300, 480 }, ImGuiCond_Once);
+	ImGui::SetNextWindowSize({ 630, 520 }, ImGuiCond_Once);
 	ImGui::Begin("peterhack", nullptr, 0);
 
 	const float footerH = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().WindowPadding.y;
@@ -19,7 +19,7 @@ void Menu::Init()
 
 	if (ImGui::BeginTabBar("##tabs"))
 	{
-		if (ImGui::BeginTabItem("ESP"))
+		if (ImGui::BeginTabItem(ICON_FA_EYE " ESP"))
 		{
 			ImGui::BeginChild("##esp_list", ImVec2(0, 0), false);
 
@@ -85,7 +85,7 @@ void Menu::Init()
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Teleport"))
+		if (ImGui::BeginTabItem(ICON_FA_LOCATION_ARROW " Teleport"))
 		{
 			ImGui::BeginChild("##tp_list", ImVec2(0, 0), false);
 
@@ -110,9 +110,9 @@ void Menu::Init()
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Tools"))
+		if (ImGui::BeginTabItem(ICON_FA_SCREWDRIVER_WRENCH " Exploits"))
 		{
-			ImGui::BeginChild("##tools_list", ImVec2(0, 0), false);
+			ImGui::BeginChild("##exploits_list", ImVec2(0, 0), false);
 
 			ImGui::Text("Survivors");
 			ImGui::Separator();
@@ -136,22 +136,10 @@ void Menu::Init()
 			// button, or controller button (when Controller Binds is on).
 			Binds::RecorderRow("Magnet Key", cfg->iMagnetKey, cfg->bControllerBinds, true);
 			if (Binds::IsPadBind(cfg->iMagnetKey) && !cfg->bControllerBinds)
-				ImGui::TextDisabled("Magnet is pad-bound — enable Controller Binds below");
+				ImGui::TextDisabled("Magnet is pad-bound — enable Controller Binds in Misc");
 
 			ImGui::Separator();
-			ImGui::Text("Controller");
-			ImGui::Separator();
-			if (ImGui::Checkbox("Controller Binds", &cfg->bControllerBinds) && !cfg->bControllerBinds)
-				Binds::CancelRecorder();
-			if (cfg->bControllerBinds)
-			{
-				if (!Gamepad::IsConnected())
-					ImGui::TextDisabled("No controller detected");
-				Binds::RecorderRow("Menu Button", cfg->iControllerMenuButton, true, false);
-			}
-
-			ImGui::Separator();
-			if (ImGui::Button("Kill All Survivors"))
+			if (ImGui::Button(ICON_FA_SKULL " Kill All Survivors"))
 				cheat->RequestKillAllSurvivors();
 
 			ImGui::Separator();
@@ -209,7 +197,7 @@ void Menu::Init()
 			ImGui::Separator();
 			ImGui::Checkbox("Anti Server Kick", &cfg->bPreventKick);
 
-			if (ImGui::Button("Return to Main Lobby"))
+			if (ImGui::Button(ICON_FA_RIGHT_FROM_BRACKET " Return to Main Lobby"))
 				cheat->RequestReturnToMainLobby();
 
 			ImGui::Separator();
@@ -221,7 +209,7 @@ void Menu::Init()
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Name Changer"))
+		if (ImGui::BeginTabItem(ICON_FA_ID_CARD " Name Changer"))
 		{
 			ImGui::BeginChild("##name_list", ImVec2(0, 0), false);
 
@@ -277,11 +265,52 @@ void Menu::Init()
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Camouflage"))
+		if (ImGui::BeginTabItem(ICON_FA_PAINTBRUSH " Camouflage"))
 		{
 			ImGui::BeginChild("##camo_list", ImVec2(0, 0), false);
 			if (g_camo)
 				g_camo->DrawMenu();
+			ImGui::EndChild();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem(ICON_FA_SLIDERS " Misc"))
+		{
+			ImGui::BeginChild("##misc_list", ImVec2(0, 0), false);
+
+			ImGui::Text(ICON_FA_GAMEPAD " Controller");
+			ImGui::Separator();
+			if (ImGui::Checkbox("Controller Binds", &cfg->bControllerBinds) && !cfg->bControllerBinds)
+				Binds::CancelRecorder();
+			if (cfg->bControllerBinds)
+			{
+				if (!Gamepad::IsConnected())
+					ImGui::TextDisabled("No controller detected");
+				Binds::RecorderRow("Menu Button", cfg->iControllerMenuButton, true, false);
+			}
+
+			ImGui::EndChild();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem(ICON_FA_GEAR " Config"))
+		{
+			ImGui::BeginChild("##config_list", ImVec2(0, 0), false);
+
+			ImGui::Text("Settings");
+			ImGui::Separator();
+			float cfgButtonW = 90.0f;
+			if (ImGui::Button(ICON_FA_FLOPPY_DISK " Save", ImVec2(cfgButtonW, 0)))
+			{
+				cfg->SaveSettings();
+				if (g_camo)
+					g_camo->settings.Save();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_FOLDER_OPEN " Load", ImVec2(cfgButtonW, 0)))
+				cfg->LoadSettings();
+			ImGui::TextDisabled("Save also stores camouflage settings");
+
 			ImGui::EndChild();
 			ImGui::EndTabItem();
 		}
@@ -293,14 +322,6 @@ void Menu::Init()
 
 	ImGui::Separator();
 
-	float buttonW = 55.0f;
-	if (ImGui::Button("Save", ImVec2(buttonW, 0)))
-		cfg->SaveSettings();
-	ImGui::SameLine();
-	if (ImGui::Button("Load", ImVec2(buttonW, 0)))
-		cfg->LoadSettings();
-
-	ImGui::SameLine();
 	float checkboxW = ImGui::CalcTextSize("Enable").x + ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - checkboxW - ImGui::GetStyle().WindowPadding.x);
 	ImGui::Checkbox("Enable", &cfg->bInitHooks);
