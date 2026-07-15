@@ -1,4 +1,8 @@
 #include "includes.hpp"
+#include "OverlayWindow.hpp"
+#include "SDK/EnhancedInput_classes.hpp"
+
+#include <cmath>
 
 #if defined _M_X64
 typedef uint64_t uintx_t;
@@ -311,6 +315,90 @@ static void InitKickFunctionPointers()
 	if (!g_fnOnRepBodyVisibility)
 		g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
 			"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
+
+	if (!g_fnDeathPlayer)
+		g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
+	if (!g_fnRagdoll)
+		g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
+	if (!g_fnGoToSpectate)
+		g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
+	if (!g_fnShowDeathWidget)
+		g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
+}
+
+void InitCombatFunctionPointers()
+{
+	if (!g_fnLineTraceSingle)
+		g_fnLineTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+			"KismetSystemLibrary", "LineTraceSingle");
+	if (!g_fnSphereTraceSingle)
+		g_fnSphereTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+			"KismetSystemLibrary", "SphereTraceSingle");
+	if (!g_fnAntiChatTrace)
+		g_fnAntiChatTrace = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "AntiChatTrace");
+	if (!g_fnSpawnShotEffectServer)
+		g_fnSpawnShotEffectServer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Server)");
+	if (!g_fnSpawnShotEffectLocal)
+		g_fnSpawnShotEffectLocal = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Local)");
+	if (!g_fnSpawnShotEffectClient)
+		g_fnSpawnShotEffectClient = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Client)");
+	if (!g_fnShakeStart)
+		g_fnShakeStart = SDK::UBPC_CameraShake_C::StaticClass()->GetFunction("BPC_CameraShake_C", "ShakeStart");
+	if (!g_fnItemShakeStart)
+		g_fnItemShakeStart = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_Main_C", "ItemShakeStart");
+	if (!g_fnHunterInpActShot)
+		g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
+}
+
+void ForceRefreshCombatFunctionPointers()
+{
+	g_fnLineTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+		"KismetSystemLibrary", "LineTraceSingle");
+	g_fnSphereTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+		"KismetSystemLibrary", "SphereTraceSingle");
+	g_fnAntiChatTrace = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "AntiChatTrace");
+	g_fnSpawnShotEffectServer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Server)");
+	g_fnSpawnShotEffectLocal = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Local)");
+	g_fnSpawnShotEffectClient = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Client)");
+	g_fnShakeStart = SDK::UBPC_CameraShake_C::StaticClass()->GetFunction("BPC_CameraShake_C", "ShakeStart");
+	g_fnItemShakeStart = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_Main_C", "ItemShakeStart");
+	g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
+}
+
+static void RefreshCombatFunctionPointersIfStale()
+{
+	if (!cfg || (!cfg->bSilentAim && !cfg->bTriggerbot && !cfg->bNoRecoil))
+		return;
+
+	static ULONGLONG s_lastRefreshMs = 0;
+	const ULONGLONG now = GetTickCount64();
+	if (now - s_lastRefreshMs < 30000)
+		return;
+	s_lastRefreshMs = now;
+	__try
+	{
+		InitCombatFunctionPointers();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] InitCombatFunctionPointers fault\n");
+	}
 }
 
 void ForceRefreshKickFunctionPointers()
@@ -321,11 +409,19 @@ void ForceRefreshKickFunctionPointers()
 	g_fnClientReturnToMainMenuWithTextReason = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientReturnToMainMenuWithTextReason");
 	g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
 		"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
+	g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
+	g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
+	g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
+	g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
 }
 
 static void RefreshKickFunctionPointersIfStale()
 {
-	if (!cfg || (!cfg->bPreventKick && !cfg->bForceCharacterVisibility))
+	if (!cfg || (!cfg->bPreventKick && !cfg->bForceCharacterVisibility && !cfg->bGodmode))
 		return;
 
 	static ULONGLONG s_lastRefreshMs = 0;
@@ -333,7 +429,194 @@ static void RefreshKickFunctionPointersIfStale()
 	if (now - s_lastRefreshMs < 30000)
 		return;
 	s_lastRefreshMs = now;
-	InitKickFunctionPointers();
+	__try
+	{
+		InitKickFunctionPointers();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] InitKickFunctionPointers fault\n");
+	}
+}
+
+// Reject obviously corrupt pointers before forwarding into the engine. 0xFFFF… is a
+// common stale/freed sentinel and was the fault address in the UE crash report.
+static bool LooksLikeUserPtr(const void* p)
+{
+	const uintptr_t v = reinterpret_cast<uintptr_t>(p);
+	return v >= 0x10000 && v < 0x0000FFFF00000000ull;
+}
+
+static void SafeForwardProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
+{
+	if (!oProcessEvent)
+		return;
+	if (!LooksLikeUserPtr(pFunction))
+	{
+		PhLog("[ProcessEvent] skip forward — bad pFunction %p\n", pFunction);
+		return;
+	}
+	if (pObject && !LooksLikeUserPtr(pObject))
+	{
+		PhLog("[ProcessEvent] skip forward — bad pObject %p\n", pObject);
+		return;
+	}
+	__try
+	{
+		oProcessEvent(pObject, pFunction, pParms);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] forward fault pObj=%p fn=%p\n", pObject, pFunction);
+	}
+}
+
+static bool CombatRedirectLive()
+{
+	if (!g_combatRedirect.active)
+		return false;
+	if (GetTickCount64() > g_combatRedirect.expireMs)
+	{
+		g_combatRedirect.active = false;
+		return false;
+	}
+	if (!g_combatRedirect.target || !CheatManager::IsObjectValid(g_combatRedirect.target))
+	{
+		g_combatRedirect.active = false;
+		return false;
+	}
+	return cfg && (cfg->bSilentAim || cfg->bTriggerbot);
+}
+
+static SDK::FVector ExtendTraceEnd(const SDK::FVector& start, const SDK::FVector& hit, double extraPast = 80.0)
+{
+	const double dx = hit.X - start.X;
+	const double dy = hit.Y - start.Y;
+	const double dz = hit.Z - start.Z;
+	const double len = sqrt(dx * dx + dy * dy + dz * dz);
+	if (len < 1.0)
+		return hit;
+	const double scale = (len + extraPast) / len;
+	return { start.X + dx * scale, start.Y + dy * scale, start.Z + dz * scale };
+}
+
+static void PatchHitResultForRedirect(SDK::FHitResult& hit, const SDK::FVector& start, const SDK::FVector& end)
+{
+	auto* target = g_combatRedirect.target;
+	auto* leon = target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass())
+		? static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(target)
+		: nullptr;
+	SDK::UPrimitiveComponent* meshComp = (leon && leon->Mesh) ? leon->Mesh : nullptr;
+
+	const SDK::FVector& impact = g_combatRedirect.hitLocation;
+	const double dx = impact.X - start.X;
+	const double dy = impact.Y - start.Y;
+	const double dz = impact.Z - start.Z;
+	const double dist = sqrt(dx * dx + dy * dy + dz * dz);
+
+	hit = {};
+	hit.bBlockingHit = true;
+	hit.Time = 1.0f;
+	hit.Distance = static_cast<float>(dist);
+	hit.Location.X = impact.X;
+	hit.Location.Y = impact.Y;
+	hit.Location.Z = impact.Z;
+	hit.ImpactPoint = hit.Location;
+	if (dist > 1.0)
+	{
+		hit.Normal.X = -dx / dist;
+		hit.Normal.Y = -dy / dist;
+		hit.Normal.Z = -dz / dist;
+		hit.ImpactNormal = hit.Normal;
+	}
+	hit.TraceStart.X = start.X;
+	hit.TraceStart.Y = start.Y;
+	hit.TraceStart.Z = start.Z;
+	hit.TraceEnd.X = end.X;
+	hit.TraceEnd.Y = end.Y;
+	hit.TraceEnd.Z = end.Z;
+	if (target)
+	{
+		hit.HitObjectHandle.ReferenceObject.ObjectIndex = target->Index;
+		hit.HitObjectHandle.ReferenceObject.ObjectSerialNumber = 0;
+	}
+	if (meshComp)
+	{
+		hit.Component.ObjectIndex = meshComp->Index;
+		hit.Component.ObjectSerialNumber = 0;
+	}
+}
+
+static thread_local bool s_combatTracePending = false;
+
+static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
+{
+	if (!pFunction || !pParms)
+		return;
+
+	// Silent aim: arm redirect at the exact moment IA_Shot fires, using the target
+	// cached during the last gather pass.
+	if (cfg && cfg->bSilentAim && pFunction == g_fnHunterInpActShot && pObject &&
+		pObject == g_localPawn.load(std::memory_order_acquire) &&
+		g_combatRedirect.silentReady && g_combatRedirect.silentTarget)
+	{
+		auto* parms = static_cast<
+			SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3*>(pParms);
+		if (SDK::UEnhancedInputLibrary::Conv_InputActionValueToBool(
+				parms->ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3))
+		{
+			CheatManager::ArmCombatShotRedirect(g_combatRedirect.silentTarget, g_combatRedirect.silentHit);
+			g_combatRedirect.silentReady = false;
+		}
+	}
+
+	if (!CombatRedirectLive())
+		return;
+
+	if (pFunction == g_fnLineTraceSingle || pFunction == g_fnSphereTraceSingle)
+	{
+		auto* parms = static_cast<SDK::Params::KismetSystemLibrary_LineTraceSingle*>(pParms);
+		parms->End = ExtendTraceEnd(parms->Start, g_combatRedirect.hitLocation);
+		s_combatTracePending = true;
+		return;
+	}
+
+	if (pFunction == g_fnAntiChatTrace)
+	{
+		auto* parms = static_cast<SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_AntiChatTrace*>(pParms);
+		parms->End = g_combatRedirect.hitLocation;
+		if (!parms->Target &&
+			g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		{
+			parms->Target = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(g_combatRedirect.target);
+		}
+		return;
+	}
+
+	if (pFunction == g_fnSpawnShotEffectServer ||
+		pFunction == g_fnSpawnShotEffectLocal ||
+		pFunction == g_fnSpawnShotEffectClient)
+	{
+		auto* parms = static_cast<SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_SpawnShotEffect_Server_*>(pParms);
+		parms->Endpoint = g_combatRedirect.hitLocation;
+		parms->IsHit = true;
+	}
+}
+
+static void CombatPostProcessEvent(SDK::UObject* /*pObject*/, SDK::UFunction* pFunction, void* pParms)
+{
+	if (!s_combatTracePending || !pFunction || !pParms)
+		return;
+	if (pFunction != g_fnLineTraceSingle && pFunction != g_fnSphereTraceSingle)
+		return;
+
+	s_combatTracePending = false;
+	if (!CombatRedirectLive())
+		return;
+
+	auto* parms = static_cast<SDK::Params::KismetSystemLibrary_LineTraceSingle*>(pParms);
+	PatchHitResultForRedirect(parms->OutHit, parms->Start, parms->End);
+	parms->ReturnValue = true;
 }
 
 // Pointer-only exploit blocking — never call GetName() on the ProcessEvent hot path.
@@ -342,14 +625,40 @@ static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* p
 	if (!cfg || !pFunction)
 		return false;
 
-	if (!cfg->bForceCharacterVisibility && !cfg->bPreventKick)
+	// No recoil: drop the camera/item shake handlers before they run.
+	if (cfg->bNoRecoil &&
+		(pFunction == g_fnShakeStart || pFunction == g_fnItemShakeStart))
+	{
+		return true;
+	}
+
+	if (!cfg->bForceCharacterVisibility && !cfg->bPreventKick && !cfg->bGodmode)
 		return false;
 
-	if (cfg->bForceCharacterVisibility && pFunction == g_fnOnRepBodyVisibility &&
-		pObject && CheatManager::IsObjectValid(pObject) &&
-		pObject->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+	// Godmode: drop the death/spectate RPCs when they target our own pawn. The
+	// server-authoritative kill (KillPlayer) manifests on the victim's client as
+	// these calls; the Invincible/Health field writes don't stop them, so this
+	// pointer-only block is what actually keeps us alive through a shot.
+	if (cfg->bGodmode && pObject && pObject == g_localPawn.load(std::memory_order_acquire) &&
+		(pFunction == g_fnDeathPlayer || pFunction == g_fnRagdoll ||
+			pFunction == g_fnGoToSpectate || pFunction == g_fnShowDeathWidget))
 	{
-		static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(pObject)->BodyVisibility = true;
+		return true;
+	}
+
+	if (cfg->bForceCharacterVisibility && pFunction == g_fnOnRepBodyVisibility && pObject)
+	{
+		__try
+		{
+			if (CheatManager::IsObjectValid(pObject) &&
+				pObject->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+			{
+				static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(pObject)->BodyVisibility = true;
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
 	}
 
 	if (cfg->bPreventKick &&
@@ -371,6 +680,12 @@ static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* p
 
 static void TryRunGameThreadInit(CheatManager* mgr)
 {
+	// Refresh cached UFunction* on the game thread during our gather pass — never
+	// from the bare ProcessEvent hot path (GetFunction during random engine calls
+	// was a likely crash source).
+	RefreshKickFunctionPointersIfStale();
+	RefreshCombatFunctionPointersIfStale();
+
 	__try
 	{
 		mgr->Init();
@@ -396,10 +711,19 @@ static void TryApplyMenuInputLock(CheatManager* mgr, bool menuOpen)
 void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
 {
 	if (g_inGameThreadFlush)
-		return oProcessEvent(pObject, pFunction, pParms);
+	{
+		if (TryBlockExploitProcessEvent(pObject, pFunction))
+			return;
+		CombatPreProcessEvent(pObject, pFunction, pParms);
+		SafeForwardProcessEvent(pObject, pFunction, pParms);
+		CombatPostProcessEvent(pObject, pFunction, pParms);
+		return;
+	}
 
 	if (TryBlockExploitProcessEvent(pObject, pFunction))
 		return;
+
+	CombatPreProcessEvent(pObject, pFunction, pParms);
 
 	static thread_local DWORD s_routedGameTid = 0;
 	static thread_local bool s_onGameThread = false;
@@ -411,9 +735,11 @@ void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction,
 	}
 
 	if (!s_onGameThread)
-		return oProcessEvent(pObject, pFunction, pParms);
-
-	RefreshKickFunctionPointersIfStale();
+	{
+		SafeForwardProcessEvent(pObject, pFunction, pParms);
+		CombatPostProcessEvent(pObject, pFunction, pParms);
+		return;
+	}
 
 	if (!g_gatherRequested.load(std::memory_order_acquire))
 	{
@@ -427,7 +753,9 @@ void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction,
 			} gatherGuard;
 			TryApplyMenuInputLock(cheat, g_menuInputLockOpen.load());
 		}
-		return oProcessEvent(pObject, pFunction, pParms);
+		SafeForwardProcessEvent(pObject, pFunction, pParms);
+		CombatPostProcessEvent(pObject, pFunction, pParms);
+		return;
 	}
 
 	if (cheat && g_gatherRequested.exchange(false, std::memory_order_acq_rel))
@@ -451,10 +779,12 @@ void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction,
 		TryApplyMenuInputLock(cheat, g_menuInputLockOpen.load());
 	}
 
-	return oProcessEvent(pObject, pFunction, pParms);
+	SafeForwardProcessEvent(pObject, pFunction, pParms);
+	CombatPostProcessEvent(pObject, pFunction, pParms);
 }
 
 bool init = false;
+static DXGI_FORMAT g_swapChainFormat = DXGI_FORMAT_UNKNOWN;
 // Controls whether the hook is active. Set to false to disable the hook and restore the original Present() function.
 static std::atomic<bool> bRunning(true);
 // Guards Unload() so it runs exactly once - both the unload hotkey and
@@ -464,6 +794,14 @@ static std::atomic<bool> bUnloaded(false);
 
 HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT Flags)
 {
+	// The streamproof overlay swapchain shares this same hooked Present vtable entry.
+	// OverlayWindow::RenderAndPresent() calls its own swapchain's Present(), which
+	// re-enters here; without this early pass-through we'd recurse (hook -> render ->
+	// present -> hook ...) until the stack overflows. Present the overlay via the
+	// original Present and return immediately.
+	if (OverlayWindow::IsOverlaySwapChain(pSwapChain))
+		return oPresent(pSwapChain, SyncInterval, Flags);
+
 	// Resolve the game thread by name, retrying each frame until found (it's named by the time we're
 	// injected, so this normally succeeds on frame 1). Once-per-frame keeps the thread-snapshot scan
 	// off the hot ProcessEvent path. Latched for the rest of the session via compare_exchange.
@@ -559,6 +897,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 			Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 			Desc.Windowed = ((GetWindowLongPtr(Process::Hwnd, GWL_STYLE) & WS_POPUP) != 0) ? false : true;
 			const DXGI_FORMAT swapChainFormat = Desc.BufferDesc.Format;
+			g_swapChainFormat = swapChainFormat;
 
 			DirectX12Interface::BuffersCounts = Desc.BufferCount;
 			DirectX12Interface::FrameContext = new DirectX12Interface::_FrameContext[DirectX12Interface::BuffersCounts];
@@ -683,6 +1022,37 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		g_gatherRequested.store(true);
 	}
 
+	// Streamproof renders ImGui on a separate topmost overlay window (excluded from
+	// capture). The game swapchain is left untouched so OBS/Discord still show gameplay.
+	const bool streamproofOverlay = cfg && cfg->bStreamproof;
+	if (streamproofOverlay && DirectX12Interface::Device && DirectX12Interface::CommandQueue)
+	{
+		if (!OverlayWindow::IsReady())
+		{
+			OverlayWindow::EnsureInitialized(
+				DirectX12Interface::Device,
+				DirectX12Interface::CommandQueue,
+				pSwapChain,
+				Process::Hwnd,
+				g_swapChainFormat != DXGI_FORMAT_UNKNOWN ? g_swapChainFormat : DXGI_FORMAT_R8G8B8A8_UNORM);
+		}
+		if (OverlayWindow::IsReady())
+		{
+			OverlayWindow::SyncPosition(Process::Hwnd);
+			OverlayWindow::SetVisible(true);
+			OverlayWindow::SetCaptureExcluded(true);
+		}
+	}
+	else
+	{
+		OverlayWindow::SetCaptureExcluded(false);
+		OverlayWindow::SetVisible(false);
+	}
+
+	// Never exclude the game window from capture — only the private overlay HWND.
+	if (Process::Hwnd)
+		SetWindowDisplayAffinity(Process::Hwnd, 0x00000000u);
+
 	if (cheat && (cfg->bMenuOpen || g_menuInputLockApplied.load(std::memory_order_acquire)))
 	{
 		g_menuInputLockOpen.store(cfg->bMenuOpen);
@@ -701,7 +1071,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	// ignore hotkeys if the game window isn't focused, or if the user is typing in a text input (chat, console, etc.)
 	if (!cfg->bMenuOpen && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput &&
 		Binds::Pressed(cfg->iMagnetKey)) // magnet toggle bind (default G)
+	{
 		cfg->bMagnetEnabled = !cfg->bMagnetEnabled;
+		if (cfg->bNotifications)
+			Notify::Info(cfg->bMagnetEnabled ? "Magnet on" : "Magnet off");
+	}
 
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -742,6 +1116,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		gui->Init();
 	}
 
+	// Persistent overlays (drawn on the foreground draw list, above the menu).
+	if (cfg && gui && cfg->bStatusHud)
+		gui->DrawHud();
+	if (cfg && cfg->bNotifications)
+		Notify::Draw();
+
 	if (prevMenuOpen && !cfg->bMenuOpen)
 	{
 		RestoreSystemMouseCursor();
@@ -758,6 +1138,21 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	prevMenuOpen = cfg->bMenuOpen;
 
 	ImGui::EndFrame();
+	ImGui::Render();
+
+	// Streamproof path: cheat UI on the private overlay swapchain; game frame is clean.
+	if (streamproofOverlay && OverlayWindow::IsReady())
+	{
+		OverlayWindow::RenderAndPresent(
+			DirectX12Interface::CommandList,
+			DirectX12Interface::CommandQueue,
+			DirectX12Interface::DescriptorHeapImGuiRender,
+			DirectX12Interface::Fence,
+			DirectX12Interface::FenceLastSignaledValue,
+			DirectX12Interface::FenceEvent,
+			ImGui::GetDrawData());
+		return oPresent(pSwapChain, SyncInterval, Flags);
+	}
 
 	DirectX12Interface::_FrameContext& CurrentFrameContext = DirectX12Interface::FrameContext[pSwapChain->GetCurrentBackBufferIndex()];
 
@@ -785,7 +1180,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 	DirectX12Interface::CommandList->OMSetRenderTargets(1, &CurrentFrameContext.DescriptorHandle, FALSE, nullptr);
 	DirectX12Interface::CommandList->SetDescriptorHeaps(1, &DirectX12Interface::DescriptorHeapImGuiRender);
 
-	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectX12Interface::CommandList);
 	Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -850,6 +1244,9 @@ HRESULT __stdcall hkResizeBuffers(IDXGISwapChain3* pSwapChain, UINT BufferCount,
 {
 	if (!bRunning)
 		return oResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+
+	if (OverlayWindow::IsReady() && Width > 0 && Height > 0)
+		OverlayWindow::OnGameResize(Width, Height);
 
 	if (init)
 	{
@@ -928,6 +1325,8 @@ void Unload()
 
 	// Release DirectInput controller devices before the module goes away.
 	Gamepad::Shutdown();
+
+	OverlayWindow::Shutdown();
 
 	// MinHook
 	MH_DisableHook(MH_ALL_HOOKS);
@@ -1053,6 +1452,15 @@ DWORD MainThread(HMODULE Module)
 
 	cfg->LoadSettings();
 
+	// Auto-load a named profile at startup if the user opted in (Config tab).
+	if (cfg->bAutoLoadProfile && cfg->szAutoLoadProfile[0] != '\0')
+	{
+		if (cfg->LoadProfile(cfg->szAutoLoadProfile))
+			PhLog("Auto-loaded profile: %s\n", cfg->szAutoLoadProfile);
+		else
+			PhLog("Auto-load profile failed: %s\n", cfg->szAutoLoadProfile);
+	}
+
 	// Wait for the game window to be in focus before proceeding
 	bool WindowFocus = false;
 	while (WindowFocus == false)
@@ -1106,6 +1514,7 @@ DWORD MainThread(HMODULE Module)
 
 	MH_EnableHook(MH_ALL_HOOKS);
 	InitKickFunctionPointers();
+	InitCombatFunctionPointers();
 
 	// poll for the END key to be pressed to unload the DLL
 	while (bRunning)

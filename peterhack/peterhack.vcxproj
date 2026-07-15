@@ -186,6 +186,8 @@
     <ClCompile Include="kiero\kiero_intern.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Notify.cpp" />
+    <ClCompile Include="OverlayWindow.cpp" />
     <ClCompile Include="minhook\src\buffer.c" />
     <ClCompile Include="minhook\src\hde\hde32.c" />
     <ClCompile Include="minhook\src\hde\hde64.c" />
@@ -195,6 +197,8 @@
     <ClCompile Include="SDK\BP_FirstPersonCharacter_cLeon_Character_functions.cpp" />
     <ClCompile Include="SDK\BP_FirstPersonCharacter_cLeon_Character_Hunter_functions.cpp" />
     <ClCompile Include="SDK\BP_FirstPersonPlayerState_Online_cLeon_functions.cpp" />
+    <ClCompile Include="SDK\BPC_CameraShake_functions.cpp" />
+    <ClCompile Include="SDK\EnhancedInput_functions.cpp" />
     <ClCompile Include="SDK\CoreUObject_functions.cpp" />
     <ClCompile Include="SDK\Engine_functions.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -208,6 +212,8 @@
     <ClInclude Include="GamepadInput.hpp" />
     <ClInclude Include="Keybinds.hpp" />
     <ClInclude Include="Theme.hpp" />
+    <ClInclude Include="Notify.hpp" />
+    <ClInclude Include="OverlayWindow.hpp" />
     <ClInclude Include="IconsFontAwesome6.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />

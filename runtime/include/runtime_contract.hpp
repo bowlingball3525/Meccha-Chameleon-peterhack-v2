@@ -15,7 +15,7 @@ namespace runtime_contract
     // ElementSize@0x34, PropertyFlags@0x38.
     constexpr std::size_t FPropertyElementSizeOffset = 0x34;
     constexpr int InternalNoResendMaxCallsPerTick = 6;
-    constexpr int MaximumNetworkBatchLimit = 20;
+    constexpr int MaximumNetworkBatchLimit = 32;
     constexpr int FastLocalCadenceMs = 17;
     constexpr int FallbackOutgoingStrokesPerBatch = 20;
     constexpr int FallbackOutgoingBatchesPerSecond = 20;

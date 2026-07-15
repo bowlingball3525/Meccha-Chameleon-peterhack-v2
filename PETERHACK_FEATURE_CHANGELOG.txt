@@ -1,0 +1,841 @@
+================================================================================
+  PETERHACK — FEATURE CHANGELOG & CONVERSATION SUMMARY
+  Generated: July 14, 2026
+  Repo: C:\Users\lance\Desktop\chameleonEsp-upstream
+  Deploy: C:\Users\lance\Desktop\peterhack
+================================================================================
+
+This document summarizes the full conversation arc: earlier fixes and UI work,
+the user's big feature wish-list, SDK exploration against the newest dump, and
+what was actually implemented vs. what remains for future phases.
+
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+  1.  SDK / Dump Verification
+  2.  Earlier Work (Before the Big Feature List)
+  3.  User's Big Feature Request List
+  4.  Implementation Phases (Plan)
+  5.  PHASE 1 — COMPLETED (Built & Deployed)
+  6.  PHASE 2–5 — NOT YET IMPLEMENTED
+  7.  Player List — Built-in Actions & Future Sub-Options
+  8.  SDK Findings (Newest Dump — For Upcoming Features)
+  9.  Files Created / Modified (Master List)
+  10. Build & Deploy Notes
+  11. Known Issues & Testing Notes
+
+
+================================================================================
+1. SDK / DUMP VERIFICATION
+================================================================================
+
+Newest dump folder:
+  C:\Dumper-7\5.6.1-44394996+++UE5+Release-5.6-Chameleon
+  Last modified: July 13, 2026
+
+Older dump (ignored):
+  C:\Dumper-7\5.6.1-44394996+++UE5+Release-5.6-Chameleon_OLD
+  Last modified: July 12, 2026
+
+Project compile target:
+  peterhack\SDK\  (2264 header/source files)
+
+Verification performed:
+  - Byte-for-byte hash comparison of all 2264 SDK files
+  - Result: 0 diffs, 0 missing — peterhack\SDK matches newest dump exactly
+
+Main character class:
+  ABP_FirstPersonCharacter_cLeon_Character_C
+
+Important SDK reality (affects movement/combat features):
+  - Character uses UE Mover system, NOT UCharacterMovementComponent
+  - Speed/fly should use SetWalkSpeed, DefaultMaxWalkSpeed, MoveSpeedMultiply
+  - Hunter firing uses SpawnShotEffect_Server_ + HitSuccess/KillPlayer RPCs
+  - Godmode candidate: Invincible bool at offset 0x05AB on Main character
+  - Health: Health (0x0640), MaxHealthValue (0x0648), Dead (0x05AA)
+  - Chat: SendToText on PlayerController (not ServerSay)
+  - Round control: GameEnd(), Complete(), ForceStart() on GameState/GameMode
+
+
+================================================================================
+2. EARLIER WORK (BEFORE THE BIG FEATURE LIST)
+================================================================================
+
+These were completed in prior conversation turns and are included in current build.
+
+
+--- Controller keybind support ---
+  - Unified keyboard + gamepad bind system (Keybinds module)
+  - XInput + DirectInput 8 backends (PS5, PS4, Xbox, Switch, Steam, etc.)
+  - Custom keybind recorder for camo hotkeys and magnet key
+  - "Controller Binds" toggle moved to Misc tab
+  - Gamepad::Poll() runs every frame; binds use edge detection
+
+  Files: Keybinds.cpp/hpp, GamepadInput.cpp/hpp, Menu.cpp, Main.cpp, Settings.cpp
+
+
+--- Camo packed radius calibration fix ---
+  - Widened acceptable packed mesh radius scale range
+  - Fallback to known-good constant when out of plausible range
+  - Stronger liveness checks (live_uobject_not_destroyed) to prevent post-round crashes
+  - Diagnostics metadata fields in bridge JSON responses
+
+  Files: runtime/src/bridge.cpp, runtime/include/runtime_contract.hpp
+
+
+--- Decoy exploit crash hardening ---
+  - Removed ServerSetMaxDecoySpawnCount RPC (dangerous during teardown)
+  - Added IsObjectUsable (RF_BeginDestroyed / RF_FinishDestroyed / RF_MirroredGarbage)
+  - ProcessEvent disabled for session after fault
+  - Quiesce writes when game resets MaxDecoySpawnCount
+
+  Files: CheatManager.cpp/hpp
+
+
+--- Menu restructure & Deep Dark theme ---
+  - Window size: 630 x 520
+  - Tabs: ESP | Teleport | Exploits | Name Changer | Camouflage | Misc | Config
+  - "Tools" renamed to "Exploits"
+  - Save/Load moved to Config tab; Save also writes camo settings
+  - Font Awesome 6 icons on tabs and key buttons
+  - Theme::ApplyDeepDark() custom ImGui styling
+  - Magnet toggle checkbox in Exploits tab
+
+  Files: Menu.cpp, Theme.cpp/hpp, IconsFontAwesome6.h, Main.cpp
+
+
+--- Loader auto-update fix ---
+  - Replaced console PromptYesNo with MessageBoxW popups
+  - ShowInfoDialog / ShowErrorDialog for update feedback
+
+  Files: loader/main.cpp, build.bat, manifest.json
+
+
+--- Camo batch size + diagnostics UI ---
+  - Batch cap raised from 20 → 32 (contract, bridge, UI slider, camo.cfg clamp)
+  - Default batch size stays 20; values > 20 show experimental warning
+  - "Show net diagnostics" toggle (persisted to camo.cfg as show_diagnostics)
+  - Panel shows: server packed cap, batch requested vs resolved, pacing pressure,
+    radius calibration status, auto-material detect status, last job OK/fail
+
+  Files: runtime_contract.hpp, bridge.cpp, CamoManager.cpp/hpp, CamoSettings.cpp/hpp,
+         IconsFontAwesome6.h
+
+
+--- Other camo tweaks ---
+  - Brush 2 minimum lowered from 5 → 2 texels
+  - Camo hotkeys in 2x2 grid; UnPreview below Preview
+  - Removed standalone "Save camo settings" button (Config Save handles it)
+
+
+================================================================================
+3. USER'S BIG FEATURE REQUEST LIST
+================================================================================
+
+Quality of life:
+  [x] Streamproof menu
+  [x] Keybind/status HUD
+  [x] In-game notification feed
+  [x] Multiple config profiles (dropdown + named textbox save)
+
+Utility / Exploits:
+  [ ] Godmode / damage immunity
+  [ ] Force round end / instant win
+  [ ] Chat spammer / custom messages
+  [x] Player list panel (names, roles, distance, actions)
+
+Visuals / ESP:
+  [x] Chams (through-wall highlight) — animations planned later
+
+Chameleon / Survivor:
+  [x] Camo presets/slots (quick-swap disguises)
+
+Movement:
+  [x] Speedhack
+  [~] Fly / Noclip (reworked July 15 — manual flight, see 7.2; awaiting test)
+
+Combat / Aim (hunter):
+  [~] Aimbot (snap/smooth, FOV circle, visibility check) — coded, awaiting test
+  [~] Silent aim (SpawnShotEffect(Server), HitSuccess, KillPlayer) — coded, awaiting test
+  [~] Triggerbot — coded, awaiting test
+  [~] No recoil (ShakeValue/ShakeRotationValue) — coded, awaiting test
+
+
+================================================================================
+4. IMPLEMENTATION PHASES (PLAN)
+================================================================================
+
+Phase 1 — Safe foundation + player list          [DONE — built July 14, 12:47 PM]
+Phase 2 — Chams + camo presets                     [DONE — built July 14]
+Phase 3 — Speedhack, godmode, fly/noclip           [DONE — built July 15; fly/noclip reworked July 15, see 7.2]
+Phase 4 — Aimbot, triggerbot, silent aim, no recoil [CODED July 15 — see section 7.3; testing 1-by-1 pending]
+Phase 5 — Force round end, chat spammer            [PENDING]
+
+
+================================================================================
+5. PHASE 1 — COMPLETED (Built & Deployed)
+================================================================================
+
+Build timestamp: July 14, 2026 ~12:47–12:48 PM
+Deploy path: C:\Users\lance\Desktop\peterhack\peterhack.dll
+             C:\Users\lance\Desktop\peterhack\bridge\meccha-xenos-bridge.dll
+
+
+--- 5.1 In-game notification feed ---
+
+What it does:
+  - Thread-safe toast notifications (top-right of screen)
+  - Types: Info, Success, Warn, Error (color-coded)
+  - Auto-fade in/out, max 6 toasts, ~3.2s default duration
+  - Used by: profile save/load, streamproof toggle, player list actions, config load
+
+How to use:
+  - Misc tab → Overlays → enable "Notifications" (default ON)
+
+API (for future features):
+  Notify::Info("text");
+  Notify::Success("text");
+  Notify::Warn("text");
+  Notify::Error("text");
+  Notify::Draw();  // called from Main.cpp render loop
+
+Files: Notify.cpp, Notify.hpp (NEW)
+       Main.cpp, Menu.cpp, includes.hpp
+
+
+--- 5.2 Streamproof menu ---
+
+What it does:
+  - Hides overlay window from OBS / screen capture / screen share
+  - Uses SetWindowDisplayAffinity(Process::Hwnd, WDA_EXCLUDEFROMCAPTURE)
+  - Only toggles when setting changes (not every frame wastefully)
+  - Overlay remains visible locally on your monitor
+
+How to use:
+  - Misc tab → Overlays → "Streamproof menu"
+  - Toast confirms on/off
+
+Requirement: Windows 10 2004+ for WDA_EXCLUDEFROMCAPTURE
+
+Files: Main.cpp, Settings.hpp/cpp, Menu.cpp
+
+
+--- 5.3 Keybind / status HUD ---
+
+What it does:
+  - Small panel top-left listing currently active cheat features
+  - Shows: ESP, FOV value, Magnet + bind, Infinite Bullets, No Gun Cooldown,
+    clone count, No Decoy Cooldown, Anti Detection, Anti Kick, Streamproof
+  - Shows "idle" when nothing active
+
+How to use:
+  - Misc tab → Overlays → "Status HUD"
+
+Files: Menu.cpp (DrawHud()), Menu.hpp, Main.cpp
+
+
+--- 5.4 Multiple named config profiles ---
+
+What it does:
+  - Save/load named profiles separate from default settings.ini
+  - Profile files: C:\peterhack\profiles\<name>.phcfg
+  - Versioned header (magic PHC1, version 1) — format mismatch rejects load safely
+  - Save/Delete/Refresh dropdown in Config tab
+  - Text box for new profile name
+
+How to use:
+  - Config tab → Profiles section
+  - Type name → "Save Profile"
+  - Select from dropdown → Load or Delete
+  - Main Save/Load buttons still use C:\peterhack\settings.ini (unchanged)
+
+Note: Profiles save Settings struct only. Camo settings still use camo.cfg unless
+      you also save camo via the main Config Save button.
+
+API:
+  cfg->SaveProfile("myname");
+  cfg->LoadProfile("myname");
+  Settings::DeleteProfile("myname");
+  Settings::ListProfiles();
+
+Files: Settings.cpp/hpp, Menu.cpp
+
+
+--- 5.5 Player list panel ---
+
+What it does:
+  - New "Players" tab with live player roster
+  - Shows: role tag [H]/[S]/[?], name, distance (meters), visibility eye icon
+  - Header: total count, hunter/survivor breakdown
+  - Filter: All / Hunters / Survivors
+  - Sort by distance toggle
+  - Per-player action buttons:
+      TP          — teleport to player
+      Copy        — copy name to clipboard
+      Mask        — impersonate (take their name via RequestChangeName)
+      Skull       — kill survivor (survivors only)
+  - "Copy all names" bulk clipboard button
+
+Data source:
+  - CheatManager::PlayerInfo extended with Role, DistanceMeters, IsVisible
+  - Populated on game thread during Init() actor scan
+  - Render thread reads cheat->PlayerInfos (same as Teleport tab)
+
+Files: CheatManager.hpp/cpp (PlayerInfo fields), Menu.cpp (Players tab)
+
+
+--- 5.6 New settings fields ---
+
+Added to Settings struct (appended at end — old settings.ini will reset to defaults
+on first load after this update due to sizeof mismatch):
+
+  bool bStreamproof    — exclude overlay from capture
+  bool bStatusHud      — show active-features HUD
+  bool bNotifications  — show toast feed (default true)
+
+Files: Settings.hpp, Settings.cpp
+
+
+--- 5.7 New icons added ---
+
+IconsFontAwesome6.h additions for Phase 1 + diagnostics:
+  ICON_FA_TRIANGLE_EXCLAMATION, ICON_FA_CIRCLE_CHECK, ICON_FA_CIRCLE_XMARK
+  ICON_FA_GAUGE_HIGH, ICON_FA_CHART_LINE
+  ICON_FA_USERS, ICON_FA_COPY, ICON_FA_MASK, ICON_FA_VIDEO_SLASH, ICON_FA_TRASH_CAN
+
+
+================================================================================
+6. PHASE 2 — COMPLETED (Built & Deployed)
+================================================================================
+
+--- 6.1 Chams (through-wall highlight) ---
+
+What it does:
+  - Game-thread stencil + custom depth on enemy player meshes
+  - Uses SetStencilValue_Force_ (stencil 11 visible / 12 hidden) plus
+    bRenderCustomDepth on body Mesh (+ hunter LocalViewBody)
+  - Respects Enemy Only filter; restores on disable / round reset
+  - Color pickers stored for future PP/material work (stencil drives highlight today)
+
+How to use:
+  - ESP tab → "Chams (through-wall highlight)"
+  - Chams Visible / Chams Hidden color pickers (below ESP colors)
+
+Files: Settings.hpp/cpp, CheatManager.hpp/cpp, Menu.cpp
+
+--- 6.1a Chams color fix (July 15) ---
+
+Root cause of "chams stuck black":
+  - The outline post-process material (MID_PM_cLeon) reports 0 vector and 0
+    scalar params; base PM_cLeon exposes none. MPC_cLeon's only param is
+    TeleportCentor (a position, not a color). The outline color is baked as a
+    constant in the material graph, so no SetVectorParameterValue can recolor
+    it. Mesh material painting was ruled out by the user.
+
+Fix — Option A (screen-space overlay chams):
+  - CheatManager::DrawEntry now draws a colored fill + edge (+ thick colored
+    skeleton when bone data is present) over each ESP entry's bounding box.
+  - Driven directly by colChamsVisible / colChamsHidden; visible vs. hidden is
+    chosen from entry.isVisible. Fill uses 35% of the picker alpha; edge uses
+    full picker alpha. Works through walls (screen-space) and respects
+    Enemy Only via the existing entry filter.
+  - Independent of ESP box/skeleton toggles (only needs bChams + a valid box).
+
+Also — Option C (material probe, experimental):
+  - ProbePmLeonHiddenColorParams() reads ~40 candidate color param names via
+    K2_GetVectorParameterValue on the promoted MID; any that return non-zero
+    are logged ([CHAMS] probe HIT ...) and driven with the picker color. All
+    SEH-guarded and read-first, so unknown names are harmless. If a real hidden
+    param surfaces in the logs, wire the picker straight to it next.
+
+Files: CheatManager.cpp (DrawEntry, ProbePmLeonHiddenColorParams)
+
+
+--- 6.2 Camo presets ---
+
+What it does:
+  - Named preset files: C:\peterhack\camo_presets\<name>.cfg (same INI as camo.cfg)
+  - Save / Load / Apply / Delete in Camouflage tab
+  - Apply loads preset, writes camo.cfg, and starts a Paint job
+
+API:
+  settings.SavePreset("name");
+  settings.LoadPreset("name");
+  CamoSettings::DeletePreset("name");
+  CamoSettings::ListPresets();
+
+Files: CamoSettings.hpp/cpp, CamoManager.cpp
+
+
+================================================================================
+7. PHASE 3 — COMPLETED (Built & Deployed)
+================================================================================
+
+Build: July 15, 2026
+Deploy: C:\Users\lance\Desktop\peterhack\peterhack.dll
+
+--- 7.1 Movement & godmode exploits ---
+
+What it does:
+  - Godmode: sets Invincible + tops Health to MaxHealthValue each scan
+  - Speedhack: MoveSpeedMultiply, GlobalSpeed, SetWalkSpeed via ProcessEvent
+  - Fly: SetMovementMode + Mover QueueNextMode + zero gravity override
+  - Noclip: disables BodyCapsule / OverapCollision collision; auto-enables fly
+  - Restores walking mode, gravity, and collision when toggles are turned off
+
+How to use:
+  - Exploits tab → Movement section
+  - Godmode / Speedhack (1–10x slider) / Fly / Noclip checkboxes
+  - Status HUD (Misc → Overlays) shows active movement cheats
+
+Files: Settings.hpp/cpp, CheatManager.cpp, Menu.cpp
+
+
+--- 7.2 Fly / Noclip rework (July 15, not yet rebuilt) ---
+
+Why:
+  - User reported fly did nothing and noclip froze the character permanently
+    (even after toggling off).
+  - Root cause: the old code queued guessed Mover mode names ("Flying",
+    "FlyingMode", "PhysicsDrivenFlyingMode", restore to "Walking") that do not
+    exist in this game's Mover setup — that wedged the movement state machine.
+    The collision restore also forced both capsules to QueryAndPhysics, which
+    does not match the game's shipped values.
+
+New approach (movement modes are never touched):
+  - Fly/Noclip: zero-gravity override (SetGravity ProcessEvent, re-asserted
+    each tick) + manual spectator-style flight in ApplyManualFlight():
+    WASD moves along the camera axes, Space = up, C/LCtrl = down,
+    LShift = 2x. Position is written directly via K2_TeleportTo each tick,
+    scaled by the new "Fly speed" slider (fFlySpeed, default 1200 u/s).
+  - Input is gated by GameInputAllowed(): game window focused + menu closed.
+  - Noclip additionally sets both capsules to NoCollision, capturing each
+    capsule's original ECollisionEnabled first and restoring those exact
+    values on disable (SafeGetCapsuleCollision/SafeSetCapsuleCollision).
+  - Turning either toggle off restores gravity (0,0,-980) and collision.
+
+Files: CheatManager.cpp (ApplyManualFlight, ApplyMovementExploits),
+       Settings.hpp/cpp (fFlySpeed), Menu.cpp (Fly speed slider + help text)
+
+
+--- 7.3e Kill-all now targets clones too (July 15) ---
+
+Kill All now also pops decoy/clone actors:
+  - Previously kill-all explicitly skipped ABP_cLeonDecoy_Base_C. It now enumerates
+    decoys (independent of the Decoy ESP toggle) and queues them alongside living
+    survivors, drained with the same 750ms pacing.
+  - Decoys have no server kill RPC, so they're popped with K2_DestroyActor
+    (SafeDestroyActor wrapper — a stable native UFunction, safe via the cached SDK
+    wrapper unlike BP-generated KillPlayer). Best-effort: guaranteed to clear the
+    clone locally; server may re-replicate if it disallows client destroy.
+  - Real survivors still go through KillPlayer as before. Button relabeled
+    "Kill All Survivors + Clones" with a tooltip.
+
+Files: CheatManager.cpp (SafeDestroyActor, HandleKillAllSurvivors rewrite),
+       CheatManager.hpp (signature + gStatics/world), Menu.cpp (button/tooltip)
+
+
+--- 7.3d Camo paint progress bar + server ETA (July 15, not yet rebuilt) ---
+
+Camouflage now shows a live progress bar while painting/previewing:
+  - The bridge already publishes a progress sidecar next to its loaded module
+    ("<bridge dll>.progress.json"), rewritten atomically (~every 250ms) with
+    {stage, message, step, total_steps, progress(0..1), elapsed_ms}. We now poll
+    and render it — no bridge changes needed. This is the same sidecar the ported
+    camo used to show progress.
+  - CamoManager::ReadProgress() reads/parses the sidecar (path derived from the
+    live bridge module handle so it works whether the DLL loaded as
+    meccha-xenos-bridge.dll or runtime-bridge.dll). Stale sidecar is deleted at
+    job start (StartWorker) so the bar begins at 0%.
+  - Camouflage tab: ImGui::ProgressBar with a % overlay + the current stage
+    message. Bar is kept monotonic by remapping the bridge's two step scales —
+    quick planning stages (total_steps==4) -> 0..10%, the long server-batch
+    stream (total_steps==stroke count) -> 10..100%.
+  - ETA "until others see it fully": shown during the streamed server phase as
+    (elapsed/progress - elapsed). That phase reaching 100% is exactly when the
+    server batch stream finishes and other players see the camo applied.
+  - Misc status HUD's "Camo: painting..." line now appends the same live %.
+
+Files: CamoManager.hpp (CamoProgress struct + decls), CamoManager.cpp
+       (ReadProgress/BridgeProgressPath/ClearProgressSidecar, DrawMenu bar,
+       HudStatusLine %)
+
+
+--- 7.3c ESP corpse fix + death diagnostic + auto-load profile (July 15, not yet rebuilt) ---
+
+ESP showing dead people — strengthened corpse detection:
+  - IsDead now latches on TWO signals (either is enough, latched for the
+    actor's lifetime): the existing ragdoll physics signal
+    (Mesh->IsAnySimulatingPhysics), PLUS the inherited `Dead` bool. Dead never
+    flips true for a live player, so it can only add corpses. It catches bodies
+    the ragdoll signal misses — e.g. joining mid-round onto a settled/asleep
+    ragdoll whose physics flag already reads false.
+  - Because the ESP scan skips IsDead actors before UpdateForcedVisibility, a
+    latched corpse is also no longer force-shown by Force Character Visibility
+    (the user's "could also be character visibility" theory).
+
+Death-flag diagnostic (Misc → "Dump Death Flags"):
+  - One-shot: writes one line per on-screen character to C:\death.txt with
+    role / Dead / ragdoll / BodyVisibility / IsLiveSelf / latchedDead, then
+    beeps. Run it while looking at a corpse the ESP still draws to see which
+    field distinguishes it, so detection can be finalized without guessing.
+  - bDumpDeath is transient (never persisted; scrubbed from settings.ini and
+    profiles like bDumpBones).
+
+Auto-load profile (Config tab → Startup):
+  - New "Auto-load profile on launch" checkbox + profile picker. On startup,
+    right after settings.ini loads, the chosen profile is loaded automatically
+    (Main.cpp, logged via PhLog).
+  - Stored in settings.ini as bAutoLoadProfile + szAutoLoadProfile[64] and
+    persisted immediately on change via SaveSettings() (note: SaveSettings had
+    no other caller — this is the first place that writes settings.ini at
+    runtime). The choice is preserved across LoadProfile so loading a profile
+    can't clobber which profile auto-loads next launch.
+
+Files: CheatManager.cpp/hpp (IsDead + DumpDeathFlags), Settings.hpp/cpp
+       (bDumpDeath, bAutoLoadProfile, szAutoLoadProfile), Main.cpp (startup
+       auto-load), Menu.cpp (Config auto-load UI + Misc dump button)
+
+
+--- 7.3b Godmode RPC block + HUD rework + camo verify (July 15, not yet rebuilt) ---
+
+Godmode — now blocks the incoming shot RPC:
+  - The kill is server-authoritative and arrives on the victim's client as
+    death/spectate RPCs (DeathPlayer, Ragdoll, GoToSpectate, ShowDeathWidget).
+    Writing Invincible/Health did nothing against them, so getting shot still
+    killed the player.
+  - Added a pointer-only block in TryBlockExploitProcessEvent (Main.cpp): those
+    four UFunctions are dropped when pObject == our own pawn and godmode is on.
+    Function pointers resolved in Init/ForceRefreshKickFunctionPointers.
+  - The local pawn is published each scan via new atomic g_localPawn (cleared
+    when the world/pawn goes away) so the compare is a cheap pointer check on
+    the ProcessEvent hot path — never touches a UObject there.
+  - Belt-and-suspenders: the godmode scan write now also clears Dead and sets
+    IsLiveSelf each tick in case a death slipped through before the block.
+  - Note: still client-side; the server may consider you dead. Best-effort,
+    matches the shot-RPC block the user asked for.
+
+Status HUD — draggable + section dropdown:
+  - Drag the HUD box to reposition it while the menu is open (gameplay input is
+    never captured when the menu is closed). Position persists in settings
+    (fHudPosX/fHudPosY), clamped on-screen. Frame brightens + shows a "drag"
+    hint while movable.
+  - Misc → Overlays now has a "HUD sections" dropdown (multi-select) to choose
+    which categories the HUD lists: ESP, Aim/FOV, Magnet, Survivor exploits,
+    Hunter exploits, Movement, Combat, Camouflage, Misc. Stored as bitmask
+    iHudMask (HudSection enum in Menu.hpp); All/None shortcuts included.
+
+Camo auto material — verified (no change needed):
+  - Confirmed end-to-end: Camouflage "Auto material" checkbox → JSON
+    "auto_material" → bridge tuning_auto_material → mesh_first_get_dominant_
+    material_properties → SDK URuntimePaintableComponent::
+    GetDominantPaintMaterialPatterns. Bridge's MeshFirstPaintMaterialPattern
+    layout matches SDK FPaintMaterialPattern (static_asserts: 0x20 size,
+    metallic 0x10 / roughness 0x14 / coverage 0x18 / sample_count 0x1C).
+  - Only activates when a region is set to Paint (fill-only reports
+    "fill_material_only"); status shows in Camouflage diagnostics.
+
+Files: Main.cpp, includes.hpp, CheatManager.cpp (godmode + g_localPawn),
+       Settings.hpp/cpp (fHudPosX/Y, iHudMask), Menu.hpp (HudSection),
+       Menu.cpp (DrawHud drag + HUD sections dropdown)
+
+
+--- 7.3 PHASE 4 — Combat / Aim (coded July 15, not yet rebuilt) ---
+
+All four features live in the new Combat tab (crosshairs icon) and run on the
+game thread from HandleCombat(), called once per scan after ESP warmup. One
+pass picks the enemy nearest the crosshair (screen-space distance from screen
+center to the aim bone, enemies only, optional line-of-sight filter); aimbot,
+triggerbot and silent aim all act on that single pick. Input only reads while
+the game window is focused and the menu is closed.
+
+Aimbot:
+  - Hold the Aim Key (default: Mouse Right, rebindable kb/mouse) to track.
+  - Target must be inside the FOV circle (fAimFov px around crosshair).
+  - Aim bone: Head or Chest (iAimBone combo).
+  - Smoothing: eases control rotation along the shortest angular path each
+    tick; 1 = instant snap, up to 20 (fAimSmooth). Applied via
+    SetControlRotation on the PlayerController.
+  - "Visible targets only" uses SafeLineOfSightTo (default ON).
+  - FOV circle drawn on the render thread (RenderEsp, config-only, no UObjects).
+
+Triggerbot (hunter only):
+  - When the real crosshair is within 22 px of the target's aim bone, fires a
+    full hunter shot; paced at max 1 shot / 400 ms.
+  - Optional hold key (iTriggerKey; 0/cleared = always active while enabled).
+
+Silent aim (hunter only):
+  - On left-click edge, lands the shot on the FOV-circle target regardless of
+    where the camera points. No camera movement.
+
+No recoil / no shake:
+  - Zeroes ShakeValue + ShakeRotationValue on the Main character each tick,
+    remembering the shipped values and restoring them when toggled off.
+  - Lives with the other per-tick local-player writes in ApplyMovementExploits.
+
+Shot path (FireHunterShot):
+  - SpawnShotEffect(Server) RPC (tracer/impact so the shot looks legit),
+    HitSuccess (hit-marker feedback), then KillSurvivor → KillPlayer RPC
+    (hunter gun one-shots in this game). All UFunctions resolved fresh from
+    the live class per call — never the SDK wrappers' cached statics, which
+    dangle across round transitions.
+
+Settings (all persisted; settings.ini/profile size change invalidates old
+files gracefully — defaults are re-initialized):
+  bAimbot, iAimKey, fAimFov, fAimSmooth, bAimVisibleOnly, bAimDrawFov,
+  iAimBone, bTriggerbot, iTriggerKey, bSilentAim, bNoRecoil
+
+Files: Settings.hpp/cpp, CheatManager.hpp/cpp (HandleCombat, FireHunterShot,
+       RenderEsp FOV circle, NeedsActorScan/NeedsLocalExploits gating),
+       Menu.cpp (Combat tab + HUD lines)
+
+
+================================================================================
+8. PHASE 4–5 — NOT YET IMPLEMENTED
+================================================================================
+
+These were planned and SDK-mapped but NOT coded yet. Use this section as the
+implementation spec for the next sessions.
+
+
+--- Phase 3 (reference — now implemented; see section 7) ---
+
+Speedhack:
+  - SDK: SetWalkSpeed(double), DefaultMaxWalkSpeed (0x0750), MoveSpeedMultiply (0x0658)
+  - NOT CharacterMovement — game uses Mover (ExtendedPhysicsCharacterMoverComponent)
+  - Medium detection risk
+
+Fly / Noclip:
+  - SDK: SetMovementMode(FName), SetMovementMode_Server_(EMovementMode, bool)
+  - SetGravity override on Mover component
+  - Non-trivial due to Mover architecture
+
+Godmode:
+  - SDK: Invincible bool at 0x05AB on ABP_FirstPersonCharacter_Main_C
+  - Health at 0x0640, MaxHealthValue at 0x0648
+  - Likely simple field write each frame in ApplyLocalPlayerExploits
+  - May be partial if server validates damage
+
+
+--- Phase 4: Combat / Aim ---
+
+Aimbot:
+  - Use existing bone data + ProjectWorldLocationToScreen
+  - FOV circle on render thread (OverlayDrawList / ForegroundDrawList)
+  - SetControlRotation or AddYawInput/AddPitchInput on game thread
+  - Toggle key + visibility check from existing SafeLineOfSightTo
+
+Silent aim:
+  - SDK: SpawnShotEffect_Server_(FVector Endpoint, bool IsHit, FRotator, int32 Seed)
+  - HitSuccess(ABP_FirstPersonCharacter_cLeon_Character_C*)
+  - KillPlayer(...) server RPC
+  - Game has anti-cheat: IsChater, CheatCheck, AntiChatTrace, CheckViewInPlayers
+
+Triggerbot:
+  - Auto-fire when crosshair on enemy
+  - Needs line trace or overlap check + fire input simulation
+
+No recoil:
+  - Likely camera pitch/recoil field writes on hunter
+  - Pairs with existing No Gun Cooldown + Infinite Bullets
+
+
+--- Phase 5: Exploits & Chat ---
+
+Force round end / instant win:
+  - SDK: ABP_GameState_cLeon_C → Complete(), ForceStart(), Winner(...)
+  - ABP_GameMode_cLeon_C → GameEnd(), GameEndCheck(), IsEndGame()
+  - Medium-high detection risk
+
+Chat spammer:
+  - SDK: ABP_FirstPersonPlayerController_C::SendToText(FString MainText, int32 Index)
+  - Or UBPC_TextChatControl_C::SendToText_Server_ on GameState
+  - Easy to implement, easy to detect
+
+
+================================================================================
+7. PLAYER LIST — BUILT-IN ACTIONS & FUTURE SUB-OPTIONS
+================================================================================
+
+Currently implemented per-player actions:
+  - Teleport to player
+  - Copy name
+  - Impersonate (change your name to theirs)
+  - Kill (survivors only)
+  - Copy all names (bulk)
+
+Suggested future sub-options (discussed, not built):
+  - Pin / watch player (highlight on ESP, priority target for aimbot)
+  - Mark as friendly / enemy override
+  - Show on 2D radar blip
+  - Auto-TP follow (magnet-style but for one player)
+  - Spectate camera lock
+  - Block / mute (client-side ignore for ESP)
+  - Export player list to file
+  - Ping display (SDK: GetPingInMilliseconds on APlayerState)
+  - Show health if readable
+  - Decoy vs real tag (when decoy detection improves)
+  - Sort by: name, role, visibility, ping
+  - Team color column
+  - Right-click context menu
+  - Add to kill queue
+  - Whitelist for aimbot (never target)
+
+
+================================================================================
+8. SDK FINDINGS (NEWEST DUMP — QUICK REFERENCE)
+================================================================================
+
+Hunter (ABP_FirstPersonCharacter_cLeon_Character_Hunter_C):
+  CurrentBullet      0x0DA0  int32
+  InfinityBullet     0x0DA4  bool
+  GunCoolTime        0x0D30  double
+  FoundTargetPlayerState  0x0D38  TArray
+
+Main character (ABP_FirstPersonCharacter_Main_C):
+  Health             0x0640  double
+  MaxHealthValue     0x0648  double
+  Dead               0x05AA  bool
+  Invincible         0x05AB  bool
+  DefaultMaxWalkSpeed 0x0750 double
+  MoveSpeedMultiply  0x0658  double
+  FirstPersonCamera  0x0428  UCameraComponent*
+  ExtendedPhysicsCharacterMoverComponent  0x03F8
+
+cLeon character:
+  IsHunter           0x0C3A  bool
+  IsLiveSelf         0x0C3C  bool
+
+GameState (ABP_GameState_cLeon_C):
+  CurrentGamePhase   0x0318  EN_cLeonGamePhase
+  MainGamePhase      0x0418  EN_cLeonMainGamePhase
+  Survivors / Hunters arrays
+  BPC_TextChatControl 0x0308
+
+PlayerState:
+  CustomPlayerName   0x0388  (Online subclass)
+  CompressedPing     0x02B0  (Engine APlayerState)
+  GetPingInMilliseconds() function
+
+Firing (no Fire/ServerFire names — use these):
+  InpActEvt_IA_Shot_* (Enhanced Input)
+  SpawnShotEffect_Server_(Endpoint, IsHit, HitRotation, Seed)
+  HitSuccess(FirstpersonCharacter)
+  KillPlayer(FirstpersonCharacter, SourcePlayerState)
+
+Chat:
+  SendToText(FString MainText, int32 Index) — PlayerController, NetServer
+
+
+================================================================================
+9. FILES CREATED / MODIFIED (MASTER LIST)
+================================================================================
+
+NEW FILES (Phase 1):
+  peterhack/Notify.cpp
+  peterhack/Notify.hpp
+
+MODIFIED (Phase 1):
+  peterhack/Settings.hpp          — bStreamproof, bStatusHud, bNotifications, profile API
+  peterhack/Settings.cpp          — defaults, SaveProfile/LoadProfile/ListProfiles/DeleteProfile
+  peterhack/Menu.hpp              — DrawHud()
+  peterhack/Menu.cpp              — Players tab, Misc overlays, Config profiles, DrawHud
+  peterhack/Main.cpp              — streamproof affinity, Notify::Draw, gui->DrawHud
+  peterhack/CheatManager.hpp      — PlayerInfo Role/DistanceMeters/IsVisible
+  peterhack/CheatManager.cpp      — populate extended PlayerInfo
+  peterhack/includes.hpp          — #include Notify.hpp
+  peterhack/IconsFontAwesome6.h   — new icon macros
+  peterhack/peterhack.vcxproj     — Notify.cpp/hpp
+  peterhack/peterhack.vcxproj.filters
+
+EARLIER SESSION (still in current build):
+  peterhack/Keybinds.cpp/hpp
+  peterhack/GamepadInput.cpp/hpp
+  peterhack/Theme.cpp/hpp
+  peterhack/CamoManager.cpp/hpp   — diagnostics UI, batch 32, auto-material panel
+  peterhack/CamoSettings.cpp/hpp  — showDiagnostics, brush2 min 2, batch clamp 32
+  peterhack/CheatManager.cpp/hpp  — decoy crash fixes, IsObjectUsable, magnet toggle
+  peterhack/Main.cpp              — fonts, theme, gamepad, ResolveAssetPath
+  loader/main.cpp                 — MessageBox update prompts
+  runtime/src/bridge.cpp          — radius fallback, liveness, batch 32
+  runtime/include/runtime_contract.hpp
+
+
+================================================================================
+10. BUILD & DEPLOY NOTES
+================================================================================
+
+Build command:
+  cd C:\Users\lance\Desktop\chameleonEsp-upstream
+  build.bat
+
+Output:
+  C:\Users\lance\Desktop\peterhack\
+    peterhack-loader.exe
+    peterhack.dll
+    manifest.json
+    fonts\fa-solid-900.ttf
+    bridge\meccha-xenos-bridge.dll
+    bridge\mesh-profiles\
+
+Run:
+  C:\Users\lance\Desktop\peterhack\peterhack-loader.exe --local --wait
+
+Important:
+  - Close game before rebuild (peterhack.dll gets locked while injected)
+  - After bridge updates, fully exit game to avoid stale meccha-xenos-bridge.dll
+  - settings.ini uses binary sizeof(Settings) — adding fields resets old saves once
+  - Camo config: C:\peterhack\camo.cfg (text INI)
+  - Profiles: C:\peterhack\profiles\*.phcfg (versioned binary)
+
+
+================================================================================
+11. KNOWN ISSUES & TESTING NOTES
+================================================================================
+
+Auto detect material:
+  - User reported "auto detect material isn't working"
+  - Bridge calls GetDominantPaintMaterialPatterns on paint component
+  - Diagnostics panel (Camo tab → Show net diagnostics) now shows exact failure
+    reason: unavailable, return_false, no_patterns, fill_material_only, etc.
+  - Auto material only applies to regions set to "Paint" (not Fill/Skip)
+
+Batch size > 20:
+  - Experimental — server may throttle (watch diagnostics for "resolved < requested")
+
+Decoy exploits:
+  - Hardened against post-round crashes; ProcessEvent disabled after fault
+  - Server RPC removed; field writes + local ProcessEvent only once
+
+Streamproof:
+  - Hides from capture tools; you still see overlay locally
+  - Does not hide from anti-cheat screen analysis (different mechanism)
+
+Phase 2–5 features:
+  - Phase 2 (chams + camo presets) is in current DLL
+  - Phase 3 (godmode, speedhack, fly, noclip) is in current DLL
+  - Phases 4–5 NOT in current DLL
+  - Combat features have server-side detection (IsChater, CheatCheck, AntiChatTrace)
+
+GitHub releases:
+  - Prior release pushed as "untested" with usage tutorial
+  - Latest local build may not yet have a new GitHub release tag for Phase 1
+
+
+================================================================================
+MENU TAB REFERENCE (CURRENT)
+================================================================================
+
+  ESP          — FOV, chams, box/lines/names/roles/skeleton/distance/decoys, colors
+  Teleport     — Simple TP list (legacy; Players tab is richer)
+  Players      — filter, sort, distance, visibility, TP/copy/impersonate/kill
+  Exploits     — Survivor/hunter toggles, movement (godmode/speed/fly/noclip), magnet, kill all, custom name, anti kick
+  Camouflage   — camo bridge UI, hotkeys, diagnostics, presets (save/load/apply)
+  Misc         — Controller binds, Overlays (HUD, notifications, streamproof)
+  Config       — Save/Load settings + camo, named profiles
+
+
+================================================================================
+END OF CHANGELOG
+================================================================================

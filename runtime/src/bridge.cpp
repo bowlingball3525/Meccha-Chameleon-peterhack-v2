@@ -51,12 +51,12 @@ namespace
     constexpr int AutoEventWatchSampleBytes = 8192;
     constexpr UINT PaintDispatchMessage = WM_APP + 0x4D43;
     constexpr int PackedReplicationDefaultBatchLimit = 20;
-    constexpr int PackedReplicationMaxBatchLimit = 20;
+    constexpr int PackedReplicationMaxBatchLimit = 32;
     constexpr int PackedReplicationDefaultPacingMs = 50;
     constexpr int PackedReplicationMinPacingMs = 50;
     constexpr int PackedReplicationFallbackMaxStrokesPerTick = 24;
     constexpr int PackedReplicationResolvedPacingMinMs = 1;
-    constexpr int PackedReplicationBatchSize = 20;
+    constexpr int PackedReplicationBatchSize = 32;
     constexpr int InternalNoResendMaxCallsPerTick = runtime_contract::InternalNoResendMaxCallsPerTick;
     constexpr int PackedReplicationFallbackOutgoingBatchesPerSecond = 20;
     constexpr int PackedReplicationMaxPacingMs = 500;

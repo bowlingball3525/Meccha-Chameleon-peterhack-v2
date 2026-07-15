@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 struct CamoSettings
 {
@@ -24,10 +26,19 @@ struct CamoSettings
 	int unpreviewHotkey = 0x72; // VK_F3
 	int stopHotkey = 0x73;      // VK_F4
 	bool hotkeysEnabled = false;
+	bool showDiagnostics = false;
 
 	void ApplyDefaults();
 	void Load();
 	void Save() const;
+	bool LoadFromPath(const char* path);
+	bool SaveToPath(const char* path) const;
+
+	// Named presets under C:\peterhack\camo_presets\<name>.cfg (same INI format as camo.cfg).
+	bool SavePreset(const std::string& name) const;
+	bool LoadPreset(const std::string& name);
+	static bool DeletePreset(const std::string& name);
+	static std::vector<std::string> ListPresets();
 
 	static const char* RegionModeName(int mode);
 };

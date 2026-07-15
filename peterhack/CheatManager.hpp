@@ -8,6 +8,9 @@ public:	struct PlayerInfo
 		SDK::FVector Location;
 		SDK::AActor* Actor;
 		bool IsSurvivor = false; // resolved on the game thread; lets the menu filter without touching a live UObject
+		int Role = 0;            // 0 = unknown, 1 = hunter, 2 = survivor
+		float DistanceMeters = 0.0f;
+		bool IsVisible = false;
 	};
 
 	// A render-ready snapshot of one player's ESP overlay, fully projected to screen space on the
@@ -75,11 +78,15 @@ private:
 	void DrawEntry(const EspEntry& entry);
 
 	void KillSurvivor(SDK::APawn* myPlayer, SDK::AActor* actor);
+	// GAME THREAD: Phase 4 combat — aimbot, triggerbot, silent aim. Runs once per
+	// scan with the freshly gathered character list.
+	void HandleCombat(FrameContext& ctx, SDK::TArray<SDK::AActor*>& Players);
 	void HandleTeleport(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors);
 	void HandleMagnet(SDK::APawn* myPlayer, SDK::AActor* selfActor, const std::unordered_set<SDK::AActor*>& currentActors, const SDK::FVector& MyLocation, SDK::TArray<SDK::AActor*>& Players, EspSnapshot& snap);
 	void HandleKillTarget(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors);
-	void HandleKillAllSurvivors(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors);
+	void HandleKillAllSurvivors(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors, SDK::UGameplayStatics* gStatics, SDK::UWorld* world);
 	void HandleChangeName(SDK::APawn* myPlayer);
+	void HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
 	void ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
 	void ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
 	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
@@ -103,6 +110,8 @@ private:
 	bool IsEspFullyWarm() const { return espScansCompleted_ >= kEspWarmupScans; }
 	bool DecoyExploitsReady() const { return decoyExploitsReadyAfterMs_ != 0 && GetTickCount64() >= decoyExploitsReadyAfterMs_; }
 	SDK::AActor* TeleportTarget = nullptr; // resolved by actor pointer, not list index, since the snapshot is rebuilt every frame
+	SDK::FVector TeleportFallbackLocation{};
+	bool TeleportHasFallback = false;
 	SDK::AActor* KillTarget = nullptr;		 // single-player kill request, resolved by actor pointer like TeleportTarget
 	bool bKillAllSurvivorsRequested = false;
 	bool bChangeNameRequested = false;							// drained on the game thread in HandleChangeName
@@ -119,9 +128,11 @@ private:
 	SDK::URuntimePaintableComponent* lastDecoyPaintable = nullptr;
 	ULONGLONG decoyPaintableReadyTickMs = 0;
 	ULONGLONG decoyExploitsReadyAfterMs_ = 0;
-	bool pendingDecoyServerRpc_ = false;
 	int lastSpawnedDecoyCount_ = -1;
 	ULONGLONG decoyQuiesceUntilMs_ = 0;
+	// After any decoy ProcessEvent fault, never call ProcessEvent again until session reset —
+	// the SEH catch is not enough; net/RPC teardown can still crash the game a few frames later.
+	bool decoyProcessEventDisabled_ = false;
 
 	// pendingSnapshot is written by the game thread (Init) and read by the render thread (RenderEsp)
 	// under this mutex. drawSnapshot is the render thread's private working copy so it can draw
@@ -133,7 +144,8 @@ private:
 public:
 	std::vector<PlayerInfo> PlayerInfos;
 	std::atomic<bool> inMatchCached{ false };
-	void RequestTeleport(SDK::AActor* Actor) { TeleportTarget = Actor; }	void RequestKillSurvivor(SDK::AActor* Actor) { KillTarget = Actor; }
+	void RequestTeleport(SDK::AActor* Actor, const SDK::FVector& fallbackLocation = {});
+	void RequestKillSurvivor(SDK::AActor* Actor) { KillTarget = Actor; }
 	void RequestKillAllSurvivors() { bKillAllSurvivorsRequested = true; }
 	void RequestReturnToMainLobby() { bReturnToLobbyRequested = true; }
 	// Queue a name change for our own player (e.g. to impersonate another player's name). Applied on
@@ -151,11 +163,16 @@ public:
 	void RenderEsp();																								// RENDER THREAD: draw the latest published snapshot
 	void ApplyMenuInputLock(bool menuOpen);																			// GAME THREAD: block camera look while the menu is open
 	void DumpBones(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+	void DumpDeathFlags(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
 
 	// True if Obj is still the live object at its GObjects slot. The scan mutates game state inline on
 	// the game thread, but an SDK call earlier in the same scan can destroy/GC an actor - calling into
 	// a freed UObject is exactly the null-pointer-deep-in-engine-code crash this guards against.
 	static bool IsObjectValid(SDK::UObject* Obj);
+	// GAME THREAD: combat trace redirect helpers (called from HandleCombat + hkProcessEvent).
+	static void CacheSilentAimTarget(SDK::AActor* target, const SDK::FVector& hitLocation);
+	static void ArmCombatShotRedirect(SDK::AActor* target, const SDK::FVector& hitLocation);
+	static void RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C* hunter);
 	static bool IsLocalPlayerSpectating(SDK::APlayerController* playerController);
 	static 	bool IsLocalPlayerInMatch(SDK::APlayerController* playerController);
 	bool NeedsLocalExploits() const;

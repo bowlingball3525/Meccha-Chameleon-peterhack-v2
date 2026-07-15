@@ -1,5 +1,6 @@
 #include "CamoSettings.hpp"
 #include "Keybinds.hpp"
+#include <Windows.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -8,6 +9,7 @@
 namespace
 {
 	const char* kCamoConfigPath = "C:\\peterhack\\camo.cfg";
+	const char* kPresetDir = "C:\\peterhack\\camo_presets";
 
 	void Trim(char* s)
 	{
@@ -56,6 +58,75 @@ namespace
 		out = 0;
 		return true;
 	}
+
+	std::string SanitizePresetName(const std::string& name)
+	{
+		std::string clean;
+		clean.reserve(name.size());
+		for (char c : name)
+		{
+			if (c == '\\' || c == '/' || c == ':' || c == '*' || c == '?' || c == '"' ||
+				c == '<' || c == '>' || c == '|')
+				continue;
+			if (c == ' ' || c == '\t')
+			{
+				if (!clean.empty() && clean.back() != '_')
+					clean.push_back('_');
+				continue;
+			}
+			clean.push_back(c);
+		}
+		while (!clean.empty() && clean.back() == '_')
+			clean.pop_back();
+		if (clean.empty())
+			clean = "preset";
+		return clean;
+	}
+
+	std::string PresetPath(const std::string& name)
+	{
+		return std::string(kPresetDir) + "\\" + SanitizePresetName(name) + ".cfg";
+	}
+
+	void SanitizeHotkeys(CamoSettings& s)
+	{
+		auto sanitizeHotkey = [](int& bind) {
+			if (Binds::IsPadBind(bind))
+			{
+				if (!Binds::IsValidBind(bind))
+					bind = 0x70;
+				return;
+			}
+			if (bind == 0x01 || bind == 0x02 || bind == 0x04 || bind == 0x05 || bind == 0x06 ||
+				bind == 0x2D || bind == 0x79 || !Binds::IsValidBind(bind))
+				bind = 0x70;
+		};
+		sanitizeHotkey(s.startHotkey);
+		sanitizeHotkey(s.previewHotkey);
+		sanitizeHotkey(s.unpreviewHotkey);
+		sanitizeHotkey(s.stopHotkey);
+
+		if (s.startHotkey == 0x79)
+			s.startHotkey = 0x70;
+		if (s.previewHotkey == 0x79)
+			s.previewHotkey = 0x71;
+		if (s.unpreviewHotkey == 0x79)
+			s.unpreviewHotkey = 0x72;
+		if (s.stopHotkey == 0x79)
+			s.stopHotkey = 0x73;
+	}
+
+	void ClampCamoLimits(CamoSettings& s)
+	{
+		if (s.batchLimit < 1)
+			s.batchLimit = 1;
+		if (s.batchLimit > 32)
+			s.batchLimit = 32;
+		if (s.batchPacingMs < 50)
+			s.batchPacingMs = 50;
+		if (s.batchPacingMs > 500)
+			s.batchPacingMs = 500;
+	}
 }
 
 const char* CamoSettings::RegionModeName(int mode)
@@ -90,14 +161,18 @@ void CamoSettings::ApplyDefaults()
 	unpreviewHotkey = 0x72;
 	stopHotkey = 0x73;
 	hotkeysEnabled = false;
+	showDiagnostics = false;
 }
 
-void CamoSettings::Load()
+bool CamoSettings::LoadFromPath(const char* path)
 {
+	if (!path || !*path)
+		return false;
+
 	ApplyDefaults();
 	FILE* file = nullptr;
-	if (fopen_s(&file, kCamoConfigPath, "r") != 0 || !file)
-		return;
+	if (fopen_s(&file, path, "r") != 0 || !file)
+		return false;
 
 	char line[512];
 	while (fgets(line, sizeof(line), file))
@@ -153,53 +228,25 @@ void CamoSettings::Load()
 			ParseInt(value, stopHotkey);
 		else if (_stricmp(key, "hotkeys_enabled") == 0)
 			hotkeysEnabled = (_stricmp(value, "1") == 0 || _stricmp(value, "true") == 0);
+		else if (_stricmp(key, "show_diagnostics") == 0)
+			showDiagnostics = (_stricmp(value, "1") == 0 || _stricmp(value, "true") == 0);
 	}
 	fclose(file);
 
-	if (batchLimit < 1)
-		batchLimit = 1;
-	if (batchLimit > 20)
-		batchLimit = 20;
-	if (batchPacingMs < 50)
-		batchPacingMs = 50;
-	if (batchPacingMs > 500)
-		batchPacingMs = 500;
-
-	auto sanitizeHotkey = [](int& bind) {
-		// Controller binds are validated as a whole (single known button bit).
-		if (Binds::IsPadBind(bind))
-		{
-			if (!Binds::IsValidBind(bind))
-				bind = 0x70;
-			return;
-		}
-		// Mouse buttons and Insert/F10 (menu toggles) are reserved.
-		if (bind == 0x01 || bind == 0x02 || bind == 0x04 || bind == 0x05 || bind == 0x06 ||
-			bind == 0x2D || bind == 0x79 || !Binds::IsValidBind(bind))
-			bind = 0x70;
-	};
-	sanitizeHotkey(startHotkey);
-	sanitizeHotkey(previewHotkey);
-	sanitizeHotkey(unpreviewHotkey);
-	sanitizeHotkey(stopHotkey);
-
-	// F10 is now a menu key — migrate old paint binds off it.
-	if (startHotkey == 0x79) // VK_F10
-		startHotkey = 0x70; // VK_F1
-	if (previewHotkey == 0x79)
-		previewHotkey = 0x71;
-	if (unpreviewHotkey == 0x79)
-		unpreviewHotkey = 0x72;
-	if (stopHotkey == 0x79)
-		stopHotkey = 0x73;
+	ClampCamoLimits(*this);
+	SanitizeHotkeys(*this);
+	return true;
 }
 
-void CamoSettings::Save() const
+bool CamoSettings::SaveToPath(const char* path) const
 {
+	if (!path || !*path)
+		return false;
+
 	_mkdir("C:\\peterhack");
 	FILE* file = nullptr;
-	if (fopen_s(&file, kCamoConfigPath, "w") != 0 || !file)
-		return;
+	if (fopen_s(&file, path, "w") != 0 || !file)
+		return false;
 
 	fprintf(file, "brush1=%.3f\n", brush1Texels);
 	fprintf(file, "brush2=%.3f\n", brush2Texels);
@@ -221,5 +268,62 @@ void CamoSettings::Save() const
 	fprintf(file, "hk_unpreview=%d\n", unpreviewHotkey);
 	fprintf(file, "hk_stop=%d\n", stopHotkey);
 	fprintf(file, "hotkeys_enabled=%d\n", hotkeysEnabled ? 1 : 0);
+	fprintf(file, "show_diagnostics=%d\n", showDiagnostics ? 1 : 0);
 	fclose(file);
+	return true;
+}
+
+void CamoSettings::Load()
+{
+	LoadFromPath(kCamoConfigPath);
+}
+
+void CamoSettings::Save() const
+{
+	SaveToPath(kCamoConfigPath);
+}
+
+bool CamoSettings::SavePreset(const std::string& name) const
+{
+	if (name.empty())
+		return false;
+	_mkdir("C:\\peterhack");
+	_mkdir(kPresetDir);
+	return SaveToPath(PresetPath(name).c_str());
+}
+
+bool CamoSettings::LoadPreset(const std::string& name)
+{
+	if (name.empty())
+		return false;
+	return LoadFromPath(PresetPath(name).c_str());
+}
+
+bool CamoSettings::DeletePreset(const std::string& name)
+{
+	if (name.empty())
+		return false;
+	return remove(PresetPath(name).c_str()) == 0;
+}
+
+std::vector<std::string> CamoSettings::ListPresets()
+{
+	std::vector<std::string> out;
+	WIN32_FIND_DATAA fd{};
+	const std::string pattern = std::string(kPresetDir) + "\\*.cfg";
+	HANDLE h = FindFirstFileA(pattern.c_str(), &fd);
+	if (h == INVALID_HANDLE_VALUE)
+		return out;
+	do
+	{
+		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			continue;
+		std::string fn = fd.cFileName;
+		const std::string ext = ".cfg";
+		if (fn.size() > ext.size() && fn.compare(fn.size() - ext.size(), ext.size(), ext) == 0)
+			fn.erase(fn.size() - ext.size());
+		out.push_back(fn);
+	} while (FindNextFileA(h, &fd));
+	FindClose(h);
+	return out;
 }

@@ -3,6 +3,8 @@
 #pragma warning(disable : 4244)
 
 #include <cmath>
+#include <algorithm>
+#include "SDK/EnhancedInput_classes.hpp"
 
 #include "SDK/PenguinHotel_classes.hpp"
 #include "SDK/PenguinHotel_parameters.hpp"
@@ -10,6 +12,16 @@
 #include "SDK/Engine_parameters.hpp"
 #include "SDK/UMG_classes.hpp"
 #include "SDK/UMG_parameters.hpp"
+#include "SDK/ExtendedPhysicsCharacterMoverComponent_classes.hpp"
+#include "SDK/Mover_classes.hpp"
+#include "SDK/BP_FirstPersonPlayerState_Online_cLeon_parameters.hpp"
+
+// Game window handle, owned by Main.cpp. Used to gate raw-keystate reads
+// (manual flight, aim/trigger keys) to when the game is actually focused.
+namespace Process
+{
+	extern HWND Hwnd;
+}
 
 // GAME THREAD: scan the world and publish a render-ready snapshot.
 //
@@ -46,33 +58,56 @@ namespace
 		function->FunctionFlags = previousFlags;
 	}
 
-	void CallSetMaxDecoySpawnCount(SDK::URuntimePaintableComponent* paintable, int target, bool includeServerRpc)
+	// Stronger than IsObjectValid: also rejects objects mid-teardown (RF_BeginDestroyed /
+	// RF_FinishDestroyed / RF_MirroredGarbage). Calling ProcessEvent on those is what
+	// crashes the game even when SEH "successfully" catches the immediate fault.
+	bool IsObjectUsable(SDK::UObject* obj)
 	{
-		if (!paintable || !CheatManager::IsObjectValid(paintable))
-			return;
+		if (!obj || !CheatManager::IsObjectValid(obj))
+			return false;
+		__try
+		{
+			const auto flags = static_cast<uint32_t>(obj->Flags);
+			constexpr uint32_t kDead =
+				static_cast<uint32_t>(SDK::EObjectFlags::BeginDestroyed) |
+				static_cast<uint32_t>(SDK::EObjectFlags::FinishDestroyed) |
+				static_cast<uint32_t>(SDK::EObjectFlags::MirroredGarbage);
+			if (flags & kDead)
+				return false;
+			if (!obj->Class)
+				return false;
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	// Local SetMaxDecoySpawnCount only — never ServerSetMaxDecoySpawnCount.
+	// The server RPC is a net ProcessEvent that faults during round/level teardown and
+	// can take the process down even after we catch the AV.
+	// Returns false if ProcessEvent faulted (caller should disable further RPCs).
+	bool CallSetMaxDecoySpawnCountLocal(SDK::URuntimePaintableComponent* paintable, int target)
+	{
+		if (!paintable || !IsObjectUsable(paintable) || !paintable->Class)
+			return true;
 
 		SDK::UFunction* fnSet = paintable->Class->GetFunction("RuntimePaintableComponent", "SetMaxDecoySpawnCount");
-		SDK::UFunction* fnServerSet = paintable->Class->GetFunction("RuntimePaintableComponent", "ServerSetMaxDecoySpawnCount");
+		if (!fnSet)
+			return true;
 
 		__try
 		{
-			if (fnSet)
-			{
-				SDK::Params::RuntimePaintableComponent_SetMaxDecoySpawnCount parms{};
-				parms.NewMaxDecoySpawnCount = target;
-				InvokeNativeProcessEvent(paintable, fnSet, &parms);
-			}
-
-			if (includeServerRpc && fnServerSet)
-			{
-				SDK::Params::RuntimePaintableComponent_ServerSetMaxDecoySpawnCount parms{};
-				parms.NewMaxDecoySpawnCount = target;
-				InvokeNativeProcessEvent(paintable, fnServerSet, &parms);
-			}
+			SDK::Params::RuntimePaintableComponent_SetMaxDecoySpawnCount parms{};
+			parms.NewMaxDecoySpawnCount = target;
+			InvokeNativeProcessEvent(paintable, fnSet, &parms);
+			return true;
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER)
 		{
 			PhLog("[EXPLOITS:DECOY-NUM] ProcessEvent fault — skipped RPC\n");
+			return false;
 		}
 	}
 }
@@ -210,6 +245,83 @@ namespace
 		}
 	}
 
+	bool SafeGetBoneWorldPos(SDK::USkinnedMeshComponent* mesh, int boneIdx, SDK::FVector& out)
+	{
+		if (!MeshReadyForSkeleton(mesh) || boneIdx < 0 || boneIdx >= skeleton::None)
+			return false;
+
+		__try
+		{
+			out = mesh->GetSocketLocation(mesh->GetBoneName(boneIdx));
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	// Control rotation of the pawn's controller (the camera/aim rotation).
+	bool SafeGetControlRotationFromPawn(SDK::APawn* pawn, SDK::FRotator& out)
+	{
+		if (!pawn || !CheatManager::IsObjectValid(pawn))
+			return false;
+		__try
+		{
+			SDK::AController* c = pawn->Controller;
+			if (!c || !CheatManager::IsObjectValid(c))
+				return false;
+			out = c->GetControlRotation();
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeSetControlRotation(SDK::APlayerController* pc, const SDK::FRotator& rot)
+	{
+		if (!pc || !CheatManager::IsObjectValid(pc))
+			return false;
+		__try
+		{
+			pc->SetControlRotation(rot);
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	bool SafeGetCameraLocation(SDK::APlayerController* pc, SDK::FVector& out)
+	{
+		if (!pc || !CheatManager::IsObjectValid(pc))
+			return false;
+		__try
+		{
+			SDK::APlayerCameraManager* cam = pc->PlayerCameraManager;
+			if (!cam || !CheatManager::IsObjectValid(cam))
+				return false;
+			out = cam->GetCameraLocation();
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	// Held-state check for a bind code. Pad binds have no held-state API here,
+	// so they are treated as not held (aim/trigger hold keys are kb/mouse only).
+	bool BindHeld(int code)
+	{
+		if (code == 0 || Binds::IsPadBind(code))
+			return false;
+		return (GetAsyncKeyState(code) & 0x8000) != 0;
+	}
+
 	bool SafeActorBeingDestroyed(SDK::AActor* actor)
 	{
 		if (!actor || !CheatManager::IsObjectValid(actor))
@@ -222,6 +334,23 @@ namespace
 		__except (EXCEPTION_EXECUTE_HANDLER)
 		{
 			return true;
+		}
+	}
+
+	// Best-effort destroy of an actor (used to pop decoy/clone actors, which have
+	// no server kill RPC). K2_DestroyActor is a stable native UFunction, so unlike
+	// the BP-generated KillPlayer it's safe to invoke via the cached SDK wrapper.
+	void SafeDestroyActor(SDK::AActor* actor)
+	{
+		if (!actor || !CheatManager::IsObjectValid(actor))
+			return;
+
+		__try
+		{
+			actor->K2_DestroyActor();
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
 		}
 	}
 
@@ -281,6 +410,7 @@ void CheatManager::ResetSessionState()
 	killAllQueue.clear();
 	killAllNextMs_ = 0;
 	TeleportTarget = nullptr;
+	TeleportHasFallback = false;
 	KillTarget = nullptr;
 	bKillAllSurvivorsRequested = false;
 	bChangeNameRequested = false;
@@ -292,9 +422,9 @@ void CheatManager::ResetSessionState()
 	lastDecoyRpcTickMs = 0;
 	decoyPaintableReadyTickMs = 0;
 	decoyExploitsReadyAfterMs_ = 0;
-	pendingDecoyServerRpc_ = false;
 	lastSpawnedDecoyCount_ = -1;
 	decoyQuiesceUntilMs_ = 0;
+	decoyProcessEventDisabled_ = false;
 	menuLookInputLocked = false;
 	inMatchStableFrames_ = 0;
 	espScansCompleted_ = 0;
@@ -336,6 +466,7 @@ void CheatManager::Init()
 			lastWorld_ = nullptr;
 			lastPersistentLevel_ = nullptr;
 			lastLocalPawn_ = nullptr;
+			g_localPawn.store(nullptr, std::memory_order_release);
 			wasInMatch_ = false;
 			wasSpectating_ = false;
 			inMatchStableFrames_ = 0;
@@ -403,6 +534,8 @@ void CheatManager::Init()
 	}
 
 	lastLocalPawn_ = ctx.MyPlayer;
+	// Publish for the ProcessEvent hook's godmode death-RPC block (pointer-only compare).
+	g_localPawn.store(ctx.MyPlayer, std::memory_order_release);
 	wasSpectating_ = spectating;
 	wasInMatch_ = inMatch;
 	inMatchCached.store(inMatch, std::memory_order_release);
@@ -443,7 +576,10 @@ void CheatManager::Init()
 		{
 			auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(ctx.MyPlayer);
 			if (localChar && IsObjectValid(localChar))
+			{
 				ApplyLocalPlayerExploits(ctx, localChar);
+				HandleNameplateStats(localChar);
+			}
 		}
 
 		HandleChangeName(ctx.MyPlayer);
@@ -484,6 +620,8 @@ void CheatManager::Init()
 	SDK::TArray<SDK::AActor*> Players;
 	if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass(), &Players))
 	{
+		if (TeleportTarget || TeleportHasFallback)
+			HandleTeleport(ctx.MyPlayer, {});
 		if (cfg->bInitHooks)
 		{
 			std::lock_guard<std::mutex> lock(snapshotMutex);
@@ -541,6 +679,17 @@ void CheatManager::Init()
 	// be reused by a live actor and wrongly suppress its ESP.
 	std::unordered_set<SDK::AActor*> currentActors;
 
+	// One-shot death-flag diagnostic: start a fresh file, append one line per
+	// character below, then close it out after the loop.
+	if (cfg->bDumpDeath)
+	{
+		if (FILE* f = fopen("C:\\death.txt", "w"))
+		{
+			fprintf(f, "role(1=hunter,2=survivor) | Dead | ragdoll | BodyVisibility | IsLiveSelf | latchedDead\n");
+			fclose(f);
+		}
+	}
+
 	for (int i = 0; i < Players.Num(); i++)
 	{
 		if (!Players.IsValidIndex(i))
@@ -557,6 +706,9 @@ void CheatManager::Init()
 
 		currentActors.insert(actor);
 
+		if (cfg->bDumpDeath)
+			DumpDeathFlags(baseClass);
+
 		// Skip dead/ragdolled corpses (see IsDead for why the obvious flags don't
 		// work).
 		if (IsDead(actor))
@@ -567,12 +719,16 @@ void CheatManager::Init()
 			continue;
 
 		const std::string PlayerName = ResolvePlayerName(actor, baseClass);
-		const bool IsVisible = espFullyWarm ? SafeLineOfSightTo(ctx.PlayerController, actor) : false;
+		const bool playerVisible = SafeLineOfSightTo(ctx.PlayerController, actor);
+		const bool IsVisible = espFullyWarm ? playerVisible : false;
 
 		if (actor == ctx.MyPlayer)
 			continue;
 
-		snap.players.push_back({ PlayerName, Location, actor, IsSurvivor(baseClass) });
+		const int playerRole = IsHunter(baseClass) ? 1 : (IsSurvivor(baseClass) ? 2 : 0);
+		const float playerDistM = MyLocation.GetDistanceToInMeters(Location);
+		snap.players.push_back({ PlayerName, Location, actor, IsSurvivor(baseClass),
+			playerRole, playerDistM, playerVisible });
 
 		if (espFullyWarm)
 			UpdateForcedVisibility(actor, baseClass);
@@ -591,6 +747,12 @@ void CheatManager::Init()
 		snap.entries.push_back(std::move(entry));
 	}
 
+	if (cfg->bDumpDeath)
+	{
+		cfg->bDumpDeath = false;
+		Beep(700, 300);
+	}
+
 	if (IsObjectValid(ctx.MyPlayer) &&
 		ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
 	{
@@ -601,6 +763,9 @@ void CheatManager::Init()
 				ApplyLocalPlayerExploits(ctx, localChar);
 			if (espFullyWarm && cfg->bMagnetEnabled && IsHunter(localChar))
 				HandleMagnet(ctx.MyPlayer, ctx.MyPlayer, currentActors, MyLocation, Players, snap);
+			if (espFullyWarm)
+				HandleCombat(ctx, Players);
+			HandleNameplateStats(localChar);
 		}
 	}
 
@@ -617,7 +782,7 @@ void CheatManager::Init()
 
 	HandleTeleport(ctx.MyPlayer, currentActors);
 	HandleKillTarget(ctx.MyPlayer, currentActors);
-	HandleKillAllSurvivors(ctx.MyPlayer, currentActors);
+	HandleKillAllSurvivors(ctx.MyPlayer, currentActors, ctx.GStatics, ctx.World);
 	if (espFullyWarm)
 	{
 		HandleChangeName(ctx.MyPlayer);
@@ -650,6 +815,16 @@ void CheatManager::RenderEsp()
 
 	for (const auto& entry : drawSnapshot.entries)
 		DrawEntry(entry);
+
+	// Aimbot FOV circle: everything needed is config + screen size, no UObjects.
+	if (cfg && cfg->bAimbot && cfg->bAimDrawFov &&
+		drawSnapshot.screenX > 0.0f && drawSnapshot.screenY > 0.0f)
+	{
+		const ImU32 col = IM_COL32(255, 255, 255, 90);
+		OverlayDrawList()->AddCircle(
+			ImVec2(drawSnapshot.screenX * 0.5f, drawSnapshot.screenY * 0.5f),
+			cfg->fAimFov, col, 64, 1.5f);
+	}
 
 	if (drawSnapshot.magnetActive)
 	{
@@ -802,19 +977,22 @@ void CheatManager::UpdateForcedVisibility(
 // True when the current actor (obj/BaseClass) should be treated as a dead
 // corpse and skipped.
 //
-// We can't use the obvious signals: the raw `Dead` field isn't replicated
-// (stays 0 on remote corpses), IsLive() returns true for dead bodies in
-// infection, and BodyVisibility is reserved for the Force Character Visibility
-// feature (which reveals stealthed/invisible survivors), so it can't double as
-// a death flag.
+// BodyVisibility can't be used here: it's reserved for the Force Character
+// Visibility feature (which reveals stealthed/invisible survivors), so it can't
+// double as a death flag. We latch death from two signals, either of which is
+// enough to mark an actor dead for the rest of its lifetime:
 //
-// Instead detect death by ragdoll: a live character - survivor or hunter - is
-// animation-driven, so its mesh isn't simulating physics; only a dead body
-// ragdolls (confirmed by logging: live = 0, corpse = 1). That flag is transient
-// though - in infection the game hides the corpse and resets the ragdoll,
-// flipping it back to 0 while the player is still dead - so we latch it: once
-// an actor has ragdolled it stays dead for as long as it exists. The latch set
-// is pruned to live actors back in Init() to avoid stale-pointer reuse.
+//   1. Ragdoll - a live character (survivor or hunter) is animation-driven, so
+//      its mesh isn't simulating physics; only a dead body ragdolls. This is
+//      transient (the game hides the corpse and resets the ragdoll), so we
+//      latch it.
+//   2. The inherited `Dead` bool - authoritative when set, and it never flips
+//      true for a live player. It isn't reliably replicated to observers, but
+//      when it is present it catches corpses that we joined mid-round (already
+//      settled/asleep ragdolls whose physics flag reads false).
+//
+// The latch set is pruned to live actors back in Init() to avoid a destroyed
+// corpse's pointer being reused by a live actor and wrongly suppressing its ESP.
 bool CheatManager::IsDead(SDK::AActor* actor)
 {
 	if (!actor)
@@ -823,7 +1001,8 @@ bool CheatManager::IsDead(SDK::AActor* actor)
 	if (!baseClass || !baseClass->Mesh)
 		return false;
 
-	if (baseClass->Mesh && IsObjectValid(baseClass->Mesh) && SafeIsAnySimulatingPhysics(baseClass->Mesh))
+	const bool ragdolling = IsObjectValid(baseClass->Mesh) && SafeIsAnySimulatingPhysics(baseClass->Mesh);
+	if (ragdolling || baseClass->Dead)
 		deadActors.insert(actor);
 	return deadActors.count(actor) > 0;
 }
@@ -1119,16 +1298,35 @@ void CheatManager::HandleTeleport(
 	SDK::APawn* myPlayer,
 	const std::unordered_set<SDK::AActor*>& currentActors)
 {
-	if (TeleportTarget && currentActors.count(TeleportTarget) && myPlayer)
+	SDK::FVector dest{};
+	bool haveDest = false;
+
+	if (TeleportTarget && currentActors.count(TeleportTarget) && IsObjectValid(TeleportTarget))
 	{
-		SDK::AActor* target = TeleportTarget;
-		if (IsObjectValid(myPlayer) && IsObjectValid(target))
-		{
-			SDK::FRotator CurrentRotation = myPlayer->K2_GetActorRotation();
-			myPlayer->K2_TeleportTo(target->K2_GetActorLocation(), CurrentRotation);
-		}
+		dest = TeleportTarget->K2_GetActorLocation();
+		haveDest = true;
 	}
+	else if (TeleportHasFallback)
+	{
+		dest = TeleportFallbackLocation;
+		haveDest = true;
+	}
+
+	if (haveDest && myPlayer && IsObjectValid(myPlayer))
+	{
+		const SDK::FRotator currentRotation = myPlayer->K2_GetActorRotation();
+		myPlayer->K2_TeleportTo(dest, currentRotation);
+	}
+
 	TeleportTarget = nullptr;
+	TeleportHasFallback = false;
+}
+
+void CheatManager::RequestTeleport(SDK::AActor* actor, const SDK::FVector& fallbackLocation)
+{
+	TeleportTarget = actor;
+	TeleportFallbackLocation = fallbackLocation;
+	TeleportHasFallback = true;
 }
 
 void CheatManager::HandleMagnet(
@@ -1224,12 +1422,19 @@ void CheatManager::HandleKillTarget(
 
 void CheatManager::HandleKillAllSurvivors(
 	SDK::APawn* myPlayer,
-	const std::unordered_set<SDK::AActor*>& currentActors)
+	const std::unordered_set<SDK::AActor*>& currentActors,
+	SDK::UGameplayStatics* gStatics,
+	SDK::UWorld* world)
 {
-	auto isValidKillAllTarget = [&](SDK::AActor* actor) -> bool {
+	auto isDecoy = [&](SDK::AActor* actor) -> bool {
+		return actor && IsObjectValid(actor) &&
+			actor->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass());
+	};
+
+	// A real living survivor pawn (not us, not a hunter, not a corpse, not a clone).
+	auto isValidSurvivorTarget = [&](SDK::AActor* actor) -> bool {
 		if (!actor || actor == myPlayer || !currentActors.count(actor) || !IsObjectValid(actor))
 			return false;
-		// Never target decoy/clone actors — only real survivor pawns.
 		if (actor->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass()))
 			return false;
 		if (!IsSurvivor(actor) || IsDead(actor))
@@ -1237,20 +1442,48 @@ void CheatManager::HandleKillAllSurvivors(
 		return true;
 	};
 
-	// A fresh request seeds the pending set with living survivors only (no hunters,
-	// self, corpses, or clones). Kills are paced below so ProcessEvent isn't spammed.
+	// A live decoy/clone actor. Decoys aren't in currentActors (they ride their own
+	// enumeration), so validate them directly.
+	auto isValidDecoyTarget = [&](SDK::AActor* actor) -> bool {
+		return isDecoy(actor) && !SafeActorBeingDestroyed(actor);
+	};
+
+	// A fresh request seeds the pending set with living survivors AND every live
+	// clone. Kills/destroys are paced below so ProcessEvent isn't spammed.
 	if (bKillAllSurvivorsRequested)
 	{
 		bKillAllSurvivorsRequested = false;
 		killAllQueue.clear();
+
+		size_t survivorCount = 0;
 		for (SDK::AActor* actor : currentActors)
 		{
-			if (isValidKillAllTarget(actor))
+			if (isValidSurvivorTarget(actor))
+			{
 				killAllQueue.insert(actor);
+				++survivorCount;
+			}
 		}
+
+		// Enumerate decoys independently of the Decoy ESP toggle so kill-all always
+		// clears clones too.
+		size_t decoyCount = 0;
+		SDK::TArray<SDK::AActor*> Decoys;
+		if (SafeGetAllActorsOfClass(gStatics, world, SDK::ABP_cLeonDecoy_Base_C::StaticClass(), &Decoys))
+		{
+			for (int i = 0; i < Decoys.Num(); i++)
+			{
+				if (!Decoys.IsValidIndex(i))
+					continue;
+				SDK::AActor* actor = Decoys[i];
+				if (isValidDecoyTarget(actor) && killAllQueue.insert(actor).second)
+					++decoyCount;
+			}
+		}
+
 		killAllNextMs_ = 0;
-		PhLog("[KILL-ALL] Queued %zu survivors (clones ignored, %ums spacing)\n",
-			killAllQueue.size(), static_cast<unsigned>(kKillAllIntervalMs));
+		PhLog("[KILL-ALL] Queued %zu survivors + %zu clones (%ums spacing)\n",
+			survivorCount, decoyCount, static_cast<unsigned>(kKillAllIntervalMs));
 	}
 
 	if (killAllQueue.empty())
@@ -1263,13 +1496,21 @@ void CheatManager::HandleKillAllSurvivors(
 	for (auto it = killAllQueue.begin(); it != killAllQueue.end();)
 	{
 		SDK::AActor* actor = *it;
-		if (!isValidKillAllTarget(actor))
+		const bool decoy = isDecoy(actor);
+		const bool valid = decoy ? isValidDecoyTarget(actor) : isValidSurvivorTarget(actor);
+		if (!valid)
 		{
 			it = killAllQueue.erase(it);
 			continue;
 		}
 
-		KillSurvivor(myPlayer, actor);
+		// Decoys have no server kill RPC — pop them via K2_DestroyActor (best-effort;
+		// removes the clone at least locally). Real survivors go through KillPlayer.
+		if (decoy)
+			SafeDestroyActor(actor);
+		else
+			KillSurvivor(myPlayer, actor);
+
 		killAllQueue.erase(it);
 		killAllNextMs_ = now + kKillAllIntervalMs;
 		break;
@@ -1320,6 +1561,89 @@ void CheatManager::HandleChangeName(SDK::APawn* myPlayer)
 	onlineState->ProcessEvent(fn, &parms);
 }
 
+// GAME THREAD: push custom likes (EEYAN) and kills (ME) through the replicated
+// PlayerState server RPCs so the floating nameplate updates for everyone.
+void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+{
+	if (!cfg || !cfg->bOverrideNameplateStats || !baseClass || !IsObjectValid(baseClass))
+		return;
+
+	auto* playerState = baseClass->PlayerState;
+	if (!playerState || !IsObjectValid(playerState))
+		return;
+	if (!playerState->IsA(SDK::ABP_FirstPersonPlayerState_Online_cLeon_C::StaticClass()))
+		return;
+
+	auto* leonPs = static_cast<SDK::ABP_FirstPersonPlayerState_Online_cLeon_C*>(playerState);
+	if (!leonPs->Class)
+		return;
+
+	const int wantLikes = cfg->iCustomLikes < 0 ? 0 : cfg->iCustomLikes;
+	const int wantKills = cfg->iCustomKills < 0 ? 0 : cfg->iCustomKills;
+
+	static int s_lastWantLikes = INT32_MIN;
+	static int s_lastWantKills = INT32_MIN;
+	static ULONGLONG s_lastRpcMs = 0;
+	const ULONGLONG now = GetTickCount64();
+	const bool configChanged = wantLikes != s_lastWantLikes || wantKills != s_lastWantKills;
+	const bool stale = (now - s_lastRpcMs) >= 2000;
+	const bool drift =
+		leonPs->CurrentEEYAN_Point != wantLikes || leonPs->CurrentME_Point != wantKills;
+
+	if (!configChanged && !stale && !drift)
+		return;
+
+	s_lastWantLikes = wantLikes;
+	s_lastWantKills = wantKills;
+	s_lastRpcMs = now;
+
+	__try
+	{
+		if (SDK::UFunction* fn = leonPs->Class->GetFunction(
+				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateEEYANPoint(Server)"))
+		{
+			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateEEYANPoint_Server_ parms{};
+			parms.CurrentEEYAN_Point = wantLikes;
+			leonPs->ProcessEvent(fn, &parms);
+		}
+
+		if (SDK::UFunction* fn = leonPs->Class->GetFunction(
+				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateMEPoint(Server)"))
+		{
+			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateMEPoint_Server_ parms{};
+			parms.CurrentME_Point = wantKills;
+			leonPs->ProcessEvent(fn, &parms);
+		}
+
+		// Local mirror + widget refresh so our own nameplate updates immediately
+		// even before replication catches up.
+		leonPs->CurrentEEYAN_Point = wantLikes;
+		leonPs->CurrentME_Point = wantKills;
+
+		if (SDK::UFunction* fn = leonPs->Class->GetFunction(
+				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateEEYANPoint(Local)"))
+		{
+			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateEEYANPoint_Local_ parms{};
+			parms.CurrentEEYAN_Point = wantLikes;
+			leonPs->ProcessEvent(fn, &parms);
+		}
+
+		if (SDK::UFunction* fn = leonPs->Class->GetFunction(
+				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateMEPoint(Local)"))
+		{
+			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateMEPoint_Local_ parms{};
+			parms.CurrentME_Point = wantKills;
+			leonPs->ProcessEvent(fn, &parms);
+		}
+
+		baseClass->EEYANChange();
+		baseClass->MEChange();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+}
+
 // True if Obj is still a fully-live object. The scan and its mutations run on
 // the game thread, but an SDK call earlier in the same scan can destroy/GC an
 // actor, so re-check right before touching one.
@@ -1360,6 +1684,33 @@ void CheatManager::DumpBones(
 	{
 		PhLog("Failed to open file for writing bones.\n");
 	}
+}
+
+// Appends one line describing this character's death-related signals. Used to
+// diagnose ESP drawing corpses: run "Dump Death Flags" from Misc while looking
+// at the offending body, then read C:\death.txt to see which flag distinguishes
+// a corpse from a live player.
+void CheatManager::DumpDeathFlags(
+	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+{
+	if (!baseClass)
+		return;
+
+	FILE* f = fopen("C:\\death.txt", "a");
+	if (!f)
+		return;
+
+	const int role = IsHunter(baseClass) ? 1 : (IsSurvivor(baseClass) ? 2 : 0);
+	const bool ragdoll = baseClass->Mesh && IsObjectValid(baseClass->Mesh) &&
+		SafeIsAnySimulatingPhysics(baseClass->Mesh);
+	const bool dead = baseClass->Dead;
+	const bool bodyVis = baseClass->BodyVisibility;
+	const bool liveSelf = baseClass->IsLiveSelf;
+	const bool latched = deadActors.count(static_cast<SDK::AActor*>(baseClass)) > 0;
+
+	fprintf(f, "role=%d Dead=%d ragdoll=%d BodyVisibility=%d IsLiveSelf=%d latchedDead=%d\n",
+		role, (int)dead, (int)ragdoll, (int)bodyVis, (int)liveSelf, (int)latched);
+	fclose(f);
 }
 
 void CheatManager::ApplyMenuInputLock(bool menuOpen)
@@ -1503,6 +1854,7 @@ bool CheatManager::NeedsActorScan() const
 	if (!cfg)
 		return false;
 	return NeedsEspDraw() || cfg->bDecoys || cfg->bMagnetEnabled || cfg->bForceCharacterVisibility ||
+		cfg->bAimbot || cfg->bTriggerbot || cfg->bSilentAim ||
 		TeleportTarget != nullptr || KillTarget != nullptr || bKillAllSurvivorsRequested;
 }
 
@@ -1512,7 +1864,10 @@ bool CheatManager::NeedsLocalExploits() const
 		return false;
 	return cfg->bNoGunCooldown || cfg->bInfiniteBullets || cfg->bAntiDetection ||
 		cfg->bNoDecoyCooldown || cfg->bSetDecoyNum || cfg->bFovChanger || cfg->bMagnetEnabled ||
-		cfg->bForceCharacterVisibility || bChangeNameRequested;
+		cfg->bForceCharacterVisibility || bChangeNameRequested || cfg->bGodmode || cfg->bSpeedhack ||
+		cfg->bFly || cfg->bNoclip || cfg->bNoRecoil ||
+		cfg->bAimbot || cfg->bTriggerbot || cfg->bSilentAim ||
+		cfg->bOverrideNameplateStats;
 }
 
 bool CheatManager::NeedsGameThreadTick() const
@@ -1535,6 +1890,11 @@ bool CheatManager::NeedsGameThreadTick() const
 void CheatManager::ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
 {
 	if (!character || !cfg->bNoDecoyCooldown || !DecoyExploitsReady())
+		return;
+	// Same teardown guard as HandleSetDecoyNum: don't write into a character that is
+	// being destroyed or when we're not in a live match (round-end teardown).
+	if (!inMatchCached.load(std::memory_order_acquire) || SafeActorBeingDestroyed(character) ||
+		!IsObjectUsable(character))
 		return;
 	if (GetTickCount64() < decoyQuiesceUntilMs_)
 		return;
@@ -1577,13 +1937,497 @@ void CheatManager::TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintabl
 	if (lastSpawnedDecoyCount_ > 0 && spawnedCount >= 0 && spawnedCount < lastSpawnedDecoyCount_)
 	{
 		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
-		pendingDecoyServerRpc_ = false;
 		PhLog("[EXPLOITS:DECOY] clones cleared — pausing decoy writes for %ums\n",
 			static_cast<unsigned>(kDecoyQuiesceMs));
 	}
 
 	if (spawnedCount >= 0)
 		lastSpawnedDecoyCount_ = spawnedCount;
+}
+
+namespace
+{
+	struct MovementSetWalkSpeedParms
+	{
+		double WalkSpeed = 0.0;
+	};
+
+	struct MovementSetGravityParms
+	{
+		bool bOverrideGravity = false;
+		uint8_t Pad[7]{};
+		SDK::FVector GravityAcceleration{};
+	};
+
+	// Read a capsule's current collision setting so disabling noclip can restore
+	// the exact original value (the body capsule and the overlap capsule ship
+	// with different settings; forcing both to QueryAndPhysics broke movement).
+	bool SafeGetCapsuleCollision(SDK::UCapsuleComponent* capsule, SDK::ECollisionEnabled& out)
+	{
+		if (!capsule || !CheatManager::IsObjectValid(capsule))
+			return false;
+		__try
+		{
+			out = capsule->GetCollisionEnabled();
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	void SafeSetCapsuleCollision(SDK::UCapsuleComponent* capsule, SDK::ECollisionEnabled mode)
+	{
+		if (!capsule || !CheatManager::IsObjectValid(capsule))
+			return;
+		__try
+		{
+			capsule->SetCollisionEnabled(mode);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	}
+
+	void CallSetWalkSpeed(SDK::ABP_FirstPersonCharacter_Main_C* mainChar, double walkSpeed)
+	{
+		if (!mainChar || !CheatManager::IsObjectValid(mainChar) || !mainChar->Class)
+			return;
+		SDK::UFunction* fn = mainChar->Class->GetFunction("BP_FirstPersonCharacter_Main_C", "SetWalkSpeed");
+		if (!fn)
+			return;
+		MovementSetWalkSpeedParms parms{};
+		parms.WalkSpeed = walkSpeed;
+		InvokeNativeProcessEvent(mainChar, fn, &parms);
+	}
+
+	void CallSetGravity(SDK::ABP_FirstPersonCharacter_Main_C* mainChar, bool overrideGravity, const SDK::FVector& gravity)
+	{
+		if (!mainChar || !CheatManager::IsObjectValid(mainChar) || !mainChar->Class)
+			return;
+		SDK::UFunction* fn = mainChar->Class->GetFunction("BP_FirstPersonCharacter_Main_C", "SetGravity");
+		if (!fn)
+			return;
+		MovementSetGravityParms parms{};
+		parms.bOverrideGravity = overrideGravity;
+		parms.GravityAcceleration = gravity;
+		InvokeNativeProcessEvent(mainChar, fn, &parms);
+	}
+
+	// True while it is safe to consume raw key state for game actions: the game
+	// window has focus and the cheat menu is closed (so WASD typed into the menu
+	// never moves the character).
+	bool GameInputAllowed()
+	{
+		if (!cfg || cfg->bMenuOpen)
+			return false;
+		const HWND fg = GetForegroundWindow();
+		return fg && Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg));
+	}
+
+	bool SafeTeleportActor(SDK::AActor* actor, const SDK::FVector& dest, const SDK::FRotator& rot)
+	{
+		if (!actor || !CheatManager::IsObjectValid(actor))
+			return false;
+		__try
+		{
+			actor->K2_TeleportTo(dest, rot);
+			return true;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return false;
+		}
+	}
+
+	// Spectator-style flight: WASD moves along the camera axes, Space/C move
+	// vertically, position is written directly each tick. This deliberately
+	// bypasses the game's Mover component — the old approach queued guessed
+	// movement-mode names ("Flying", "FlyingMode", ...) that don't exist in
+	// this game's Mover setup, which wedged the movement state machine and left
+	// the character unable to move even after toggling the feature off.
+	void ApplyManualFlight(SDK::ABP_FirstPersonCharacter_Main_C* mainChar)
+	{
+		static ULONGLONG lastMs = 0;
+		const ULONGLONG now = GetTickCount64();
+		const double dt = lastMs ? (double)(now - lastMs) / 1000.0 : 0.0;
+		lastMs = now;
+		if (dt <= 0.0 || dt > 0.25) // first tick after enable, or a long hitch
+			return;
+
+		if (!GameInputAllowed())
+			return;
+
+		double fwd = 0.0, right = 0.0, up = 0.0;
+		if (GetAsyncKeyState('W') & 0x8000) fwd += 1.0;
+		if (GetAsyncKeyState('S') & 0x8000) fwd -= 1.0;
+		if (GetAsyncKeyState('D') & 0x8000) right += 1.0;
+		if (GetAsyncKeyState('A') & 0x8000) right -= 1.0;
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) up += 1.0;
+		if ((GetAsyncKeyState('C') & 0x8000) || (GetAsyncKeyState(VK_LCONTROL) & 0x8000)) up -= 1.0;
+		if (fwd == 0.0 && right == 0.0 && up == 0.0)
+			return;
+
+		SDK::FRotator viewRot{};
+		if (!SafeGetControlRotationFromPawn(mainChar, viewRot))
+			return;
+
+		// View-relative axes from yaw/pitch (roll ignored).
+		constexpr double kDegToRad = 3.14159265358979323846 / 180.0;
+		const double yaw = viewRot.Yaw * kDegToRad;
+		const double pitch = viewRot.Pitch * kDegToRad;
+		const SDK::FVector forwardVec{ cos(pitch) * cos(yaw), cos(pitch) * sin(yaw), sin(pitch) };
+		const SDK::FVector rightVec{ -sin(yaw), cos(yaw), 0.0 };
+
+		SDK::FVector delta{
+			forwardVec.X * fwd + rightVec.X * right,
+			forwardVec.Y * fwd + rightVec.Y * right,
+			forwardVec.Z * fwd + up,
+		};
+		const double len = sqrt(delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z);
+		if (len < 0.0001)
+			return;
+
+		double speed = (cfg->fFlySpeed > 0.0f) ? (double)cfg->fFlySpeed : 1200.0;
+		if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+			speed *= 2.0; // sprint
+		const double step = speed * dt / len;
+		delta.X *= step;
+		delta.Y *= step;
+		delta.Z *= step;
+
+		SDK::FVector loc{};
+		if (!SafeGetActorLocation(mainChar, loc))
+			return;
+		const SDK::FVector dest{ loc.X + delta.X, loc.Y + delta.Y, loc.Z + delta.Z };
+
+		SDK::FRotator actorRot{};
+		__try
+		{
+			actorRot = mainChar->K2_GetActorRotation();
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+		SafeTeleportActor(mainChar, dest, actorRot);
+	}
+
+	void ApplyMovementExploits(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	{
+		if (!baseClass || !CheatManager::IsObjectValid(baseClass) || !cfg)
+			return;
+
+		auto* mainChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(baseClass);
+		if (!mainChar || !CheatManager::IsObjectValid(mainChar))
+			return;
+
+		const bool wantsFly = cfg->bFly || cfg->bNoclip;
+		const bool wantsSpeed = cfg->bSpeedhack && cfg->fSpeedMultiplier > 1.0f;
+		static bool movementHacked = false;
+		static bool noclipActive = false;
+
+		__try
+		{
+			if (cfg->bGodmode)
+			{
+				mainChar->Invincible = true;
+				if (mainChar->MaxHealthValue > 0.0)
+					mainChar->Health = mainChar->MaxHealthValue;
+				// Clear any death state that slipped through before the RPC block
+				// caught it, so a momentary hit can't leave us ragdolled/dead.
+				mainChar->Dead = false;
+				baseClass->IsLiveSelf = true;
+			}
+
+			if (wantsSpeed)
+			{
+				const double mult = static_cast<double>(cfg->fSpeedMultiplier);
+				const double baseMultiply = mainChar->DefaultMoveMultiply > 0.0
+					? mainChar->DefaultMoveMultiply
+					: 1.0;
+				mainChar->MoveSpeedMultiply = baseMultiply * mult;
+				mainChar->GlobalSpeed = mult;
+
+				const double baseWalk = mainChar->DefaultMaxWalkSpeed > 0.0
+					? mainChar->DefaultMaxWalkSpeed
+					: 600.0;
+				CallSetWalkSpeed(mainChar, baseWalk * mult);
+			}
+
+			// Fly / noclip: zero gravity so the character floats, then drive the
+			// pawn position directly from WASD/Space/C. Movement modes are never
+			// touched (see ApplyManualFlight for why).
+			if (wantsFly)
+			{
+				// Re-assert every tick — the game can reset gravity on respawn
+				// or mode changes, and re-applying the override is cheap.
+				const SDK::FVector zeroGravity{ 0.0, 0.0, 0.0 };
+				CallSetGravity(mainChar, true, zeroGravity);
+				movementHacked = true;
+				ApplyManualFlight(mainChar);
+			}
+			else if (movementHacked)
+			{
+				const SDK::FVector defaultGravity{ 0.0, 0.0, -980.0 };
+				CallSetGravity(mainChar, false, defaultGravity);
+				movementHacked = false;
+			}
+
+			// Noclip capsules: capture each capsule's real collision setting on
+			// enable and restore exactly that on disable. The old code forced
+			// both capsules to QueryAndPhysics on restore, which does not match
+			// the game's defaults and contributed to the character staying
+			// frozen after noclip was turned off.
+			static SDK::ECollisionEnabled savedBodyCollision = SDK::ECollisionEnabled::QueryAndPhysics;
+			static SDK::ECollisionEnabled savedOverlapCollision = SDK::ECollisionEnabled::QueryOnly;
+			static bool collisionSaved = false;
+
+			if (cfg->bNoclip)
+			{
+				if (!noclipActive)
+				{
+					collisionSaved =
+						SafeGetCapsuleCollision(mainChar->BodyCapsule, savedBodyCollision) &&
+						SafeGetCapsuleCollision(mainChar->OverapCollision, savedOverlapCollision);
+					noclipActive = true;
+				}
+				SafeSetCapsuleCollision(mainChar->BodyCapsule, SDK::ECollisionEnabled::NoCollision);
+				SafeSetCapsuleCollision(mainChar->OverapCollision, SDK::ECollisionEnabled::NoCollision);
+			}
+			else if (noclipActive)
+			{
+				SafeSetCapsuleCollision(mainChar->BodyCapsule,
+					collisionSaved ? savedBodyCollision : SDK::ECollisionEnabled::QueryAndPhysics);
+				SafeSetCapsuleCollision(mainChar->OverapCollision,
+					collisionSaved ? savedOverlapCollision : SDK::ECollisionEnabled::QueryOnly);
+				noclipActive = false;
+			}
+
+			// No recoil / no camera shake: zero the shake scalars the gun and
+			// movement effects feed from, remembering the shipped values so the
+			// toggle restores them.
+			static double savedShakeValue = 0.0;
+			static double savedShakeRotation = 0.0;
+			static bool shakeSaved = false;
+			if (cfg->bNoRecoil)
+			{
+				if (!shakeSaved)
+				{
+					savedShakeValue = mainChar->ShakeValue;
+					savedShakeRotation = mainChar->ShakeRotationValue;
+					shakeSaved = true;
+				}
+				mainChar->ShakeValue = 0.0;
+				mainChar->ShakeRotationValue = 0.0;
+				if (mainChar->BPC_CameraShake && CheatManager::IsObjectValid(mainChar->BPC_CameraShake))
+					mainChar->BPC_CameraShake->ShakeEnd();
+			}
+			else if (shakeSaved)
+			{
+				mainChar->ShakeValue = savedShakeValue;
+				mainChar->ShakeRotationValue = savedShakeRotation;
+				shakeSaved = false;
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	}
+}
+
+// GAME THREAD: arm bullet-trace overrides for the next hunter shot window.
+// hkProcessEvent patches LineTraceSingle/SphereTraceSingle OutHit + End, and
+// SpawnShotEffect endpoint, so the kill goes through the game's own shot path.
+void CheatManager::ArmCombatShotRedirect(SDK::AActor* target, const SDK::FVector& hitLocation)
+{
+	if (!target || !IsObjectValid(target))
+		return;
+	if (target->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass()))
+		return;
+
+	g_combatRedirect.active = true;
+	g_combatRedirect.target = target;
+	g_combatRedirect.hitLocation = hitLocation;
+	g_combatRedirect.expireMs = GetTickCount64() + 750;
+}
+
+void CheatManager::CacheSilentAimTarget(SDK::AActor* target, const SDK::FVector& hitLocation)
+{
+	if (!target || !IsObjectValid(target))
+	{
+		g_combatRedirect.silentReady = false;
+		g_combatRedirect.silentTarget = nullptr;
+		return;
+	}
+	g_combatRedirect.silentTarget = target;
+	g_combatRedirect.silentHit = hitLocation;
+	g_combatRedirect.silentReady = true;
+}
+
+void CheatManager::RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C* hunter)
+{
+	if (!hunter || !IsObjectValid(hunter) || !hunter->Class)
+		return;
+
+	SDK::UFunction* fn = g_fnHunterInpActShot;
+	if (!fn)
+	{
+		fn = hunter->Class->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
+		if (fn)
+			g_fnHunterInpActShot = fn;
+	}
+	if (!fn)
+		return;
+
+	const SDK::FInputActionValue actionValue = SDK::UEnhancedInputLibrary::MakeInputActionValueOfType(
+		1.0, 0.0, 0.0, SDK::EInputActionValueType::Boolean);
+
+	SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 parms{};
+	parms.ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = actionValue;
+	parms.ElapsedTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
+	parms.TriggeredTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
+	parms.SourceAction_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = nullptr;
+	hunter->ProcessEvent(fn, &parms);
+}
+
+// GAME THREAD: Phase 4 combat. One pass picks the enemy nearest the crosshair
+// (screen-space distance to the configured aim bone) and then aimbot,
+// triggerbot and silent aim all act on that single pick.
+void CheatManager::HandleCombat(FrameContext& ctx, SDK::TArray<SDK::AActor*>& Players)
+{
+	if (!cfg || (!cfg->bAimbot && !cfg->bTriggerbot && !cfg->bSilentAim))
+		return;
+	if (!inMatchCached.load(std::memory_order_acquire))
+		return;
+	if (!ctx.MyPlayer || !IsObjectValid(ctx.MyPlayer) ||
+		!ctx.PlayerController || !IsObjectValid(ctx.PlayerController))
+		return;
+
+	// Sample the fire edge every tick (even when we early-out later) so a click
+	// made while no target was in range can't "carry over" to a later frame.
+	static bool prevFireDown = false;
+	const bool inputAllowed = GameInputAllowed();
+	const bool fireDown = inputAllowed && (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+	const bool fireEdge = fireDown && !prevFireDown;
+	prevFireDown = fireDown;
+
+	if (!inputAllowed)
+		return;
+
+	const bool aimHeld = cfg->bAimbot && BindHeld(cfg->iAimKey);
+	const bool triggerActive = cfg->bTriggerbot &&
+		(cfg->iTriggerKey == 0 || BindHeld(cfg->iTriggerKey));
+	const bool silentWanted = cfg->bSilentAim && fireEdge;
+	if (!aimHeld && !triggerActive && !silentWanted)
+		return;
+
+	const float centerX = ctx.screenX * 0.5f;
+	const float centerY = ctx.screenY * 0.5f;
+	const int aimBone = (cfg->iAimBone == 1) ? skeleton::spine2 : skeleton::Head;
+
+	SDK::AActor* bestActor = nullptr;
+	SDK::FVector bestWorld{};
+	float bestDist = 1.0e30f;
+
+	for (int i = 0; i < Players.Num(); i++)
+	{
+		if (!Players.IsValidIndex(i))
+			continue;
+		SDK::AActor* actor = Players[i];
+		if (!actor || actor == ctx.MyPlayer || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
+			continue;
+		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+			continue;
+		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+		if (!baseClass || IsDead(actor))
+			continue;
+		if (!IsEnemy(ctx.MyPlayer, baseClass))
+			continue;
+		if (cfg->bAimVisibleOnly && !SafeLineOfSightTo(ctx.PlayerController, actor))
+			continue;
+
+		SDK::FVector world{};
+		if (!SafeGetBoneWorldPos(baseClass->Mesh, aimBone, world) &&
+			!SafeGetActorLocation(actor, world))
+			continue;
+
+		SDK::FVector2D screen{};
+		if (!SafeProjectWorldLocationToScreen(ctx.PlayerController, world, screen) ||
+			!IsScreenCoordValid(screen))
+			continue;
+
+		const float dx = static_cast<float>(screen.X) - centerX;
+		const float dy = static_cast<float>(screen.Y) - centerY;
+		const float dist = sqrtf(dx * dx + dy * dy);
+		if (dist < bestDist)
+		{
+			bestDist = dist;
+			bestActor = actor;
+			bestWorld = world;
+		}
+	}
+
+	if (!bestActor || bestDist > cfg->fAimFov)
+	{
+		if (cfg->bSilentAim)
+			CacheSilentAimTarget(nullptr, {});
+		return;
+	}
+
+	if (cfg->bSilentAim)
+		CacheSilentAimTarget(bestActor, bestWorld);
+
+	if (aimHeld)
+	{
+		SDK::FVector camLoc{};
+		bool haveCam = SafeGetCameraLocation(ctx.PlayerController, camLoc);
+		if (!haveCam)
+			haveCam = SafeGetActorLocation(ctx.MyPlayer, camLoc);
+		SDK::FRotator current{};
+		if (haveCam && SafeGetControlRotationFromPawn(ctx.MyPlayer, current))
+		{
+			constexpr double kRadToDeg = 180.0 / 3.14159265358979323846;
+			const double dx = bestWorld.X - camLoc.X;
+			const double dy = bestWorld.Y - camLoc.Y;
+			const double dz = bestWorld.Z - camLoc.Z;
+			const double desiredYaw = atan2(dy, dx) * kRadToDeg;
+			const double desiredPitch = atan2(dz, sqrt(dx * dx + dy * dy)) * kRadToDeg;
+
+			// Shortest angular path, eased by the smoothing factor (1 = snap).
+			auto wrapDelta = [](double a) {
+				while (a > 180.0) a -= 360.0;
+				while (a < -180.0) a += 360.0;
+				return a;
+			};
+			const double smooth = (cfg->fAimSmooth < 1.0f) ? 1.0 : static_cast<double>(cfg->fAimSmooth);
+			const double t = 1.0 / smooth;
+
+			SDK::FRotator out{};
+			out.Pitch = current.Pitch + wrapDelta(desiredPitch - current.Pitch) * t;
+			out.Yaw = current.Yaw + wrapDelta(desiredYaw - current.Yaw) * t;
+			out.Roll = 0.0;
+			SafeSetControlRotation(ctx.PlayerController, out);
+		}
+	}
+
+	// Triggerbot: arm trace redirect and fire through the hunter's IA_Shot path.
+	if (triggerActive && IsHunter(ctx.MyPlayer))
+	{
+		constexpr float kTriggerWindowPx = 22.0f;
+		static ULONGLONG nextTriggerMs = 0;
+		const ULONGLONG now = GetTickCount64();
+		if (bestDist <= kTriggerWindowPx && now >= nextTriggerMs)
+		{
+			ArmCombatShotRedirect(bestActor, bestWorld);
+			auto* hunter = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*>(ctx.MyPlayer);
+			RequestHunterShot(hunter);
+			nextTriggerMs = now + 400;
+		}
+	}
+
+	// Silent aim: redirect is armed in ProcessEvent when IA_Shot fires (see CombatPre).
 }
 
 void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
@@ -1633,6 +2477,7 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 		}
 	}
 
+	ApplyMovementExploits(baseClass);
 	(void)ctx;
 }
 
@@ -1640,6 +2485,17 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 {
 	if (!cfg->bSetDecoyNum || !character || !DecoyExploitsReady())
 		return;
+	// Never touch the paintable while the owning character is mid-teardown or we're
+	// outside a live match. IsObjectValid only checks the GC index, so a being-destroyed
+	// component still passes it — poking SetMaxDecoySpawnCount / ServerSet then faults
+	// deep in net serialization and can crash the game a few frames later.
+	if (!inMatchCached.load(std::memory_order_acquire) || SafeActorBeingDestroyed(character) ||
+		!IsObjectUsable(character))
+	{
+		lastDecoyPaintable = nullptr;
+		decoyPaintableReadyTickMs = 0;
+		return;
+	}
 	if (GetTickCount64() < decoyQuiesceUntilMs_)
 		return;
 
@@ -1651,11 +2507,10 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 	}
 
 	SDK::URuntimePaintableComponent* paintable = character->RuntimePaintable;
-	if (!paintable || !IsObjectValid(paintable))
+	if (!paintable || !IsObjectUsable(paintable))
 	{
 		lastDecoyPaintable = nullptr;
 		decoyPaintableReadyTickMs = 0;
-		pendingDecoyServerRpc_ = false;
 		return;
 	}
 
@@ -1665,7 +2520,6 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 		lastDecoyPaintable = paintable;
 		decoyPaintableReadyTickMs = now + 1500;
 		lastDecoyCountApplied = -1;
-		pendingDecoyServerRpc_ = false;
 	}
 	if (decoyPaintableReadyTickMs != 0 && now < decoyPaintableReadyTickMs)
 		return;
@@ -1680,40 +2534,74 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 	{
 		lastDecoyCountConfigured = target;
 		lastDecoyCountApplied = -1;
-		pendingDecoyServerRpc_ = false;
 	}
 
-	const int current = paintable->MaxDecoySpawnCount;
-	if (current == target && lastDecoyCountApplied == target && !pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) < 3000)
-		return;
-	if (lastDecoyCountApplied == target && !pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) < 1000)
-		return;
-
-	const int oldCount = current;
-	const bool sendServerRpc = pendingDecoyServerRpc_ && (now - lastDecoyRpcTickMs) >= 1500;
-
-	if (current != target)
+	int current = 0;
+	__try
 	{
-		__try
+		current = paintable->MaxDecoySpawnCount;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
+		return;
+	}
+
+	// Game overwrote our value (replication / teardown). Do NOT fire ProcessEvent to
+	// fight it — that is the crash path from the console logs (was 2 -> re-apply).
+	// Quietly re-patch the field only, or bail if we're clearly in a reset window.
+	const bool gameOverwrote = (lastDecoyCountApplied == target && current != target);
+	if (gameOverwrote)
+	{
+		if (current < target)
 		{
-			paintable->MaxDecoySpawnCount = target;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER)
-		{
-			PhLog("[EXPLOITS:DECOY-NUM] field write fault — skipped\n");
+			// Count dropped toward the default — treat as a reset window, not a race to win.
+			decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
+			PhLog("[EXPLOITS:DECOY-NUM] count reset by game (%d -> %d) — pausing writes\n",
+				target, current);
 			return;
 		}
 	}
 
-	CallSetMaxDecoySpawnCount(paintable, target, sendServerRpc);
+	if (current == target && lastDecoyCountApplied == target)
+		return;
+	if (lastDecoyCountApplied == target && (now - lastDecoyRpcTickMs) < 1000)
+		return;
 
-	if (target != lastDecoyCountApplied || sendServerRpc)
+	const int oldCount = current;
+
+	__try
+	{
+		paintable->MaxDecoySpawnCount = target;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[EXPLOITS:DECOY-NUM] field write fault — skipped\n");
+		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
+		decoyProcessEventDisabled_ = true;
+		return;
+	}
+
+	// ProcessEvent only on the first apply for this paintable/target. Never call the
+	// ServerSet* net RPC. After any fault, stay field-write-only for the rest of the session.
+	const bool firstApply = (lastDecoyCountApplied != target);
+	if (firstApply && !decoyProcessEventDisabled_ && !gameOverwrote)
+	{
+		if (!CallSetMaxDecoySpawnCountLocal(paintable, target))
+		{
+			decoyProcessEventDisabled_ = true;
+			decoyQuiesceUntilMs_ = now + (kDecoyQuiesceMs * 6); // ~30s after a fault
+			PhLog("[EXPLOITS:DECOY-NUM] ProcessEvent disabled for this session (field-write only)\n");
+			return;
+		}
+	}
+
+	if (target != lastDecoyCountApplied)
 		PhLog("[EXPLOITS:DECOY-NUM] MaxDecoySpawnCount -> %d (was %d)%s\n",
-			target, oldCount, sendServerRpc ? " [server]" : "");
+			target, oldCount, decoyProcessEventDisabled_ ? " [field]" : "");
 
 	lastDecoyCountApplied = target;
 	lastDecoyRpcTickMs = now;
-	pendingDecoyServerRpc_ = !sendServerRpc;
 }
 
 void CheatManager::HandleReturnToMainLobby(SDK::APlayerController* playerController)

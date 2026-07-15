@@ -3,6 +3,11 @@
 #include <windows.h>
 #include <winhttp.h>
 #include <tlhelp32.h>
+#include <shellapi.h>
+
+#pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "user32.lib")
 
 #include <cstdint>
 #include <filesystem>
@@ -27,10 +32,12 @@ namespace
 		bool injectOnly = false;
 		bool waitForProcess = false;
 		bool skipUpdateCheck = false;
+		bool launchGame = true;   // launch the game if it isn't already running
 		fs::path manifestPath;
 		fs::path deployDir;
 		std::wstring processName = kDefaultProcess;
 		std::wstring injectDll = kDefaultInjectDll;
+		std::wstring gamePath;    // explicit game exe / launch URL override (--game)
 	};
 
 	struct Manifest
@@ -41,6 +48,8 @@ namespace
 		std::string releasePackage;
 		std::wstring processName = kDefaultProcess;
 		std::wstring injectDll = kDefaultInjectDll;
+		std::wstring gamePath;      // optional explicit exe path
+		std::wstring gameLaunchUrl; // optional steam://rungameid/<id>
 		std::vector<std::string> files;
 	};
 
@@ -163,6 +172,10 @@ namespace
 			manifest.processName = ToWide(*process);
 		if (auto injectDll = ExtractJsonString(json, "injectDll"))
 			manifest.injectDll = ToWide(*injectDll);
+		if (auto gamePath = ExtractJsonString(json, "gamePath"))
+			manifest.gamePath = ToWide(*gamePath);
+		if (auto gameLaunchUrl = ExtractJsonString(json, "gameLaunchUrl"))
+			manifest.gameLaunchUrl = ToWide(*gameLaunchUrl);
 
 		const size_t filesPos = json.find("\"files\"");
 		if (filesPos == std::string::npos)
@@ -753,6 +766,359 @@ namespace
 		}
 	}
 
+	bool IsProcessRunning(DWORD pid);
+
+	std::optional<std::wstring> RegReadString(HKEY root, const wchar_t* subkey, const wchar_t* value)
+	{
+		wchar_t buffer[MAX_PATH]{};
+		DWORD size = sizeof(buffer);
+		DWORD type = 0;
+		const LSTATUS status = RegGetValueW(root, subkey, value, RRF_RT_REG_SZ, &type, buffer, &size);
+		if (status != ERROR_SUCCESS)
+			return std::nullopt;
+		return std::wstring(buffer);
+	}
+
+	std::wstring UnescapeVdfPath(std::string_view raw)
+	{
+		std::string out;
+		out.reserve(raw.size());
+		for (size_t i = 0; i < raw.size(); ++i)
+		{
+			if (raw[i] == '\\' && i + 1 < raw.size() && raw[i + 1] == '\\')
+			{
+				out.push_back('\\');
+				++i;
+			}
+			else
+			{
+				out.push_back(raw[i]);
+			}
+		}
+		return ToWide(out);
+	}
+
+	// Steam library roots: the base Steam dir plus every extra library configured
+	// in steamapps\libraryfolders.vdf.
+	std::vector<fs::path> SteamLibraryFolders()
+	{
+		std::vector<fs::path> libraries;
+
+		std::wstring steamPath;
+		if (auto value = RegReadString(HKEY_CURRENT_USER, L"SOFTWARE\\Valve\\Steam", L"SteamPath"))
+			steamPath = *value;
+		else if (auto machine = RegReadString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"InstallPath"))
+			steamPath = *machine;
+		else
+			steamPath = L"C:/Program Files (x86)/Steam";
+
+		std::error_code ec;
+		const fs::path steamRoot(steamPath);
+		if (fs::exists(steamRoot, ec))
+			libraries.push_back(steamRoot);
+
+		const fs::path vdf = steamRoot / L"steamapps" / L"libraryfolders.vdf";
+		if (auto text = ReadFileUtf8(vdf))
+		{
+			const std::string& json = *text;
+			size_t cursor = 0;
+			const std::string needle = "\"path\"";
+			for (;;)
+			{
+				cursor = json.find(needle, cursor);
+				if (cursor == std::string::npos)
+					break;
+				cursor = json.find('"', cursor + needle.size());
+				if (cursor == std::string::npos)
+					break;
+				++cursor;
+				const size_t end = json.find('"', cursor);
+				if (end == std::string::npos)
+					break;
+				libraries.push_back(fs::path(UnescapeVdfPath(json.substr(cursor, end - cursor))));
+				cursor = end + 1;
+			}
+		}
+
+		return libraries;
+	}
+
+	// Find the game exe under any Steam library's steamapps\common. Tries the
+	// known relative layout first, then a bounded recursive search.
+	std::optional<fs::path> AutoDetectGameExe(const std::wstring& exeName)
+	{
+		std::error_code ec;
+		for (const fs::path& library : SteamLibraryFolders())
+		{
+			const fs::path common = library / L"steamapps" / L"common";
+			if (!fs::exists(common, ec) || !fs::is_directory(common, ec))
+				continue;
+
+			const fs::path known =
+				common / L"MECCHA CHAMELEON" / L"Chameleon" / L"Binaries" / L"Win64" / exeName;
+			if (fs::exists(known, ec))
+				return known;
+
+			for (fs::recursive_directory_iterator it(common, fs::directory_options::skip_permission_denied, ec), end;
+				it != end; it.increment(ec))
+			{
+				if (ec)
+					break;
+				if (it.depth() > 6)
+				{
+					it.disable_recursion_pending();
+					continue;
+				}
+				if (it->is_regular_file(ec) && _wcsicmp(it->path().filename().c_str(), exeName.c_str()) == 0)
+					return it->path();
+			}
+		}
+		return std::nullopt;
+	}
+
+	// Find the Steam app id for the detected game exe by matching the install
+	// folder (the path component right after steamapps\common) against the
+	// "installdir" of every appmanifest_<appid>.acf in every library. Launching
+	// through Steam (steam://rungameid/<id>) instead of the raw exe is what
+	// makes the game start with a signed-in Steam session — a directly spawned
+	// exe skips Steam's handshake and the game reports "not signed in".
+	std::optional<std::wstring> AutoDetectSteamAppId(const fs::path& gameExe)
+	{
+		std::wstring installDir;
+		for (auto it = gameExe.begin(); it != gameExe.end(); ++it)
+		{
+			if (_wcsicmp(it->c_str(), L"common") == 0)
+			{
+				auto next = std::next(it);
+				if (next != gameExe.end())
+					installDir = next->wstring();
+				break;
+			}
+		}
+		if (installDir.empty())
+			return std::nullopt;
+
+		const std::string installDirUtf8 = ToUtf8(installDir);
+
+		std::error_code ec;
+		for (const fs::path& library : SteamLibraryFolders())
+		{
+			const fs::path steamapps = library / L"steamapps";
+			if (!fs::exists(steamapps, ec) || !fs::is_directory(steamapps, ec))
+				continue;
+
+			for (fs::directory_iterator it(steamapps, fs::directory_options::skip_permission_denied, ec), end;
+				it != end; it.increment(ec))
+			{
+				if (ec)
+					break;
+				if (!it->is_regular_file(ec))
+					continue;
+
+				const std::wstring name = it->path().filename().wstring();
+				if (name.rfind(L"appmanifest_", 0) != 0 || it->path().extension() != L".acf")
+					continue;
+
+				auto text = ReadFileUtf8(it->path());
+				if (!text)
+					continue;
+
+				// Pull the quoted value after "installdir" and compare with the
+				// game's install folder (case-insensitive).
+				const std::string needle = "\"installdir\"";
+				size_t pos = text->find(needle);
+				if (pos == std::string::npos)
+					continue;
+				pos = text->find('"', pos + needle.size());
+				if (pos == std::string::npos)
+					continue;
+				++pos;
+				const size_t valueEnd = text->find('"', pos);
+				if (valueEnd == std::string::npos)
+					continue;
+				const std::string value = text->substr(pos, valueEnd - pos);
+				if (_stricmp(value.c_str(), installDirUtf8.c_str()) != 0)
+					continue;
+
+				// appmanifest_<appid>.acf — the id is right there in the name.
+				const std::wstring stem = it->path().stem().wstring(); // appmanifest_123456
+				const size_t underscore = stem.rfind(L'_');
+				if (underscore == std::wstring::npos)
+					continue;
+				const std::wstring appId = stem.substr(underscore + 1);
+				if (appId.empty() ||
+					appId.find_first_not_of(L"0123456789") != std::wstring::npos)
+					continue;
+				return appId;
+			}
+		}
+		return std::nullopt;
+	}
+
+	bool LaunchGameTarget(const std::wstring& target)
+	{
+		// A steam:// URL (or any protocol) goes through ShellExecute; a plain
+		// path is launched directly with its own directory as the working dir.
+		if (target.rfind(L"steam://", 0) == 0 || target.find(L"://") != std::wstring::npos)
+		{
+			const HINSTANCE result = ShellExecuteW(nullptr, L"open", target.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+			return reinterpret_cast<INT_PTR>(result) > 32;
+		}
+
+		const fs::path exe(target);
+		std::error_code ec;
+		if (!fs::exists(exe, ec))
+		{
+			LogError(L"Game exe not found: " + exe.wstring());
+			return false;
+		}
+
+		std::wstring cmd = L"\"" + exe.wstring() + L"\"";
+		std::vector<wchar_t> cmdBuffer(cmd.begin(), cmd.end());
+		cmdBuffer.push_back(L'\0');
+
+		const std::wstring workingDir = exe.parent_path().wstring();
+
+		STARTUPINFOW startupInfo{};
+		startupInfo.cb = sizeof(startupInfo);
+		PROCESS_INFORMATION processInfo{};
+		if (!CreateProcessW(nullptr, cmdBuffer.data(), nullptr, nullptr, FALSE, 0,
+				nullptr, workingDir.empty() ? nullptr : workingDir.c_str(), &startupInfo, &processInfo))
+		{
+			LogError(L"CreateProcess failed for game. win32=" + std::to_wstring(GetLastError()));
+			return false;
+		}
+		CloseHandle(processInfo.hProcess);
+		CloseHandle(processInfo.hThread);
+		return true;
+	}
+
+	// Resolve what to launch: --game override, manifest gamePath/gameLaunchUrl,
+	// then auto-detection from the Steam libraries.
+	std::optional<std::wstring> ResolveGameLaunchTarget(const Options& options, const Manifest& manifest)
+	{
+		if (!options.gamePath.empty())
+			return options.gamePath;
+		if (!manifest.gameLaunchUrl.empty())
+			return manifest.gameLaunchUrl;
+		if (!manifest.gamePath.empty())
+			return manifest.gamePath;
+
+		const std::wstring exeName = !manifest.processName.empty() ? manifest.processName : kDefaultProcess;
+		if (auto detected = AutoDetectGameExe(exeName))
+		{
+			Log(L"[launch] Found game: " + detected->wstring());
+
+			// Prefer launching through Steam so the game gets a signed-in
+			// session; starting the exe directly makes it complain that the
+			// user is not signed in to Steam.
+			if (auto appId = AutoDetectSteamAppId(*detected))
+			{
+				Log(L"[launch] Steam app id: " + *appId + L" — launching via steam://");
+				return L"steam://rungameid/" + *appId;
+			}
+
+			Log(L"[launch] No Steam app id found — falling back to direct exe launch");
+			return detected->wstring();
+		}
+		return std::nullopt;
+	}
+
+	bool ProcessHasModule(DWORD pid, const std::wstring& moduleName)
+	{
+		HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+		if (snapshot == INVALID_HANDLE_VALUE)
+			return false;
+
+		MODULEENTRY32W entry{};
+		entry.dwSize = sizeof(entry);
+		bool found = false;
+		if (Module32FirstW(snapshot, &entry))
+		{
+			do
+			{
+				if (_wcsicmp(entry.szModule, moduleName.c_str()) == 0)
+				{
+					found = true;
+					break;
+				}
+			} while (Module32NextW(snapshot, &entry));
+		}
+		CloseHandle(snapshot);
+		return found;
+	}
+
+	struct MainWindowSearch
+	{
+		DWORD pid = 0;
+		bool found = false;
+	};
+
+	BOOL CALLBACK MainWindowEnumProc(HWND window, LPARAM param)
+	{
+		auto* search = reinterpret_cast<MainWindowSearch*>(param);
+		DWORD windowPid = 0;
+		GetWindowThreadProcessId(window, &windowPid);
+		if (windowPid != search->pid)
+			return TRUE;
+		if (!IsWindowVisible(window))
+			return TRUE;
+		if (GetWindow(window, GW_OWNER) != nullptr)
+			return TRUE;
+		if (GetWindowTextLengthW(window) <= 0)
+			return TRUE;
+		search->found = true;
+		return FALSE;
+	}
+
+	bool ProcessHasMainWindow(DWORD pid)
+	{
+		MainWindowSearch search;
+		search.pid = pid;
+		EnumWindows(MainWindowEnumProc, reinterpret_cast<LPARAM>(&search));
+		return search.found;
+	}
+
+	// Wait until the game is actually "loaded enough" to inject into: its D3D12
+	// renderer module is present and a real main window exists, then a short
+	// settle so kiero's Present hook can attach cleanly.
+	bool WaitForGameReady(DWORD pid, DWORD timeoutMs)
+	{
+		const ULONGLONG deadline = GetTickCount64() + timeoutMs;
+		bool rendererReady = false;
+		bool windowReady = false;
+		for (;;)
+		{
+			if (!IsProcessRunning(pid))
+			{
+				LogError(L"Game process exited while waiting for it to load.");
+				return false;
+			}
+			if (!rendererReady && ProcessHasModule(pid, L"d3d12.dll"))
+			{
+				rendererReady = true;
+				Log(L"[launch] Renderer (d3d12.dll) loaded.");
+			}
+			if (!windowReady && ProcessHasMainWindow(pid))
+			{
+				windowReady = true;
+				Log(L"[launch] Game window is up.");
+			}
+			if (rendererReady && windowReady)
+			{
+				Log(L"[launch] Game loaded — settling before injection...");
+				Sleep(4000);
+				return true;
+			}
+			if (GetTickCount64() >= deadline)
+			{
+				Log(L"[launch] Readiness wait timed out; injecting anyway.");
+				return IsProcessRunning(pid);
+			}
+			Sleep(500);
+		}
+	}
+
 	bool IsProcessRunning(DWORD pid)
 	{
 		HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
@@ -836,10 +1202,17 @@ namespace
 			L"  --local         Use files next to the loader / deploy folder (no HTTP download)\n"
 			L"  --inject-only   Skip download/copy; require files already in deploy folder\n"
 			L"  --wait          Wait up to 5 minutes for the game process\n"
+			L"  --launch        Launch the game if it isn't running (default on)\n"
+			L"  --no-launch     Do not launch the game; only inject if it's already running\n"
+			L"  --game <path>   Game exe path or steam:// URL to launch\n"
 			L"  --skip-update-check  Do not check GitHub for a newer release\n"
 			L"  --manifest <path>  Manifest JSON (default: manifest.json next to loader)\n"
 			L"  --deploy <dir>  Deploy folder (default: Desktop\\peterhack)\n"
 			L"  --help          Show this help\n\n"
+			L"Auto-launch:\n"
+			L"  If the game isn't running, the loader launches it (auto-detected from your\n"
+			L"  Steam libraries), waits for the renderer + window to load, then injects.\n"
+			L"  Override the target with --game or manifest gamePath / gameLaunchUrl.\n\n"
 			L"Manifest baseUrl:\n"
 			L"  \"local\"  -> copy from loader directory\n"
 			L"  https://...  -> download each file listed in manifest.json\n"
@@ -882,6 +1255,21 @@ namespace
 			if (arg == L"--skip-update-check")
 			{
 				options.skipUpdateCheck = true;
+				continue;
+			}
+			if (arg == L"--launch")
+			{
+				options.launchGame = true;
+				continue;
+			}
+			if (arg == L"--no-launch")
+			{
+				options.launchGame = false;
+				continue;
+			}
+			if (arg == L"--game" && i + 1 < argc)
+			{
+				options.gamePath = argv[++i];
 				continue;
 			}
 			if (arg == L"--manifest" && i + 1 < argc)
@@ -944,6 +1332,33 @@ int wmain(int argc, wchar_t** argv)
 	const fs::path dllPath = options->deployDir / injectDll;
 
 	DWORD pid = FindProcessId(processName);
+	bool weLaunchedGame = false;
+
+	// If the game isn't running and launching is allowed, start it ourselves,
+	// then wait for it to come up and finish loading before injecting.
+	if (!pid && options->launchGame && !options->injectOnly)
+	{
+		if (auto target = ResolveGameLaunchTarget(*options, manifest))
+		{
+			Log(L"[launch] Starting game: " + *target);
+			if (LaunchGameTarget(*target))
+			{
+				weLaunchedGame = true;
+				Log(L"[launch] Waiting for " + processName + L" to appear...");
+				pid = WaitForProcess(processName, 5 * 60 * 1000);
+			}
+			else
+			{
+				LogError(L"Failed to launch the game. Start it manually, or pass --game <path>.");
+			}
+		}
+		else
+		{
+			LogError(L"Could not locate the game exe automatically. "
+				L"Pass --game <path> or set gamePath in manifest.json.");
+		}
+	}
+
 	if (!pid && options->waitForProcess)
 	{
 		Log(L"Waiting for " + processName + L"...");
@@ -951,7 +1366,7 @@ int wmain(int argc, wchar_t** argv)
 	}
 	if (!pid)
 	{
-		LogError(L"Process not found: " + processName + L" (launch the game or use --wait)");
+		LogError(L"Process not found: " + processName + L" (launch the game, use --wait, or --game <path>)");
 		return 4;
 	}
 	if (!IsProcessRunning(pid))
@@ -959,6 +1374,11 @@ int wmain(int argc, wchar_t** argv)
 		LogError(L"Process exited before injection.");
 		return 4;
 	}
+
+	// Only gate on readiness when we started the game (an already-running game
+	// is assumed loaded, matching the previous inject-immediately behaviour).
+	if (weLaunchedGame)
+		WaitForGameReady(pid, 5 * 60 * 1000);
 
 	Log(L"Injecting " + dllPath.wstring() + L" into pid " + std::to_wstring(pid));
 	if (!InjectDll(pid, dllPath))
