@@ -10,7 +10,7 @@
 // the target process, BridgeStartV1 copies it into bridge-owned state, and then the
 // injector may safely reclaim the remote block after the remote start thread exits.
 // Keep the fixed offsets in sync with the controller serializer.
-constexpr std::uint32_t BridgeStartMagicV1 = 0x3153434D; // bytes: "MCS1"
+constexpr std::uint32_t BridgeStartMagicV1 = 0x314B4850; // bytes: "PHK1"
 constexpr std::uint32_t BridgeStartAbiV1 = 1;
 constexpr std::uint32_t BridgeBootstrapProtocolV1 = 1;
 

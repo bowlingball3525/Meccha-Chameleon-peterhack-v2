@@ -28,6 +28,11 @@ struct CamoSettings
 	bool hotkeysEnabled = false;
 	bool showDiagnostics = false;
 
+	bool UsesFill() const
+	{
+		return frontRegionMode == 1 || sideRegionMode == 1 || backRegionMode == 1;
+	}
+
 	void ApplyDefaults();
 	void Load();
 	void Save() const;

@@ -29,7 +29,7 @@ Output lands in **`%USERPROFILE%\Desktop\peterhack\`**:
 | `peterhack-loader.exe` | Downloads/copies DLLs and injects into the game |
 | `peterhack.dll` | Main overlay (menu, ESP, tools, camo client) |
 | `manifest.json` | File list for the loader |
-| `bridge\meccha-xenos-bridge.dll` | Camouflage TCP bridge |
+| `bridge\peterhack-bridge.dll` | Camouflage TCP bridge |
 | `bridge\mesh-profiles\*.json` | Mesh paint profiles |
 
 Close the game before building if you get `LNK1104: cannot open peterhack.dll` (file locked).
@@ -151,7 +151,7 @@ Or use `build.bat`, which also compiles the camo bridge via `runtime\scripts\bui
 | Build fails: cannot open `peterhack.dll` | Close game and loader; rebuild |
 | No menu | Confirm injection (console should show DX12 hook messages); focus game window |
 | Tools/camo do nothing | Enable toggles in menu; for camo enable hotkeys + wait 3s in match |
-| Bridge error on Camo tab | Run `build.bat`; ensure `bridge\meccha-xenos-bridge.dll` exists next to loader |
+| Bridge error on Camo tab | Run `build.bat`; ensure `bridge\peterhack-bridge.dll` exists next to loader |
 | Game crash | Unload with **END**, update to latest build; check console for `[ProcessEvent] Init fault` |
 | Console spam | Fixed in recent builds (single-line logging); rebuild if you see duplicates |
 
@@ -175,4 +175,3 @@ Current target version: **2.6.0** (see README).
 - [Dumper-7](https://github.com/Encryqed/Dumper-7) — SDK generation  
 - [Unreal-Internal-Base](https://github.com/GLX-ILLUSION/Unreal-Internal-Base) — base patterns  
 - [Dear ImGui](https://github.com/ocornut/imgui) — UI  
-- [MecchaCamouflage](https://github.com/acentrist/MecchaCamouflage) — camo bridge reference  

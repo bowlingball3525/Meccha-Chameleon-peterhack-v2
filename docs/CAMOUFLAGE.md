@@ -1,8 +1,8 @@
-# Camouflage (MecchaCamouflage mesh_first_paint)
+# Camouflage (Peterhack mesh_first_paint)
 
 peterhack loads the native camo **bridge** in-process and talks to it over TCP (`BridgeStartV1` + hello handshake, or legacy port **47654**).
 
-1. **Load** `meccha-xenos-bridge.dll` into the game process.
+1. **Load** `peterhack-bridge.dll` into the game process.
 2. Bridge listens on **127.0.0.1** (dynamic port from `BridgeStartV1`, or 47654 for legacy builds).
 3. peterhack sends **`paint_full_route`** with mesh-first-paint JSON.
 
@@ -14,7 +14,7 @@ Desktop/peterhack/
   peterhack-loader.exe
   manifest.json
   bridge/
-    meccha-xenos-bridge.dll
+    peterhack-bridge.dll
     mesh-profiles/
       paintman.mesh-profile-v2.json
       paintman_cube.mesh-profile-v2.json
@@ -65,7 +65,7 @@ Settings persist to `C:\peterhack\camo.cfg`.
 
 ## Rebuilding after bridge source updates
 
-Replace `runtime/src/bridge.cpp` from upstream MecchaCamouflage if needed, then:
+Edit `runtime/src/bridge.cpp` as needed, then:
 
 ```bat
 build.bat

@@ -713,7 +713,7 @@ namespace
             return {};
         }
         std::wstring base = local_appdata;
-        const std::wstring root = base + L"\\MecchaCamouflage";
+        const std::wstring root = base + L"\\Peterhack";
         const std::wstring runtime = root + L"\\runtime";
         if (!ensure_directory(root) || !ensure_directory(runtime))
         {
@@ -4387,7 +4387,7 @@ namespace
     {
         const double progress = total_steps > 0 ? std::max(0.0, std::min(1.0, static_cast<double>(step) / static_cast<double>(total_steps))) : 0.0;
         const double eta_ms = progress > 0.02 ? std::max(0.0, (elapsed_ms / progress) - elapsed_ms) : 0.0;
-        std::string out = "Meccha p " + std::to_string(step) + "/" + std::to_string(total_steps) +
+        std::string out = "Peterhack p " + std::to_string(step) + "/" + std::to_string(total_steps) +
                           " " + stage +
                           " " + std::to_string(static_cast<int>(progress * 100.0)) + "%" +
                           " elapsed=" + std::to_string(static_cast<int>(elapsed_ms / 1000.0)) + "s";
@@ -7414,7 +7414,7 @@ namespace
 
     // =============================================================================
     // Section: Runtime triangle cache and mesh-first paint planning
-    // Risk: high. Planner guards block unsafe samples instead of guessing.
+    // Risk: high. Planner marks unsafe samples; replay skips them instead of aborting.
     // =============================================================================
 
     auto mesh_first_finite_vector(const sdk::FVector& value) -> bool
@@ -10447,7 +10447,7 @@ namespace
         };
         std::string document{};
         document.reserve(256 + strokes.size() * 256);
-        document += "{\"schema\":\"meccha_uv_replay_plan_v1\"";
+        document += "{\"schema\":\"peterhack_uv_replay_plan_v1\"";
         document += ",\"texture_size\":" + std::to_string(std::max(1, texture_size));
         document += ",\"stroke_count\":" + std::to_string(strokes.size());
         document += ",\"effective_fill_end\":" + std::to_string(effective_fill_end);
@@ -12015,14 +12015,19 @@ namespace
                     std::to_string(research_force_paint_color ? 0 : plan_stats.enabled_samples);
         metadata += ",\"research_constant_paint_color_assignments\":" +
                     std::to_string(research_constant_paint_color_assignments);
-        if (plan_stats.unsafe_enabled > 0)
+        if (any_paint_region && (plan_stats.enabled_samples - plan_stats.unsafe_enabled) <= 0)
         {
             return response_json(false,
                                  "planner_blocked",
                                  0,
                                  1,
-                                 "mesh-first planner found unsafe color-transfer candidates in enabled regions; replay was blocked instead of skipping samples",
+                                 "mesh-first planner found no safe paint samples in enabled regions",
                                  metadata + ",\"replay_blocked\":true");
+        }
+        if (plan_stats.unsafe_enabled > 0)
+        {
+            metadata += ",\"unsafe_samples_skipped\":" + std::to_string(plan_stats.unsafe_enabled);
+            metadata += ",\"planner_unsafe_policy\":\"skip_samples_continue\"";
         }
         if (research_artifacts)
         {
@@ -12233,6 +12238,10 @@ namespace
                                                                  front_region_mode,
                                                                  side_region_mode,
                                                                  back_region_mode);
+            if (mode == MeshFirstRegionMode::Paint && sample.unsafe)
+            {
+                continue;
+            }
             const double horizontal = scanline_camera_right_available
                                           ? sdk_vec_dot(sdk_vec_sub(sample.world_position,
                                                                     center_ray.location),

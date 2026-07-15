@@ -550,7 +550,7 @@
         out += std::to_string(failures);
         out += ",\"message\":\"";
         out += json_escape(message);
-        out += "\",\"timing_ms\":{},\"metadata\":{\"bridge\":\"meccha-direct-bridge-v1\"";
+        out += "\",\"timing_ms\":{},\"metadata\":{\"bridge\":\"peterhack-bridge-v1\"";
         if (!metadata.empty())
         {
             out += ",";

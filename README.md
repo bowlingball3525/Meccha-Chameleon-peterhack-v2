@@ -8,7 +8,7 @@ Internal overlay and tools for **Meccha Chameleon** (DirectX 12). Currently targ
 ## Quick start
 
 ```bat
-git clone https://github.com/bowlingball3525/Meccha-Chameleon-peterhack-v2.git
+git clone <your-peterhack-repo-url>
 cd peterhack
 build.bat
 "%USERPROFILE%\Desktop\peterhack\peterhack-loader.exe" --local --wait
@@ -22,13 +22,13 @@ After `build.bat`, `%USERPROFILE%\Desktop\peterhack\` contains:
 
 - `peterhack-loader.exe` — inject helper (local files + optional HTTP manifest)
 - `peterhack.dll` — ESP, tools, ImGui menu, camo client
-- `bridge\meccha-xenos-bridge.dll` — mesh-first-paint camouflage bridge
+- `bridge\peterhack-bridge.dll` — mesh-first-paint camouflage bridge
 
 ## Features
 
 - **ESP** — box, skeleton, lines, distance, names, roles, decoys
 - **Tools** — survivor/hunter exploits, magnet, kill helpers, FOV, anti-kick, name change
-- **Camouflage** — MecchaCamouflage-style mesh paint (F10 / F2 / F3 / F4 hotkeys)
+- **Camouflage** — mesh-first-paint camo (F10 / F2 / F3 / F4 hotkeys)
 - **Loader** — single deploy folder, `--local --wait` workflow
 
 ## Build requirements
@@ -42,4 +42,4 @@ This project is for educational and research purposes only. The authors are not 
 
 ## Credits
 
-[Dumper-7](https://github.com/Encryqed/Dumper-7) · [Unreal-Internal-Base](https://github.com/GLX-ILLUSION/Unreal-Internal-Base) · [imgui](https://github.com/ocornut/imgui) · [MecchaCamouflage](https://github.com/acentrist/MecchaCamouflage)
+[Dumper-7](https://github.com/Encryqed/Dumper-7) · [Unreal-Internal-Base](https://github.com/GLX-ILLUSION/Unreal-Internal-Base) · [imgui](https://github.com/ocornut/imgui)

@@ -28,7 +28,7 @@ extern std::atomic<DWORD> g_GameThreadId;
 namespace
 {
 	constexpr int kBridgePort = 47654;
-	const char* kBridgeDllName = "meccha-xenos-bridge.dll";
+	const char* kBridgeDllName = "peterhack-bridge.dll";
 	const char* kProcessName = "PenguinHotel-Win64-Shipping.exe";
 
 	std::once_flag g_wsaOnce;
@@ -507,16 +507,15 @@ std::wstring CamoManager::ResolveBridgeDllPath() const
 
 HMODULE CamoManager::GetBridgeModuleHandle() const
 {
-	HMODULE mod = GetModuleHandleW(L"meccha-xenos-bridge.dll");
+	HMODULE mod = GetModuleHandleW(L"peterhack-bridge.dll");
 	if (mod)
 		return mod;
-	return GetModuleHandleW(L"runtime-bridge.dll");
+	return nullptr;
 }
 
 // The bridge writes progress next to its own loaded module as
 // "<module path>.progress.json" (see write_bridge_progress in the bridge), so
-// derive it from the live module handle rather than the configured DLL name -
-// they can differ (meccha-xenos-bridge.dll vs runtime-bridge.dll).
+// derive it from the live module handle rather than the configured DLL name.
 std::wstring CamoManager::BridgeProgressPath() const
 {
 	HMODULE mod = GetBridgeModuleHandle();
@@ -762,7 +761,7 @@ bool CamoManager::InvokeBridgeStartV1(BridgeStartBlockV1& block)
 		return true;
 	}
 
-	PhLog("[CAMO] BridgeStartV1 failed exit=%lu state=%u win32=%lu winsock=%lu\n",
+	PhLog("[peterhack] BridgeStartV1 failed exit=%lu state=%u win32=%lu winsock=%lu\n",
 		static_cast<unsigned long>(exitCode),
 		static_cast<unsigned>(block.result_state),
 		static_cast<unsigned long>(block.win32_error),
@@ -800,7 +799,7 @@ bool CamoManager::EnsureBridgeListenerStarted()
 	{
 		bridgeUsesHello_.store(false);
 		bridgePort_.store(kBridgePort);
-		PhLog("[CAMO] Using legacy bridge listener on 127.0.0.1:%d\n", kBridgePort);
+		PhLog("[peterhack] Using legacy bridge listener on 127.0.0.1:%d\n", kBridgePort);
 		return true;
 	}
 
@@ -815,9 +814,9 @@ bool CamoManager::EnsureBridgeListenerStarted()
 
 	if (bridgePort_.load() > 0 && !PingBridge(400))
 	{
-		PhLog("[CAMO] Bridge ping failed — requesting shutdown before restart\n");
+		PhLog("[peterhack] Bridge ping failed — requesting shutdown before restart\n");
 		if (!RequestBridgeShutdown(12000))
-			PhLog("[CAMO] Bridge shutdown timed out — retrying start\n");
+			PhLog("[peterhack] Bridge shutdown timed out — retrying start\n");
 		ClearBridgeIdentity();
 		if (!BridgeModuleLoaded())
 		{
@@ -852,7 +851,7 @@ bool CamoManager::EnsureBridgeListenerStarted()
 			{
 				bridgeUsesHello_.store(false);
 				bridgePort_.store(static_cast<int>(block.bound_port));
-				PhLog("[CAMO] Reconnected to existing legacy bridge on port %u\n", block.bound_port);
+				PhLog("[peterhack] Reconnected to existing legacy bridge on port %u\n", block.bound_port);
 				return true;
 			}
 		}
@@ -866,7 +865,7 @@ bool CamoManager::EnsureBridgeListenerStarted()
 		std::memcpy(bridgeInstanceGuid_, block.instance_guid, sizeof(bridgeInstanceGuid_));
 	}
 	bridgePort_.store(static_cast<int>(block.bound_port));
-	PhLog("[CAMO] BridgeStartV1 listening on 127.0.0.1:%u\n", block.bound_port);
+	PhLog("[peterhack] BridgeStartV1 listening on 127.0.0.1:%u\n", block.bound_port);
 	return true;
 }
 
@@ -891,7 +890,7 @@ bool CamoManager::EnsureBridge()
 		if (PingBridge(800))
 			return true;
 
-		PhLog("[CAMO] Bridge marked ready but TCP ping failed — restarting listener\n");
+		PhLog("[peterhack] Bridge marked ready but TCP ping failed — restarting listener\n");
 		InvalidateBridgeConnection();
 	}
 
@@ -922,19 +921,19 @@ bool CamoManager::EnsureBridge()
 		if (GetFileAttributesW(dllPath.c_str()) == INVALID_FILE_ATTRIBUTES)
 		{
 			bridgeState_.store(CamoBridgeState::Error);
-			SetError("Bridge DLL missing — build with build.bat or copy meccha-xenos-bridge.dll next to peterhack.dll");
-			PhLog("[CAMO] Bridge DLL missing at expected path\n");
+			SetError("Bridge DLL missing — build with build.bat or copy peterhack-bridge.dll next to peterhack.dll");
+			PhLog("[peterhack] Bridge DLL missing at expected path\n");
 			return false;
 		}
 
 		if (!LoadLibraryW(dllPath.c_str()))
 		{
 			bridgeState_.store(CamoBridgeState::Error);
-			SetError("LoadLibrary failed for meccha-xenos-bridge.dll");
-			PhLog("[CAMO] LoadLibrary failed for meccha-xenos-bridge.dll\n");
+			SetError("LoadLibrary failed for peterhack-bridge.dll");
+			PhLog("[peterhack] LoadLibrary failed for peterhack-bridge.dll\n");
 			return false;
 		}
-		PhLog("[CAMO] Loaded meccha-xenos-bridge.dll\n");
+		PhLog("[peterhack] Loaded peterhack-bridge.dll\n");
 	}
 
 	if (!EnsureBridgeListenerStarted())
@@ -954,10 +953,10 @@ bool CamoManager::EnsureBridge()
 				{
 					bridgeState_.store(CamoBridgeState::Error);
 					SetError("Bridge is not the mesh_first_paint build");
-					PhLog("[CAMO] Bridge missing mesh_first_paint capability\n");
+					PhLog("[peterhack] Bridge missing mesh_first_paint capability\n");
 					return false;
 				}
-				PhLog("[CAMO] Bridge ready on 127.0.0.1:%d\n", bridgePort_.load());
+				PhLog("[peterhack] Bridge ready on 127.0.0.1:%d\n", bridgePort_.load());
 			}
 			MarkBridgeReady(bridgePort_.load());
 			SetStatus("Camo bridge ready");
@@ -968,7 +967,7 @@ bool CamoManager::EnsureBridge()
 
 	bridgeState_.store(CamoBridgeState::Error);
 	SetError("Bridge TCP not responding after start");
-	PhLog("[CAMO] Bridge TCP not responding on 127.0.0.1:%d\n", bridgePort_.load());
+	PhLog("[peterhack] Bridge TCP not responding on 127.0.0.1:%d\n", bridgePort_.load());
 	return false;
 }
 
@@ -1097,8 +1096,11 @@ bool CamoManager::RunJob(CamoJobKind kind)
 	if (response.find("\"success\":true") == std::string::npos)
 	{
 		UpdateDiagnostics(response, kind, false);
-		SetError("Paint failed — see console");
-		PhLog("[CAMO] response: %s\n", response.c_str());
+		if (response.find("\"stage\":\"planner_blocked\"") != std::string::npos)
+			SetError("Camo blocked — pose too extreme (e.g. emote clipping into wall). Stand normally or use fill-only regions.");
+		else
+			SetError("Paint failed — see console");
+		PhLog("[peterhack] response: %s\n", response.c_str());
 		return false;
 	}
 
@@ -1206,7 +1208,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	{
 		ClearHotkeyEdges();
 		s_hotkeyArmTickMs = now + 500;
-		PhLog("[CAMO] Match entered — camo hotkeys armed in 0.5s (enable in Camo tab if needed)\n");
+		PhLog("[peterhack] Match entered — camo hotkeys armed in 0.5s (enable in Camo tab if needed)\n");
 		if (settings.hotkeysEnabled && bridgeState_.load() != CamoBridgeState::Ready)
 			StartBridgeLoadAsync();
 	}
@@ -1233,7 +1235,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 
 	if (HotkeyPressed(settings.startHotkey))
 	{
-		PhLog("[CAMO] Paint hotkey pressed\n");
+		PhLog("[peterhack] Paint hotkey pressed\n");
 		RequestPaint(CamoJobKind::Paint);
 	}
 	else if (HotkeyPressed(settings.previewHotkey))
@@ -1262,7 +1264,7 @@ void CamoManager::DrawMenu()
 {
 	const bool busy = busy_.load();
 
-	ImGui::Text("MecchaCamouflage mesh_first_paint");
+	ImGui::Text("Peterhack mesh_first_paint");
 	ImGui::Separator();
 
 	const auto state = bridgeState_.load();
@@ -1337,34 +1339,47 @@ void CamoManager::DrawMenu()
 	ImGui::SliderFloat("Side UV", &settings.sideSourceMaxUv, 0.001f, 0.08f, "%.3f");
 	ImGui::SliderFloat("Front/back UV", &settings.frontBackSourceMaxUv, 0.001f, 0.45f, "%.3f");
 
-	RegionModeCombo("Front", settings.frontRegionMode);
-	RegionModeCombo("Side", settings.sideRegionMode);
-	RegionModeCombo("Back", settings.backRegionMode);
+	ImGui::Separator();
 	ImGui::Checkbox("Auto material", &settings.autoMaterial);
-
 	if (!settings.autoMaterial)
 	{
 		ImGui::SliderFloat("Metallic", &settings.metallic, 0.0f, 1.0f);
 		ImGui::SliderFloat("Roughness", &settings.roughness, 0.0f, 1.0f);
 	}
 
-	float fillRgb[3]{};
-	FillColorToFloat3(settings.fillColorHex, fillRgb);
-	ImVec4 fillPreview(fillRgb[0], fillRgb[1], fillRgb[2], 1.0f);
-	if (ImGui::ColorButton("##fill_color_btn", fillPreview))
-		ImGui::OpenPopup("popup_fill_color");
-	ImGui::SameLine();
-	ImGui::Text("Fill color");
-	if (ImGui::BeginPopup("popup_fill_color"))
+	ImGui::Separator();
+	RegionModeCombo("Front", settings.frontRegionMode);
+	RegionModeCombo("Side", settings.sideRegionMode);
+	RegionModeCombo("Back", settings.backRegionMode);
+
+	const bool usesFill = settings.UsesFill();
+	if (usesFill)
 	{
-		if (ImGui::ColorPicker3("##fill_color_pick", fillRgb,
-			ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_DisplayRGB |
-			ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_InputRGB))
-			FillColorFromFloat3(fillRgb, settings.fillColorHex, IM_ARRAYSIZE(settings.fillColorHex));
-		ImGui::EndPopup();
+		ImGui::Separator();
+		ImGui::Text("Fill");
+		float fillRgb[3]{};
+		FillColorToFloat3(settings.fillColorHex, fillRgb);
+		ImVec4 fillPreview(fillRgb[0], fillRgb[1], fillRgb[2], 1.0f);
+		if (ImGui::ColorButton("##fill_color_btn", fillPreview))
+			ImGui::OpenPopup("popup_fill_color");
+		ImGui::SameLine();
+		ImGui::Text("Fill color");
+		if (ImGui::BeginPopup("popup_fill_color"))
+		{
+			if (ImGui::ColorPicker3("##fill_color_pick", fillRgb,
+				ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_DisplayRGB |
+				ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_InputRGB))
+				FillColorFromFloat3(fillRgb, settings.fillColorHex, IM_ARRAYSIZE(settings.fillColorHex));
+			ImGui::EndPopup();
+		}
+		ImGui::SliderFloat("Fill metallic", &settings.fillMetallic, 0.0f, 1.0f);
+		ImGui::SliderFloat("Fill roughness", &settings.fillRoughness, 0.0f, 1.0f);
 	}
-	ImGui::SliderFloat("Fill metallic", &settings.fillMetallic, 0.0f, 1.0f);
-	ImGui::SliderFloat("Fill roughness", &settings.fillRoughness, 0.0f, 1.0f);
+	else
+	{
+		ImGui::Separator();
+		ImGui::TextDisabled("Fill settings (enable Fill on a region)");
+	}
 
 	ImGui::Separator();
 	ImGui::Text("Presets");

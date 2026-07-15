@@ -1,4 +1,4 @@
-# Build official MecchaCamouflage bridge (camo-only, no exploit merge).
+# Build peterhack camouflage bridge (camo-only).
 # Run from repo root: powershell -File runtime\scripts\build-camo-bridge.ps1
 
 param(
@@ -54,7 +54,7 @@ function Invoke-VsToolCommand {
 
 Push-Location $RuntimeRoot
 try {
-    $BridgeOutput = Join-Path $OutDir "runtime-bridge.dll"
+    $BridgeOutput = Join-Path $OutDir "peterhack-bridge.dll"
     Invoke-VsToolCommand -ToolName "cl.exe" -ToolArgs @(
         "/nologo", "/std:c++17", "/EHsc", "/O2", "/LD", $BridgeSource,
         "/I", (Join-Path $RuntimeRoot "include"),
@@ -67,7 +67,7 @@ try {
 
     $BridgeDeploy = Join-Path $DeployDir "bridge"
     New-Item -ItemType Directory -Force -Path $BridgeDeploy | Out-Null
-    Copy-Item -Force $BridgeOutput (Join-Path $BridgeDeploy "meccha-xenos-bridge.dll")
+    Copy-Item -Force $BridgeOutput (Join-Path $BridgeDeploy "peterhack-bridge.dll")
 
     $ProfilesSrc = Join-Path $RuntimeRoot "resources\mesh-profiles"
     $ProfilesDst = Join-Path $BridgeDeploy "mesh-profiles"

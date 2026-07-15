@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-sdk = Path(r"C:\Users\lance\Desktop\chameleonEsp-upstream\peterhack\SDK")
+sdk = Path(__file__).resolve().parent.parent / "peterhack" / "SDK"
 
 
 def find_in_class(text: str, class_marker: str, field_name: str):

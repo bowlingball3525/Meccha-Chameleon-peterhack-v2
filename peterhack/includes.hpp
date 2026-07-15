@@ -103,6 +103,11 @@ inline SDK::UFunction* g_fnDeathPlayer = nullptr;
 inline SDK::UFunction* g_fnRagdoll = nullptr;
 inline SDK::UFunction* g_fnGoToSpectate = nullptr;
 inline SDK::UFunction* g_fnShowDeathWidget = nullptr;
+inline SDK::UFunction* g_fnDeathEvent = nullptr;
+inline SDK::UFunction* g_fnDeathUIShowAndAwait = nullptr;
+inline SDK::UFunction* g_fnSpawnDeathSplash = nullptr;
+inline SDK::UFunction* g_fnSetSpectatingState = nullptr;
+inline SDK::UFunction* g_fnGameStateShowDeathWidget = nullptr;
 
 // Combat ProcessEvent hooks — line/sphere trace redirect + shot effect endpoint override.
 inline SDK::UFunction* g_fnLineTraceSingle = nullptr;
@@ -114,6 +119,8 @@ inline SDK::UFunction* g_fnSpawnShotEffectClient = nullptr;
 inline SDK::UFunction* g_fnShakeStart = nullptr;
 inline SDK::UFunction* g_fnItemShakeStart = nullptr;
 inline SDK::UFunction* g_fnHunterInpActShot = nullptr;
+inline SDK::UFunction* g_fnKillPlayer = nullptr;
+inline SDK::UFunction* g_fnClientRestart = nullptr;
 
 // Armed by HandleCombat on fire/trigger; consumed by hkProcessEvent trace patches.
 struct CombatShotRedirect
@@ -133,9 +140,15 @@ inline CombatShotRedirect g_combatRedirect{};
 void InitCombatFunctionPointers();
 void ForceRefreshCombatFunctionPointers();
 
-// The local player's pawn, published by the game-thread scan so the ProcessEvent
-// hook can cheaply tell "our" death RPCs from everyone else's by pointer.
+// Local player identity for the ProcessEvent hook — pointer-only compares on the
+// hot path; never touch UObjects there except in __try blocks for parm checks.
 inline std::atomic<void*> g_localPawn{ nullptr };
+inline std::atomic<void*> g_localPlayerState{ nullptr };
+// The cLeon character body — kept even while spectating so godmode can still
+// block death RPCs targeting the ragdolled corpse.
+inline std::atomic<void*> g_localCharacterBody{ nullptr };
+
+void ForceRefreshGodmodeFunctionPointers();
 
 // Re-resolve kick/visibility UFunction* after world/server changes (BP functions are recreated).
 void ForceRefreshKickFunctionPointers();

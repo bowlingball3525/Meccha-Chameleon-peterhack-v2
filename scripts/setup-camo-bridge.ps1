@@ -7,7 +7,7 @@ $bridgeDir = Join-Path $deploy "bridge"
 $srcProfiles = Join-Path $root "runtime\resources\mesh-profiles"
 $dstProfiles = Join-Path $bridgeDir "mesh-profiles"
 
-if (-not (Test-Path (Join-Path $bridgeDir "meccha-xenos-bridge.dll"))) {
+if (-not (Test-Path (Join-Path $bridgeDir "peterhack-bridge.dll"))) {
     Write-Host "Missing bridge DLL. Build first:" -ForegroundColor Yellow
     Write-Host "  $root\build.bat" -ForegroundColor Yellow
     exit 1

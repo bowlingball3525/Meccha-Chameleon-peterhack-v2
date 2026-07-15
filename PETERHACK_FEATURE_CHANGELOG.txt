@@ -1,7 +1,17 @@
 ================================================================================
+  PETERHACK v2.7.1 (July 15, 2026)
+================================================================================
+  - Rebrand: peterhack-bridge.dll + PHK1 bridge ABI (replace bridge + DLL together)
+  - Silent aim: UFunction refresh, LMB pre-arm, KillPlayer fallback, no ESP warmup gate
+  - Combat menu: target selection below Silent Aim toggle
+  - Camo: skip unsafe planner samples (partial camo on extreme emote / wall-clip poses)
+  - Release package: peterhack-v2.7.1-win64.zip
+
+
+================================================================================
   PETERHACK — FEATURE CHANGELOG & CONVERSATION SUMMARY
   Generated: July 14, 2026
-  Repo: C:\Users\lance\Desktop\chameleonEsp-upstream
+  Repo: peterhack (local checkout)
   Deploy: C:\Users\lance\Desktop\peterhack
 ================================================================================
 
@@ -179,7 +189,7 @@ Phase 5 — Force round end, chat spammer            [PENDING]
 
 Build timestamp: July 14, 2026 ~12:47–12:48 PM
 Deploy path: C:\Users\lance\Desktop\peterhack\peterhack.dll
-             C:\Users\lance\Desktop\peterhack\bridge\meccha-xenos-bridge.dll
+             C:\Users\lance\Desktop\peterhack\bridge\peterhack-bridge.dll
 
 
 --- 5.1 In-game notification feed ---
@@ -446,7 +456,7 @@ Camouflage now shows a live progress bar while painting/previewing:
     camo used to show progress.
   - CamoManager::ReadProgress() reads/parses the sidecar (path derived from the
     live bridge module handle so it works whether the DLL loaded as
-    meccha-xenos-bridge.dll or runtime-bridge.dll). Stale sidecar is deleted at
+    peterhack-bridge.dll). Stale sidecar is deleted at
     job start (StartWorker) so the bar begins at 0%.
   - Camouflage tab: ImGui::ProgressBar with a % overlay + the current stage
     message. Bar is kept monotonic by remapping the bridge's two step scales —
@@ -767,7 +777,7 @@ EARLIER SESSION (still in current build):
 ================================================================================
 
 Build command:
-  cd C:\Users\lance\Desktop\chameleonEsp-upstream
+  cd <peterhack-repo-root>
   build.bat
 
 Output:
@@ -776,7 +786,7 @@ Output:
     peterhack.dll
     manifest.json
     fonts\fa-solid-900.ttf
-    bridge\meccha-xenos-bridge.dll
+    bridge\peterhack-bridge.dll
     bridge\mesh-profiles\
 
 Run:
@@ -784,7 +794,7 @@ Run:
 
 Important:
   - Close game before rebuild (peterhack.dll gets locked while injected)
-  - After bridge updates, fully exit game to avoid stale meccha-xenos-bridge.dll
+  - After bridge updates, fully exit game to avoid stale peterhack-bridge.dll
   - settings.ini uses binary sizeof(Settings) — adding fields resets old saves once
   - Camo config: C:\peterhack\camo.cfg (text INI)
   - Profiles: C:\peterhack\profiles\*.phcfg (versioned binary)

@@ -32,12 +32,8 @@ void Menu::Init()
 			if (cfg->bAimbot)
 			{
 				Binds::RecorderRow("Aim Key (hold)", cfg->iAimKey, false, true);
-				ImGui::SliderFloat("FOV (px)", &cfg->fAimFov, 10.0f, 500.0f, "%.0f");
 				ImGui::SliderFloat("Smoothing", &cfg->fAimSmooth, 1.0f, 20.0f, "%.1f");
 				ImGui::TextDisabled("1 = instant snap, higher = slower and more legit-looking");
-				ImGui::Combo("Aim bone", &cfg->iAimBone, "Head\0Chest\0");
-				ImGui::Checkbox("Visible targets only", &cfg->bAimVisibleOnly);
-				ImGui::Checkbox("Draw FOV circle", &cfg->bAimDrawFov);
 			}
 
 			ImGui::Separator();
@@ -63,7 +59,18 @@ void Menu::Init()
 			ImGui::Separator();
 			ImGui::Checkbox("Silent Aim", &cfg->bSilentAim);
 			if (cfg->bSilentAim)
-				ImGui::TextDisabled("Left-click lands on the nearest enemy inside the FOV circle,\nwithout moving your camera");
+				ImGui::TextDisabled("Locks the nearest enemy in the FOV circle and redirects\nyour shot traces / KillPlayer RPC without moving the camera.");
+
+			ImGui::Text("Target selection (aimbot / silent / trigger)");
+			if (cfg->bAimbot || cfg->bSilentAim || cfg->bTriggerbot)
+			{
+				ImGui::SliderFloat("FOV (px)", &cfg->fAimFov, 10.0f, 500.0f, "%.0f");
+				ImGui::Combo("Aim bone", &cfg->iAimBone, "Head\0Chest\0");
+				ImGui::Checkbox("Visible targets only", &cfg->bAimVisibleOnly);
+				ImGui::Checkbox("Draw FOV circle", &cfg->bAimDrawFov);
+			}
+			else
+				ImGui::TextDisabled("Enable aimbot, silent aim, or triggerbot to configure FOV");
 
 			ImGui::Separator();
 			ImGui::Text("Recoil");
@@ -358,7 +365,7 @@ void Menu::Init()
 				ImGui::TextDisabled("WASD moves, Space up, C/Ctrl down, Shift = 2x speed");
 			}
 			if (cfg->bNoclip)
-				ImGui::TextDisabled("Noclip also disables capsule collision (walk through walls)");
+				ImGui::TextDisabled("Noclip: no collision + WASD fly controls (Space/C up/down)");
 
 			ImGui::Separator();
 			ImGui::Text("General");

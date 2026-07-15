@@ -63,7 +63,7 @@ echo   %DEPLOY%
 echo     peterhack-loader.exe
 echo     manifest.json
 echo     peterhack.dll
-echo     bridge\meccha-xenos-bridge.dll
+echo     bridge\peterhack-bridge.dll
 echo     bridge\mesh-profiles\
 echo.
 echo Run: %DEPLOY%\peterhack-loader.exe --local --wait

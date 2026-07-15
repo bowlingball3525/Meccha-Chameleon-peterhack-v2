@@ -616,10 +616,10 @@ namespace
 		candidates.push_back(sourceDir / fs::path(relative));
 
 		// Legacy flat layout from older builds (bridge DLL + profiles at deploy root).
-		if (relative == "bridge/meccha-xenos-bridge.dll")
+		if (relative == "bridge/peterhack-bridge.dll")
 		{
-			candidates.push_back(sourceDir / L"meccha-xenos-bridge.dll");
-			candidates.push_back(sourceDir / L"bridge" / L"meccha-xenos-bridge.dll");
+			candidates.push_back(sourceDir / L"peterhack-bridge.dll");
+			candidates.push_back(sourceDir / L"bridge" / L"peterhack-bridge.dll");
 		}
 		else if (relative.rfind("bridge/mesh-profiles/", 0) == 0)
 		{
@@ -671,7 +671,7 @@ namespace
 
 	bool VerifyBridgeLayout(const fs::path& deployDir)
 	{
-		const fs::path bridgeDll = deployDir / L"bridge" / L"meccha-xenos-bridge.dll";
+		const fs::path bridgeDll = deployDir / L"bridge" / L"peterhack-bridge.dll";
 		if (!fs::exists(bridgeDll))
 		{
 			LogError(L"Bridge DLL missing at: " + bridgeDll.wstring());

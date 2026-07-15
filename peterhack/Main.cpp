@@ -1,4 +1,5 @@
 #include "includes.hpp"
+#include "SDK/BP_GameState_cLeon_classes.hpp"
 #include "OverlayWindow.hpp"
 #include "SDK/EnhancedInput_classes.hpp"
 
@@ -328,7 +329,98 @@ static void InitKickFunctionPointers()
 	if (!g_fnShowDeathWidget)
 		g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
 			"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
+	if (!g_fnDeathEvent)
+		g_fnDeathEvent = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_Main_C", "DeathEvent");
+	if (!g_fnDeathUIShowAndAwait)
+		g_fnDeathUIShowAndAwait = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_Main_C", "DeathUIShowAndAwait");
+	if (!g_fnSpawnDeathSplash)
+		g_fnSpawnDeathSplash = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_C", "SpawnDeathSplash");
+	if (!g_fnSetSpectatingState)
+		g_fnSetSpectatingState = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_Main_C", "SetSpectatingState");
+	if (!g_fnGameStateShowDeathWidget)
+		g_fnGameStateShowDeathWidget = SDK::ABP_GameState_cLeon_C::StaticClass()->GetFunction(
+			"BP_GameState_cLeon_C", "ShowDeathWidget");
+	if (!g_fnKillPlayer)
+		g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
+	if (!g_fnClientRestart)
+		g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
 }
+
+void ForceRefreshGodmodeFunctionPointers()
+{
+	g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
+	g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
+	g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
+	g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
+	g_fnDeathEvent = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_Main_C", "DeathEvent");
+	g_fnDeathUIShowAndAwait = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_Main_C", "DeathUIShowAndAwait");
+	g_fnSpawnDeathSplash = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_C", "SpawnDeathSplash");
+	g_fnSetSpectatingState = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_Main_C", "SetSpectatingState");
+	g_fnGameStateShowDeathWidget = SDK::ABP_GameState_cLeon_C::StaticClass()->GetFunction(
+		"BP_GameState_cLeon_C", "ShowDeathWidget");
+	g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
+	g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
+}
+
+static void EnsureGodmodeFunctionPointers()
+{
+	if (g_fnDeathPlayer && g_fnRagdoll && g_fnGoToSpectate && g_fnShowDeathWidget &&
+		g_fnDeathEvent && g_fnDeathUIShowAndAwait && g_fnSpawnDeathSplash &&
+		g_fnSetSpectatingState && g_fnGameStateShowDeathWidget && g_fnKillPlayer &&
+		g_fnClientRestart)
+	{
+		return;
+	}
+	__try
+	{
+		ForceRefreshGodmodeFunctionPointers();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		PhLog("[ProcessEvent] ForceRefreshGodmodeFunctionPointers fault\n");
+	}
+}
+
+static bool IsGodmodeDeathFunction(SDK::UFunction* fn)
+{
+	return fn && (fn == g_fnDeathPlayer || fn == g_fnRagdoll || fn == g_fnGoToSpectate ||
+		fn == g_fnShowDeathWidget || fn == g_fnDeathEvent || fn == g_fnDeathUIShowAndAwait ||
+		fn == g_fnSpawnDeathSplash);
+}
+
+// Minimal parm layouts for godmode blocks — avoids pulling the huge Main
+// parameters header into every translation unit.
+struct GodmodeSetSpectatingStateParms
+{
+	bool State;
+};
+struct GodmodeShowDeathWidgetParms
+{
+	SDK::APlayerState* TargetPlayerState;
+};
+struct GodmodeClientRestartParms
+{
+	SDK::APawn* NewPawn;
+};
+struct GodmodeKillPlayerParms
+{
+	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter;
+	SDK::ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState;
+};
 
 void InitCombatFunctionPointers()
 {
@@ -358,6 +450,11 @@ void InitCombatFunctionPointers()
 	if (!g_fnHunterInpActShot)
 		g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
+	if (!g_fnKillPlayer)
+		g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
+	if (!g_fnClientRestart)
+		g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
 }
 
 void ForceRefreshCombatFunctionPointers()
@@ -379,6 +476,9 @@ void ForceRefreshCombatFunctionPointers()
 		"BP_FirstPersonCharacter_Main_C", "ItemShakeStart");
 	g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
 		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
+	g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
+	g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
 }
 
 static void RefreshCombatFunctionPointersIfStale()
@@ -417,6 +517,7 @@ void ForceRefreshKickFunctionPointers()
 		"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
 	g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
 		"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
+	ForceRefreshGodmodeFunctionPointers();
 }
 
 static void RefreshKickFunctionPointersIfStale()
@@ -548,32 +649,171 @@ static void PatchHitResultForRedirect(SDK::FHitResult& hit, const SDK::FVector& 
 }
 
 static thread_local bool s_combatTracePending = false;
+static thread_local bool s_silentShotPending = false;
+static thread_local SDK::UObject* s_silentShotObject = nullptr;
+
+static bool IsLocalCombatPawn(const void* object)
+{
+	if (!object)
+		return false;
+	const void* localPawn = g_localPawn.load(std::memory_order_acquire);
+	if (localPawn && object == localPawn)
+		return true;
+	const void* localBody = g_localCharacterBody.load(std::memory_order_acquire);
+	return localBody && object == localBody;
+}
+
+static bool InputActionValueActuated(const SDK::FInputActionValue& value, float triggeredTime)
+{
+	if (triggeredTime > 0.0f)
+		return true;
+	const double raw = *reinterpret_cast<const double*>(&value);
+	return raw >= 0.5;
+}
+
+static SDK::UFunction* ResolveLiveFunction(SDK::UObject* object, const char* className, const char* functionName)
+{
+	if (!object || !className || !functionName)
+		return nullptr;
+	__try
+	{
+		SDK::UClass* cls = object->Class;
+		if (!cls)
+			return nullptr;
+		return cls->GetFunction(className, functionName);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return nullptr;
+	}
+}
+
+static bool FunctionPointerMatchesLive(SDK::UObject* object, SDK::UFunction* fn, const char* className,
+	const char* functionName, SDK::UFunction** cache)
+{
+	if (!fn || !cache)
+		return false;
+	if (*cache && fn == *cache)
+		return true;
+	SDK::UFunction* live = ResolveLiveFunction(object, className, functionName);
+	if (live && fn == live)
+	{
+		*cache = live;
+		return true;
+	}
+	return false;
+}
+
+static bool IsKillPlayerFunction(SDK::UObject* object, SDK::UFunction* fn)
+{
+	if (!fn)
+		return false;
+	if (g_fnKillPlayer && fn == g_fnKillPlayer)
+		return true;
+	if (object && FunctionPointerMatchesLive(object, fn,
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer", &g_fnKillPlayer))
+		return true;
+	return false;
+}
+
+static bool IsHunterShotFunction(SDK::UObject* object, SDK::UFunction* fn)
+{
+	if (!object || !fn || !IsLocalCombatPawn(object))
+		return false;
+	if (!object->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()))
+		return false;
+	if (g_fnHunterInpActShot && fn == g_fnHunterInpActShot)
+		return true;
+
+	static const char* kShotEvents[] = {
+		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3",
+		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_2",
+		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_4",
+	};
+	for (const char* eventName : kShotEvents)
+	{
+		if (FunctionPointerMatchesLive(object, fn,
+				"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", eventName, &g_fnHunterInpActShot))
+			return true;
+		if (FunctionPointerMatchesLive(object, fn,
+				"BP_FirstPersonCharacter_cLeon_Character_C", eventName, &g_fnHunterInpActShot))
+			return true;
+	}
+	return false;
+}
+
+static bool IsLineTraceFunction(SDK::UFunction* fn)
+{
+	if (!fn)
+		return false;
+	return fn == g_fnLineTraceSingle || fn == g_fnSphereTraceSingle;
+}
+
+static bool IsAntiChatTraceFunction(SDK::UObject* object, SDK::UFunction* fn)
+{
+	if (!fn)
+		return false;
+	if (g_fnAntiChatTrace && fn == g_fnAntiChatTrace)
+		return true;
+	if (object && FunctionPointerMatchesLive(object, fn,
+			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "AntiChatTrace", &g_fnAntiChatTrace))
+		return true;
+	return false;
+}
+
+static bool IsSpawnShotEffectFunction(SDK::UFunction* fn)
+{
+	if (!fn)
+		return false;
+	return fn == g_fnSpawnShotEffectServer || fn == g_fnSpawnShotEffectLocal || fn == g_fnSpawnShotEffectClient;
+}
+
+struct HunterShotParmsLayout
+{
+	SDK::FInputActionValue ActionValue;
+	float ElapsedTime;
+	float TriggeredTime;
+	const SDK::UInputAction* SourceAction;
+};
+
+static bool TryArmSilentAimShot(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
+{
+	if (!cfg || !cfg->bSilentAim || !pParms || !g_combatRedirect.silentReady || !g_combatRedirect.silentTarget)
+		return false;
+	if (!IsHunterShotFunction(pObject, pFunction))
+		return false;
+
+	const auto* parms = static_cast<const HunterShotParmsLayout*>(pParms);
+	if (!InputActionValueActuated(parms->ActionValue, parms->TriggeredTime))
+		return false;
+
+	CheatManager::ArmCombatShotRedirect(g_combatRedirect.silentTarget, g_combatRedirect.silentHit);
+	s_silentShotPending = true;
+	s_silentShotObject = pObject;
+	return true;
+}
 
 static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
 {
 	if (!pFunction || !pParms)
 		return;
 
-	// Silent aim: arm redirect at the exact moment IA_Shot fires, using the target
-	// cached during the last gather pass.
-	if (cfg && cfg->bSilentAim && pFunction == g_fnHunterInpActShot && pObject &&
-		pObject == g_localPawn.load(std::memory_order_acquire) &&
-		g_combatRedirect.silentReady && g_combatRedirect.silentTarget)
+	TryArmSilentAimShot(pObject, pFunction, pParms);
+
+	if (CombatRedirectLive() && IsKillPlayerFunction(pObject, pFunction) && pParms &&
+		pObject && IsLocalCombatPawn(pObject) &&
+		g_combatRedirect.target &&
+		g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
 	{
-		auto* parms = static_cast<
-			SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3*>(pParms);
-		if (SDK::UEnhancedInputLibrary::Conv_InputActionValueToBool(
-				parms->ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3))
-		{
-			CheatManager::ArmCombatShotRedirect(g_combatRedirect.silentTarget, g_combatRedirect.silentHit);
-			g_combatRedirect.silentReady = false;
-		}
+		auto* parms = static_cast<GodmodeKillPlayerParms*>(pParms);
+		parms->FirstpersonCharacter =
+			static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(g_combatRedirect.target);
 	}
 
 	if (!CombatRedirectLive())
 		return;
 
-	if (pFunction == g_fnLineTraceSingle || pFunction == g_fnSphereTraceSingle)
+	if (IsLineTraceFunction(pFunction))
 	{
 		auto* parms = static_cast<SDK::Params::KismetSystemLibrary_LineTraceSingle*>(pParms);
 		parms->End = ExtendTraceEnd(parms->Start, g_combatRedirect.hitLocation);
@@ -581,7 +821,7 @@ static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFuncti
 		return;
 	}
 
-	if (pFunction == g_fnAntiChatTrace)
+	if (IsAntiChatTraceFunction(pObject, pFunction))
 	{
 		auto* parms = static_cast<SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_AntiChatTrace*>(pParms);
 		parms->End = g_combatRedirect.hitLocation;
@@ -593,9 +833,7 @@ static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFuncti
 		return;
 	}
 
-	if (pFunction == g_fnSpawnShotEffectServer ||
-		pFunction == g_fnSpawnShotEffectLocal ||
-		pFunction == g_fnSpawnShotEffectClient)
+	if (IsSpawnShotEffectFunction(pFunction))
 	{
 		auto* parms = static_cast<SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_SpawnShotEffect_Server_*>(pParms);
 		parms->Endpoint = g_combatRedirect.hitLocation;
@@ -603,11 +841,22 @@ static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFuncti
 	}
 }
 
-static void CombatPostProcessEvent(SDK::UObject* /*pObject*/, SDK::UFunction* pFunction, void* pParms)
+static void CombatPostProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
 {
+	if (s_silentShotPending && pObject == s_silentShotObject && IsHunterShotFunction(pObject, pFunction))
+	{
+		s_silentShotPending = false;
+		s_silentShotObject = nullptr;
+		if (cfg && cfg->bSilentAim && g_combatRedirect.silentReady && g_combatRedirect.silentTarget &&
+			cheat && CheatManager::IsObjectValid(g_combatRedirect.silentTarget))
+		{
+			cheat->ExecuteSilentAimKill(static_cast<SDK::APawn*>(pObject), g_combatRedirect.silentTarget);
+		}
+	}
+
 	if (!s_combatTracePending || !pFunction || !pParms)
 		return;
-	if (pFunction != g_fnLineTraceSingle && pFunction != g_fnSphereTraceSingle)
+	if (!IsLineTraceFunction(pFunction))
 		return;
 
 	s_combatTracePending = false;
@@ -620,7 +869,7 @@ static void CombatPostProcessEvent(SDK::UObject* /*pObject*/, SDK::UFunction* pF
 }
 
 // Pointer-only exploit blocking — never call GetName() on the ProcessEvent hot path.
-static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction)
+static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
 {
 	if (!cfg || !pFunction)
 		return false;
@@ -639,11 +888,78 @@ static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* p
 	// server-authoritative kill (KillPlayer) manifests on the victim's client as
 	// these calls; the Invincible/Health field writes don't stop them, so this
 	// pointer-only block is what actually keeps us alive through a shot.
-	if (cfg->bGodmode && pObject && pObject == g_localPawn.load(std::memory_order_acquire) &&
-		(pFunction == g_fnDeathPlayer || pFunction == g_fnRagdoll ||
-			pFunction == g_fnGoToSpectate || pFunction == g_fnShowDeathWidget))
+	if (cfg->bGodmode)
 	{
-		return true;
+		EnsureGodmodeFunctionPointers();
+
+		const void* localBody = g_localCharacterBody.load(std::memory_order_acquire);
+		if (!localBody)
+			localBody = g_localPawn.load(std::memory_order_acquire);
+		if (localBody && pObject == localBody)
+		{
+			if (IsGodmodeDeathFunction(pFunction))
+				return true;
+
+			// Block entering spectate, but allow SetSpectatingState(false) through so
+			// our recovery writes can clear a stuck death state.
+			if (pFunction == g_fnSetSpectatingState && pParms)
+			{
+				__try
+				{
+					const auto* parms = static_cast<const GodmodeSetSpectatingStateParms*>(pParms);
+					if (parms->State)
+						return true;
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER)
+				{
+				}
+			}
+		}
+
+		// Drop hunter KillPlayer RPCs that target our body (server kill path).
+		if (pFunction == g_fnKillPlayer && pParms && localBody)
+		{
+			__try
+			{
+				const auto* parms = static_cast<const GodmodeKillPlayerParms*>(pParms);
+				if (parms->FirstpersonCharacter == localBody)
+					return true;
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER)
+			{
+			}
+		}
+
+		// Engine repossess to spectate pawn after death — block while godmode is on.
+		if (pFunction == g_fnClientRestart && pParms && localBody)
+		{
+			__try
+			{
+				const auto* parms = static_cast<const GodmodeClientRestartParms*>(pParms);
+				if (parms->NewPawn != localBody)
+					return true;
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER)
+			{
+			}
+		}
+
+		if (pFunction == g_fnGameStateShowDeathWidget && pParms)
+		{
+			const void* localPs = g_localPlayerState.load(std::memory_order_acquire);
+			if (localPs)
+			{
+				__try
+				{
+					const auto* parms = static_cast<const GodmodeShowDeathWidgetParms*>(pParms);
+					if (parms->TargetPlayerState == localPs)
+						return true;
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER)
+				{
+				}
+			}
+		}
 	}
 
 	if (cfg->bForceCharacterVisibility && pFunction == g_fnOnRepBodyVisibility && pObject)
@@ -712,7 +1028,7 @@ void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction,
 {
 	if (g_inGameThreadFlush)
 	{
-		if (TryBlockExploitProcessEvent(pObject, pFunction))
+		if (TryBlockExploitProcessEvent(pObject, pFunction, pParms))
 			return;
 		CombatPreProcessEvent(pObject, pFunction, pParms);
 		SafeForwardProcessEvent(pObject, pFunction, pParms);
@@ -720,7 +1036,7 @@ void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction,
 		return;
 	}
 
-	if (TryBlockExploitProcessEvent(pObject, pFunction))
+	if (TryBlockExploitProcessEvent(pObject, pFunction, pParms))
 		return;
 
 	CombatPreProcessEvent(pObject, pFunction, pParms);
@@ -1515,6 +1831,7 @@ DWORD MainThread(HMODULE Module)
 	MH_EnableHook(MH_ALL_HOOKS);
 	InitKickFunctionPointers();
 	InitCombatFunctionPointers();
+	ForceRefreshGodmodeFunctionPointers();
 
 	// poll for the END key to be pressed to unload the DLL
 	while (bRunning)

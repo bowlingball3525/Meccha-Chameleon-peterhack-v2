@@ -92,11 +92,13 @@ private:
 	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
 	void TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintable);
 	void HandleReturnToMainLobby(SDK::APlayerController* playerController);
+	void HandleGodmodeRecovery(FrameContext& ctx);
 	void ResetSessionState();
 	void ResetSpawnTransition();
 	SDK::UWorld* lastWorld_ = nullptr;
 	SDK::ULevel* lastPersistentLevel_ = nullptr;
 	SDK::APawn* lastLocalPawn_ = nullptr;
+	SDK::APawn* lastGodmodeCharacter_ = nullptr;
 	bool wasInMatch_ = false;
 	bool wasSpectating_ = false;
 	ULONGLONG worldStableAfterMs_ = 0;
@@ -146,6 +148,8 @@ public:
 	std::atomic<bool> inMatchCached{ false };
 	void RequestTeleport(SDK::AActor* Actor, const SDK::FVector& fallbackLocation = {});
 	void RequestKillSurvivor(SDK::AActor* Actor) { KillTarget = Actor; }
+	// GAME THREAD: direct kill used by silent aim after a shot event.
+	void ExecuteSilentAimKill(SDK::APawn* hunter, SDK::AActor* target);
 	void RequestKillAllSurvivors() { bKillAllSurvivorsRequested = true; }
 	void RequestReturnToMainLobby() { bReturnToLobbyRequested = true; }
 	// Queue a name change for our own player (e.g. to impersonate another player's name). Applied on
@@ -174,7 +178,9 @@ public:
 	static void ArmCombatShotRedirect(SDK::AActor* target, const SDK::FVector& hitLocation);
 	static void RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C* hunter);
 	static bool IsLocalPlayerSpectating(SDK::APlayerController* playerController);
-	static 	bool IsLocalPlayerInMatch(SDK::APlayerController* playerController);
+	static bool IsLocalPlayerInMatch(SDK::APlayerController* playerController);
+	static bool IsLiveCharacterBody(SDK::AActor* body);
+	static bool IsAliveFreecam(SDK::APlayerController* playerController, SDK::AActor* cachedBody);
 	bool NeedsLocalExploits() const;
 	bool NeedsEspDraw() const;
 	bool NeedsActorScan() const;
