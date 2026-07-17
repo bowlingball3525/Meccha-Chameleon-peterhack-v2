@@ -16,35 +16,15 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_CentorText.WBP_CentorText_C.PreConstruct
+// Function WBP_CentorText.WBP_CentorText_C.Construct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_CentorText_C::PreConstruct(bool IsDesignTime_PreConstruct)
+void UWBP_CentorText_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_CentorText_C", "PreConstruct");
-
-	Params::WBP_CentorText_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_CentorText.WBP_CentorText_C.Finish
-// (BlueprintCallable, BlueprintEvent)
-
-void UWBP_CentorText_C::Finish()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_CentorText_C", "Finish");
+		Func = Class->GetFunction("WBP_CentorText_C", "Construct");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -70,17 +50,37 @@ void UWBP_CentorText_C::ExecuteUbergraph_WBP_CentorText(int32 EntryPoint)
 }
 
 
-// Function WBP_CentorText.WBP_CentorText_C.Construct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Function WBP_CentorText.WBP_CentorText_C.Finish
+// (BlueprintCallable, BlueprintEvent)
 
-void UWBP_CentorText_C::Construct()
+void UWBP_CentorText_C::Finish()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_CentorText_C", "Construct");
+		Func = Class->GetFunction("WBP_CentorText_C", "Finish");
 
 	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function WBP_CentorText.WBP_CentorText_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_CentorText_C::PreConstruct(bool IsDesignTime)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_CentorText_C", "PreConstruct");
+
+	Params::WBP_CentorText_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 

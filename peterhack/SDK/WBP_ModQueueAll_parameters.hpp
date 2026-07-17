@@ -18,82 +18,29 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_ModQueueAll_C_PreConstruct final
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.CheckInstalledItems
+// 0x0060 (0x0060 - 0x0000)
+struct WBP_ModQueueAll_C_CheckInstalledItems final
 {
 public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_PreConstruct;
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnSuccess_F78BBAD84186A9297376358454884094
-// 0x00B8 (0x00B8 - 0x0000)
-struct WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094 final
-{
-public:
-	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
-	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094;
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnFailure_F78BBAD84186A9297376358454884094
-// 0x00B8 (0x00B8 - 0x0000)
-struct WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094 final
-{
-public:
-	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
-	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094;
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F
-// 0x000C (0x000C - 0x0000)
-struct WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F final
-{
-public:
-	class FName                                   SessionName;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          bWasSuccessful;                                    // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F;
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnCallFailed_20A1B5B44A276C069768D3A60A80535F
-// 0x000C (0x000C - 0x0000)
-struct WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F final
-{
-public:
-	class FName                                   SessionName;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          bWasSuccessful;                                    // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F;
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.GetWaitPlayers
-// 0x0080 (0x0080 - 0x0000)
-struct WBP_ModQueueAll_C_GetWaitPlayers final
-{
-public:
-	class FString                                 ReturnNames;                                       // 0x0000(0x0010)(Parm, OutParm, ZeroConstructor, HasGetValueTypeHash)
-	bool                                          CompleteState;                                     // 0x0010(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_11[0x7];                                       // 0x0011(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-	class FString                                 ResturnStrings;                                    // 0x0018(0x0010)(Edit, BlueprintVisible, ZeroConstructor, HasGetValueTypeHash)
-	bool                                          Is_Complete;                                       // 0x0028(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_29[0x3];                                       // 0x0029(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         Temp_int_Array_Index_Variable;                     // 0x002C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0034(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> CallFunc_GetAllActorsOfClass_OutActors; // 0x0038(0x0010)(ReferenceParm)
-	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0048(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_4C[0x4];                                       // 0x004C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	class ABP_FirstPersonPlayerState_Online_cLeon_C* CallFunc_Array_Get_Item;                        // 0x0050(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	bool                                          ReturnInstalled;                                   // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          ReturnDownloading;                                 // 0x0001(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          Downloading;                                       // 0x0002(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          Installed;                                         // 0x0003(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Array_Index_Variable;                     // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class USteamWorkshopMapSubsystem*             CallFunc_GetGameInstanceSubsystem_ReturnValue;     // 0x0010(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TArray<struct FSteamWorkshopItemInfo>         CallFunc_GetSubscribedWorkshopItems_OutItems;      // 0x0018(0x0010)(ReferenceParm)
+	class FString                                 CallFunc_GetSubscribedWorkshopItems_ErrorMessage;  // 0x0028(0x0010)(ZeroConstructor, HasGetValueTypeHash)
+	bool                                          CallFunc_GetSubscribedWorkshopItems_ReturnValue;   // 0x0038(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_39[0x3];                                       // 0x0039(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x003C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FSteamWorkshopItemInfo                 CallFunc_Array_Get_Item;                           // 0x0040(0x0018)()
 	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0058(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          CallFunc_Not_PreBool_ReturnValue;                  // 0x0059(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_5A[0x6];                                       // 0x005A(0x0006)(Fixing Size After Last Property [ Dumper-7 ])
-	class FString                                 CallFunc_Concat_StrStr_ReturnValue;                // 0x0060(0x0010)(ZeroConstructor, HasGetValueTypeHash)
-	class FString                                 CallFunc_Concat_StrStr_ReturnValue_1;              // 0x0070(0x0010)(ZeroConstructor, HasGetValueTypeHash)
+	bool                                          CallFunc_EqualEqual_StrStr_ReturnValue;            // 0x0059(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_GetWaitPlayers;
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_CheckInstalledItems;
 
 // Function WBP_ModQueueAll.WBP_ModQueueAll_C.ExecuteUbergraph_WBP_ModQueueAll
 // 0x0360 (0x0360 - 0x0000)
@@ -164,29 +111,82 @@ public:
 };
 DUMPER7_ASSERTS_WBP_ModQueueAll_C_ExecuteUbergraph_WBP_ModQueueAll;
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.CheckInstalledItems
-// 0x0060 (0x0060 - 0x0000)
-struct WBP_ModQueueAll_C_CheckInstalledItems final
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.GetWaitPlayers
+// 0x0080 (0x0080 - 0x0000)
+struct WBP_ModQueueAll_C_GetWaitPlayers final
 {
 public:
-	bool                                          ReturnInstalled;                                   // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          ReturnDownloading;                                 // 0x0001(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          Downloading;                                       // 0x0002(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          Installed;                                         // 0x0003(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Array_Index_Variable;                     // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	class USteamWorkshopMapSubsystem*             CallFunc_GetGameInstanceSubsystem_ReturnValue;     // 0x0010(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	TArray<struct FSteamWorkshopItemInfo>         CallFunc_GetSubscribedWorkshopItems_OutItems;      // 0x0018(0x0010)(ReferenceParm)
-	class FString                                 CallFunc_GetSubscribedWorkshopItems_ErrorMessage;  // 0x0028(0x0010)(ZeroConstructor, HasGetValueTypeHash)
-	bool                                          CallFunc_GetSubscribedWorkshopItems_ReturnValue;   // 0x0038(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_39[0x3];                                       // 0x0039(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x003C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FSteamWorkshopItemInfo                 CallFunc_Array_Get_Item;                           // 0x0040(0x0018)()
+	class FString                                 ReturnNames;                                       // 0x0000(0x0010)(Parm, OutParm, ZeroConstructor, HasGetValueTypeHash)
+	bool                                          CompleteState;                                     // 0x0010(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_11[0x7];                                       // 0x0011(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+	class FString                                 ResturnStrings;                                    // 0x0018(0x0010)(Edit, BlueprintVisible, ZeroConstructor, HasGetValueTypeHash)
+	bool                                          Is_Complete;                                       // 0x0028(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_29[0x3];                                       // 0x0029(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         Temp_int_Array_Index_Variable;                     // 0x002C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0034(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> CallFunc_GetAllActorsOfClass_OutActors; // 0x0038(0x0010)(ReferenceParm)
+	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0048(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_4C[0x4];                                       // 0x004C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	class ABP_FirstPersonPlayerState_Online_cLeon_C* CallFunc_Array_Get_Item;                        // 0x0050(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0058(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          CallFunc_EqualEqual_StrStr_ReturnValue;            // 0x0059(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          CallFunc_Not_PreBool_ReturnValue;                  // 0x0059(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_5A[0x6];                                       // 0x005A(0x0006)(Fixing Size After Last Property [ Dumper-7 ])
+	class FString                                 CallFunc_Concat_StrStr_ReturnValue;                // 0x0060(0x0010)(ZeroConstructor, HasGetValueTypeHash)
+	class FString                                 CallFunc_Concat_StrStr_ReturnValue_1;              // 0x0070(0x0010)(ZeroConstructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ModQueueAll_C_CheckInstalledItems;
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_GetWaitPlayers;
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnCallFailed_20A1B5B44A276C069768D3A60A80535F
+// 0x000C (0x000C - 0x0000)
+struct WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F final
+{
+public:
+	class FName                                   SessionName;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          bWasSuccessful;                                    // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F;
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F
+// 0x000C (0x000C - 0x0000)
+struct WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F final
+{
+public:
+	class FName                                   SessionName;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          bWasSuccessful;                                    // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F;
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnFailure_F78BBAD84186A9297376358454884094
+// 0x00B8 (0x00B8 - 0x0000)
+struct WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094 final
+{
+public:
+	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
+	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094;
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnSuccess_F78BBAD84186A9297376358454884094
+// 0x00B8 (0x00B8 - 0x0000)
+struct WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094 final
+{
+public:
+	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
+	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094;
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_ModQueueAll_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ModQueueAll_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

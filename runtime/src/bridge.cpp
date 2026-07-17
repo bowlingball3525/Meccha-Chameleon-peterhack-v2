@@ -53,7 +53,7 @@ namespace
     constexpr int PackedReplicationDefaultBatchLimit = 20;
     constexpr int PackedReplicationMaxBatchLimit = 32;
     constexpr int PackedReplicationDefaultPacingMs = 50;
-    constexpr int PackedReplicationMinPacingMs = 50;
+    constexpr int PackedReplicationMinPacingMs = 25;
     constexpr int PackedReplicationFallbackMaxStrokesPerTick = 24;
     constexpr int PackedReplicationResolvedPacingMinMs = 1;
     constexpr int PackedReplicationBatchSize = 32;
@@ -6292,6 +6292,51 @@ namespace
         return g_mesh_first_preview_snapshot;
     }
 
+    auto mesh_first_ensure_paint_initialized(Reflection& ref,
+                                             std::uintptr_t component,
+                                             std::uintptr_t mesh,
+                                             std::string& failure) -> bool
+    {
+        failure.clear();
+        if (!live_uobject(component))
+        {
+            failure = "paint_component_unavailable";
+            return false;
+        }
+        const auto initialized = call_no_params_return_bool_detail(ref, component, "IsInitialized");
+        if (initialized.process_ok && initialized.value)
+        {
+            return true;
+        }
+        if (!live_uobject(mesh))
+        {
+            failure = "paint_mesh_unavailable";
+            return false;
+        }
+        const auto function = ref.find_function(component, "InitializePaint");
+        if (!function)
+        {
+            failure = "InitializePaint_unavailable";
+            return false;
+        }
+        sdk::RuntimePaintableComponent_InitializePaint params{};
+        params.MeshComponent = reinterpret_cast<void*>(mesh);
+        if (!process_event(component, function, reinterpret_cast<std::uint8_t*>(&params), failure))
+        {
+            if (failure.empty())
+            {
+                failure = "InitializePaint_failed";
+            }
+            return false;
+        }
+        if (!params.ReturnValue)
+        {
+            failure = "InitializePaint_return_false";
+            return false;
+        }
+        return true;
+    }
+
     auto mesh_first_get_dominant_material_properties(Reflection& ref, std::uintptr_t component) -> MeshFirstMaterialProperties
     {
         MeshFirstMaterialProperties out{};
@@ -9884,6 +9929,10 @@ namespace
     auto mesh_first_replication_pacing_clamp_delay(const std::shared_ptr<MeshFirstServerBatchAsyncJob>& job, int value) -> int
     {
         const int requested = std::clamp(value, PackedReplicationMinPacingMs, PackedReplicationMaxPacingMs);
+        if (!job || !job->replication_pacing_enabled || job->replication_pacing_backoff_count <= 0)
+        {
+            return requested;
+        }
         const int resolved = mesh_first_replication_pacing_resolved_pacing(job);
         return std::clamp(std::max(requested, resolved), PackedReplicationMinPacingMs, PackedReplicationMaxPacingMs);
     }
@@ -10970,9 +11019,9 @@ namespace
                         10.0);
         const double tuning_side_source_max_uv = clamp_range(json_number_field(request, "side_source_max_uv", 0.08), 0.001, 0.50);
         const double tuning_front_back_source_max_uv = clamp_range(json_number_field(request, "front_back_source_max_uv", 0.45), 0.001, 2.00);
-        const bool tuning_auto_material = json_bool_field(request, "auto_material", false);
+        const bool tuning_auto_material = json_bool_field(request, "auto_material", true);
         const double tuning_metallic = clamp_range(json_number_field(request, "metallic", 0.0), 0.0, 1.0);
-        const double tuning_roughness = clamp_range(json_number_field(request, "roughness", 1.0), 0.0, 1.0);
+        const double tuning_roughness = clamp_range(json_number_field(request, "roughness", 0.65), 0.0, 1.0);
         const double fill_color_r = clamp_range(json_number_field(request, "fill_color_r", 1.0), 0.0, 1.0);
         const double fill_color_g = clamp_range(json_number_field(request, "fill_color_g", 1.0), 0.0, 1.0);
         const double fill_color_b = clamp_range(json_number_field(request, "fill_color_b", 1.0), 0.0, 1.0);
@@ -12340,13 +12389,24 @@ namespace
         metadata += ",\"paint_target_channel\":\"all\"";
         metadata += ",\"paint_target_channel_value\":" + std::to_string(static_cast<int>(paint_target_channel));
         MeshFirstMaterialProperties material_properties{};
-        if (any_paint_region && tuning_auto_material)
+        const bool any_material_region = any_paint_region || any_fill_region;
+        if (any_material_region && tuning_auto_material)
         {
-            material_properties = mesh_first_get_dominant_material_properties(ref, ctx.component);
+            std::string init_failure{};
+            if (!mesh_first_ensure_paint_initialized(ref, ctx.component, selected_mesh.mesh, init_failure))
+            {
+                material_properties.failure = init_failure.empty()
+                                                  ? "paint_textures_uninitialized"
+                                                  : ("paint_init:" + init_failure);
+            }
+            else
+            {
+                material_properties = mesh_first_get_dominant_material_properties(ref, ctx.component);
+            }
         }
         metadata += ",\"material_properties_source\":\"" +
-                    std::string(!any_paint_region
-                                    ? "fill_material_only"
+                    std::string(!any_material_region
+                                    ? "no_active_regions"
                                     : (!tuning_auto_material
                                            ? "manual_tuning"
                                            : (material_properties.ok
@@ -12407,11 +12467,28 @@ namespace
             sdk::FPaintChannelData channel{};
             if (fill_mode)
             {
+                double stroke_fill_metallic = fill_metallic;
+                double stroke_fill_roughness = fill_roughness;
+                if (tuning_auto_material)
+                {
+                    if (material_properties.ok)
+                    {
+                        stroke_fill_metallic = material_properties.metallic;
+                        stroke_fill_roughness = material_properties.roughness;
+                        ++material_properties_auto_samples;
+                    }
+                    else
+                    {
+                        stroke_fill_metallic = clamp01(sample.metallic);
+                        stroke_fill_roughness = clamp01(sample.roughness);
+                        ++material_properties_source_sample_fallbacks;
+                    }
+                }
                 channel = sdk_make_channel(sdk_srgb_to_linear_unit(fill_color_r),
                                            sdk_srgb_to_linear_unit(fill_color_g),
                                            sdk_srgb_to_linear_unit(fill_color_b),
-                                           fill_metallic,
-                                           fill_roughness,
+                                           stroke_fill_metallic,
+                                           stroke_fill_roughness,
                                            sdk::EPaintChannelApplyMode::Override);
             }
             else
@@ -17113,27 +17190,41 @@ namespace
             nt.FileHeader.TimeDateStamp == 0xB76CD1AFu &&
             nt.OptionalHeader.SizeOfImage == 0x0AAFD000u &&
             nt.OptionalHeader.CheckSum == 0x0A7394E2u;
-        if (!steam_shipping_build)
+        // Steam Shipping build captured from PenguinHotel-Win64-Shipping.exe on
+        // 2026-07-17 (SDK 5.6.1-44394996).
+        const bool current_shipping_build =
+            nt.Signature == IMAGE_NT_SIGNATURE &&
+            nt.OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC &&
+            nt.FileHeader.TimeDateStamp == 0x047BA867u &&
+            nt.OptionalHeader.SizeOfImage == 0x0AAFD000u &&
+            nt.OptionalHeader.CheckSum == 0x0A7328BBu;
+        if (!steam_shipping_build && !current_shipping_build)
         {
             out.failure = "main_module_build_identity_mismatch";
             return out;
         }
         static const auto text_file_identity = main_module_text_file_identity();
-        if (!text_file_identity.ok || text_file_identity.raw_size != 0x07AA2800u ||
-            text_file_identity.fnv1a64 != 0x4200B2CAF330F8C3ULL)
+        const bool text_identity_matches = text_file_identity.ok &&
+                                           text_file_identity.raw_size == 0x07AA2800u &&
+                                           ((steam_shipping_build &&
+                                             text_file_identity.fnv1a64 == 0x4200B2CAF330F8C3ULL) ||
+                                            (current_shipping_build &&
+                                             text_file_identity.fnv1a64 == 0x079EDD688D78E96BULL));
+        if (!text_identity_matches)
         {
             out.failure = "main_module_text_identity_mismatch";
             return out;
         }
 
-        constexpr std::uintptr_t ExpectedThunkRva = 0x50E40E0;
-        constexpr std::uintptr_t ExpectedImplementationRva = 0x50FBD80;
-        constexpr std::uintptr_t ExpectedDecoderRva = 0x5103A10;
-        constexpr std::uintptr_t ExpectedEnqueueInnerRva = 0x50F5EE0;
-        constexpr std::uintptr_t ExpectedComponentContextResolverRva = 0x3AEAF10;
-        constexpr std::uintptr_t ExpectedManagerResolverRva = 0x50E9170;
-        constexpr std::uintptr_t ExpectedManagerEnqueueRva = 0x5109030;
-        constexpr std::uintptr_t ExpectedQueueCoalescerRva = 0x5108E30;
+        const std::uintptr_t ExpectedThunkRva = current_shipping_build ? 0x50E39A0 : 0x50E40E0;
+        const std::uintptr_t ExpectedImplementationRva = current_shipping_build ? 0x50FD9F0 : 0x50FBD80;
+        const std::uintptr_t ExpectedDecoderRva = current_shipping_build ? 0x5105740 : 0x5103A10;
+        const std::uintptr_t ExpectedEnqueueInnerRva = current_shipping_build ? 0x50F5CF0 : 0x50F5EE0;
+        const std::uintptr_t ExpectedComponentContextResolverRva =
+            current_shipping_build ? 0x3AEACE0 : 0x3AEAF10;
+        const std::uintptr_t ExpectedManagerResolverRva = current_shipping_build ? 0x50E8A70 : 0x50E9170;
+        const std::uintptr_t ExpectedManagerEnqueueRva = current_shipping_build ? 0x510AD60 : 0x5109030;
+        const std::uintptr_t ExpectedQueueCoalescerRva = current_shipping_build ? 0x510AB60 : 0x5108E30;
 
         std::vector<std::uintptr_t> thunks{};
         for (std::uintptr_t slot = 0; slot <= 0x180; slot += sizeof(std::uintptr_t))
@@ -17323,7 +17414,11 @@ namespace
             nt.FileHeader.TimeDateStamp == 0xB76CD1AFu &&
             nt.OptionalHeader.SizeOfImage == 0x0AAFD000u &&
             nt.OptionalHeader.CheckSum == 0x0A7394E2u;
-        if (!legacy_shipping_build && !steam_shipping_build)
+        const bool current_shipping_build =
+            nt.FileHeader.TimeDateStamp == 0x047BA867u &&
+            nt.OptionalHeader.SizeOfImage == 0x0AAFD000u &&
+            nt.OptionalHeader.CheckSum == 0x0A7328BBu;
+        if (!legacy_shipping_build && !steam_shipping_build && !current_shipping_build)
         {
             out.failure = "main_module_build_identity_mismatch";
             return out;
@@ -17335,17 +17430,24 @@ namespace
                                              text_file_identity.fnv1a64 == 0x085F72BE8C58A9E6ULL) ||
                                             (steam_shipping_build &&
                                              text_file_identity.raw_size == 0x07AA2800u &&
-                                             text_file_identity.fnv1a64 == 0x4200B2CAF330F8C3ULL));
+                                             text_file_identity.fnv1a64 == 0x4200B2CAF330F8C3ULL) ||
+                                            (current_shipping_build &&
+                                             text_file_identity.raw_size == 0x07AA2800u &&
+                                             text_file_identity.fnv1a64 == 0x079EDD688D78E96BULL));
         if (!text_identity_matches)
         {
             out.failure = "main_module_text_identity_mismatch";
             return out;
         }
 
-        const std::uintptr_t ExpectedThunkRva = steam_shipping_build ? 0x50E4E20 : 0x50E59E0;
-        const std::uintptr_t ExpectedImplRva = steam_shipping_build ? 0x50FEA90 : 0x50FF650;
-        const std::uintptr_t ExpectedConstructorRva = steam_shipping_build ? 0x50DA6A0 : 0x50DB260;
-        const std::uintptr_t ExpectedCommonRva = steam_shipping_build ? 0x50EE0C0 : 0x50EEC80;
+        const std::uintptr_t ExpectedThunkRva =
+            current_shipping_build ? 0x50E46E0 : (steam_shipping_build ? 0x50E4E20 : 0x50E59E0);
+        const std::uintptr_t ExpectedImplRva =
+            current_shipping_build ? 0x5100700 : (steam_shipping_build ? 0x50FEA90 : 0x50FF650);
+        const std::uintptr_t ExpectedConstructorRva =
+            current_shipping_build ? 0x50D9F60 : (steam_shipping_build ? 0x50DA6A0 : 0x50DB260);
+        const std::uintptr_t ExpectedCommonRva =
+            current_shipping_build ? 0x50ED9C0 : (steam_shipping_build ? 0x50EE0C0 : 0x50EEC80);
         std::vector<InternalNoResendRoute> matches{};
         for (std::uintptr_t slot = 0; slot <= 0x180; slot += sizeof(std::uintptr_t))
         {

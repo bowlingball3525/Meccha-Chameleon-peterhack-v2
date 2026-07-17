@@ -1385,12 +1385,13 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		? Binds::PadMask(cfg->iControllerMenuButton) : 0);
 
 	// ignore hotkeys if the game window isn't focused, or if the user is typing in a text input (chat, console, etc.)
+	// Magnet hotkey toggles in-match active state; menu checkbox must stay enabled.
 	if (!cfg->bMenuOpen && IsGameWindowFocused() && !ImGui::GetIO().WantTextInput &&
-		Binds::Pressed(cfg->iMagnetKey)) // magnet toggle bind (default G)
+		cfg->bMagnetEnabled && Binds::Pressed(cfg->iMagnetKey))
 	{
-		cfg->bMagnetEnabled = !cfg->bMagnetEnabled;
+		cfg->bMagnetActive = !cfg->bMagnetActive;
 		if (cfg->bNotifications)
-			Notify::Info(cfg->bMagnetEnabled ? "Magnet on" : "Magnet off");
+			Notify::Info(cfg->bMagnetActive ? "Magnet on" : "Magnet off");
 	}
 
 	ImGui::End();
@@ -1444,6 +1445,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 		if (Process::Hwnd)
 			SetForegroundWindow(Process::Hwnd);
 		Binds::CancelRecorder(); // abort any in-progress key/pad capture
+		Binds::ClearKeyEdges(); // swallow stale magnet/menu key edges after closing UI
 		if (g_camo)
 			g_camo->ClearHotkeyEdges();
 		memset(menuIo.MouseDown, 0, sizeof(menuIo.MouseDown));

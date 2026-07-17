@@ -26,8 +26,8 @@ public:
 	class URuntimePaintCopyComponent*             RuntimePaintCopy;                                  // 0x02B8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ExecuteUbergraph_BP_cLeonDecoy_Base(int32 EntryPoint);
 	void ReceiveTick(float DeltaSeconds);
+	void ExecuteUbergraph_BP_cLeonDecoy_Base(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

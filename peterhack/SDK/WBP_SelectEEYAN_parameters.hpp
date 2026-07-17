@@ -16,15 +16,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_SelectEEYAN.WBP_SelectEEYAN_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_SelectEEYAN_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_SelectEEYAN_C_PreConstruct;
-
 // Function WBP_SelectEEYAN.WBP_SelectEEYAN_C.ExecuteUbergraph_WBP_SelectEEYAN
 // 0x0018 (0x0018 - 0x0000)
 struct WBP_SelectEEYAN_C_ExecuteUbergraph_WBP_SelectEEYAN final
@@ -35,6 +26,15 @@ public:
 	bool                                          K2Node_Event_IsDesignTime;                         // 0x0014(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_SelectEEYAN_C_ExecuteUbergraph_WBP_SelectEEYAN;
+
+// Function WBP_SelectEEYAN.WBP_SelectEEYAN_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_SelectEEYAN_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_SelectEEYAN_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

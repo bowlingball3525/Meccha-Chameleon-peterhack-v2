@@ -16,26 +16,6 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_cLeon_WatchRankingContents.WBP_cLeon_WatchRankingContents_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_cLeon_WatchRankingContents_C::PreConstruct(bool IsDesignTime_PreConstruct)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_cLeon_WatchRankingContents_C", "PreConstruct");
-
-	Params::WBP_cLeon_WatchRankingContents_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
 // Function WBP_cLeon_WatchRankingContents.WBP_cLeon_WatchRankingContents_C.ExecuteUbergraph_WBP_cLeon_WatchRankingContents
 // (Final, UbergraphFunction, HasDefaults)
 // Parameters:
@@ -51,6 +31,26 @@ void UWBP_cLeon_WatchRankingContents_C::ExecuteUbergraph_WBP_cLeon_WatchRankingC
 	Params::WBP_cLeon_WatchRankingContents_C_ExecuteUbergraph_WBP_cLeon_WatchRankingContents Parms{};
 
 	Parms.EntryPoint = EntryPoint;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_cLeon_WatchRankingContents.WBP_cLeon_WatchRankingContents_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_cLeon_WatchRankingContents_C::PreConstruct(bool IsDesignTime)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_cLeon_WatchRankingContents_C", "PreConstruct");
+
+	Params::WBP_cLeon_WatchRankingContents_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

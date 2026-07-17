@@ -808,7 +808,9 @@ void CheatManager::Init()
 				cfg->bAntiDetection || cfg->bNoDecoyCooldown || cfg->bSetDecoyNum;
 			if (espFullyWarm || needMovementExploits)
 				ApplyLocalPlayerExploits(ctx, localChar);
-			if (espFullyWarm && cfg->bMagnetEnabled && IsHunter(localChar))
+			if (!cfg->bMagnetEnabled)
+				cfg->bMagnetActive = false;
+			if (espFullyWarm && cfg->bMagnetEnabled && cfg->bMagnetActive && IsHunter(localChar))
 				HandleMagnet(ctx.MyPlayer, ctx.MyPlayer, currentActors, MyLocation, Players, snap);
 			if (espFullyWarm || cfg->bAimbot || cfg->bTriggerbot || cfg->bSilentAim)
 				HandleCombat(ctx, Players);
@@ -1272,6 +1274,16 @@ void CheatManager::BuildDecoyEntry(SDK::APlayerController* pc,
 // UObject access (everything was resolved in BuildEspEntry on the game thread).
 void CheatManager::DrawEntry(const EspEntry& entry)
 {
+	ImDrawList* const dl = OverlayDrawList();
+	const bool outlineEnabled = cfg->bEspOutline;
+	const int outlineMask = cfg->iEspOutlineMask;
+	const float outlineThickness = cfg->fEspOutlineThickness;
+	const ImU32 colOutline = ImGui::ColorConvertFloat4ToU32(*(ImVec4*)cfg->colEspOutline);
+	const auto wantOutline = [&](int bit) -> bool
+	{
+		return outlineEnabled && (outlineMask & bit);
+	};
+
 	const ImU32 colEsp = ImGui::ColorConvertFloat4ToU32(
 		entry.role == 3 ? *(ImVec4*)cfg->colDecoy
 		: entry.isVisible ? *(ImVec4*)cfg->colVisible
@@ -1287,14 +1299,22 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 		{
 			if (!IsScreenCoordValid(seg.first) || !IsScreenCoordValid(seg.second))
 				continue;
-			OverlayDrawList()->AddLine(ImVec2(seg.first.X, seg.first.Y), ImVec2(seg.second.X, seg.second.Y), colEsp, 1.0f);
+			Drawings::DrawLine(dl,
+				ImVec2(seg.first.X, seg.first.Y),
+				ImVec2(seg.second.X, seg.second.Y),
+				colEsp, 1.0f,
+				wantOutline(EspOutlineSection::Skeleton), colOutline, outlineThickness);
 		}
 	}
 
 	if (entry.hasBox && IsScreenCoordValid(entry.boxMin) && IsScreenCoordValid(entry.boxMax))
 	{
 		if (cfg->bNames)
-			OverlayDrawList()->AddText(ImVec2(entry.boxMin.X, entry.boxMin.Y - 15), colEsp, entry.name.c_str());
+		{
+			Drawings::DrawText(dl, ImVec2(entry.boxMin.X, entry.boxMin.Y - 15),
+				colEsp, entry.name.c_str(),
+				wantOutline(EspOutlineSection::Name), colOutline, outlineThickness);
+		}
 
 		if (cfg->bRoles)
 		{
@@ -1311,22 +1331,31 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 			if (roleText)
 			{
 				const float nameWidth = cfg->bNames ? ImGui::CalcTextSize(entry.name.c_str()).x + 5 : 0.0f;
-				OverlayDrawList()->AddText(ImVec2(entry.boxMin.X + nameWidth, entry.boxMin.Y - 15), colWhite, roleText);
+				Drawings::DrawText(dl, ImVec2(entry.boxMin.X + nameWidth, entry.boxMin.Y - 15),
+					colWhite, roleText,
+					wantOutline(EspOutlineSection::Role), colOutline, outlineThickness);
 			}
 		}
 
 		if (cfg->bBox)
-			draw->DrawBox(entry.boxMin.X, entry.boxMin.Y, entry.boxMax.X - entry.boxMin.X, entry.boxMax.Y - entry.boxMin.Y, colEsp, 1.0f);
+		{
+			draw->DrawBox(dl,
+				entry.boxMin.X, entry.boxMin.Y,
+				entry.boxMax.X - entry.boxMin.X, entry.boxMax.Y - entry.boxMin.Y,
+				colEsp, 1,
+				wantOutline(EspOutlineSection::Box), colOutline, outlineThickness);
+		}
 
 		if (cfg->bDistance)
 		{
 			char DistanceText[32];
 			snprintf(DistanceText, sizeof(DistanceText), "%.0fm", entry.distanceMeters);
 
-			// center the label just under the box
 			const ImVec2 TextSize = ImGui::CalcTextSize(DistanceText);
 			const float TextX = (entry.boxMin.X + entry.boxMax.X) * 0.5f - TextSize.x * 0.5f;
-			OverlayDrawList()->AddText(ImVec2(TextX, entry.boxMax.Y + 2), colEsp, DistanceText);
+			Drawings::DrawText(dl, ImVec2(TextX, entry.boxMax.Y + 2),
+				colEsp, DistanceText,
+				wantOutline(EspOutlineSection::Distance), colOutline, outlineThickness);
 		}
 
 		// if (cfg->bHunterAmmo && entry.ammo >= 0)
@@ -1338,15 +1367,18 @@ void CheatManager::DrawEntry(const EspEntry& entry)
 		// 	const float TextX = (entry.boxMin.X + entry.boxMax.X) * 0.5f -
 		// TextSize.x * 0.5f; 	const float TextY = entry.boxMax.Y + 2 +
 		// (cfg->bDistance ? ImGui::GetTextLineHeight() : 0.0f);
-		// 	OverlayDrawList()->AddText(ImVec2(TextX, TextY), colWhite,
-		// AmmoText);
+		// 	Drawings::DrawText(dl, ImVec2(TextX, TextY), colWhite, AmmoText, outline, colOutline);
 		// }
 	}
 
 	if (cfg->bLines && entry.hasSnapline && IsScreenCoordValid(entry.snaplineScreen))
 	{
 		const auto& io = ImGui::GetIO();
-		OverlayDrawList()->AddLine(ImVec2(static_cast<float>(io.DisplaySize.x / 2), static_cast<float>(io.DisplaySize.y)), ImVec2(entry.snaplineScreen.X, entry.snaplineScreen.Y), colLine, 0.7f);
+		Drawings::DrawLine(dl,
+			ImVec2(static_cast<float>(io.DisplaySize.x / 2), static_cast<float>(io.DisplaySize.y)),
+			ImVec2(entry.snaplineScreen.X, entry.snaplineScreen.Y),
+			colLine, 0.7f,
+			wantOutline(EspOutlineSection::Lines), colOutline, outlineThickness);
 	}
 }
 
@@ -1682,7 +1714,7 @@ void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Char
 				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateEEYANPoint(Server)"))
 		{
 			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateEEYANPoint_Server_ parms{};
-			parms.CurrentEEYAN_Point = wantLikes;
+			parms.CurrentEEYAN_Point_0 = wantLikes;
 			leonPs->ProcessEvent(fn, &parms);
 		}
 
@@ -1690,7 +1722,7 @@ void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Char
 				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateMEPoint(Server)"))
 		{
 			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateMEPoint_Server_ parms{};
-			parms.CurrentME_Point = wantKills;
+			parms.CurrentME_Point_0 = wantKills;
 			leonPs->ProcessEvent(fn, &parms);
 		}
 
@@ -1943,7 +1975,8 @@ bool CheatManager::NeedsActorScan() const
 {
 	if (!cfg)
 		return false;
-	return NeedsEspDraw() || cfg->bDecoys || cfg->bMagnetEnabled || cfg->bForceCharacterVisibility ||
+	return NeedsEspDraw() || cfg->bDecoys || (cfg->bMagnetEnabled && cfg->bMagnetActive) ||
+		cfg->bForceCharacterVisibility ||
 		cfg->bAimbot || cfg->bTriggerbot || cfg->bSilentAim ||
 		TeleportTarget != nullptr || KillTarget != nullptr || bKillAllSurvivorsRequested;
 }
@@ -1953,7 +1986,8 @@ bool CheatManager::NeedsLocalExploits() const
 	if (!cfg)
 		return false;
 	return cfg->bNoGunCooldown || cfg->bInfiniteBullets || cfg->bAntiDetection ||
-		cfg->bNoDecoyCooldown || cfg->bSetDecoyNum || cfg->bFovChanger || cfg->bMagnetEnabled ||
+		cfg->bNoDecoyCooldown || cfg->bSetDecoyNum || cfg->bFovChanger ||
+		(cfg->bMagnetEnabled && cfg->bMagnetActive) ||
 		cfg->bForceCharacterVisibility || bChangeNameRequested || cfg->bGodmode || cfg->bSpeedhack ||
 		cfg->bFly || cfg->bNoclip || cfg->bNoRecoil ||
 		cfg->bAimbot || cfg->bTriggerbot || cfg->bSilentAim ||
@@ -1977,34 +2011,60 @@ bool CheatManager::NeedsGameThreadTick() const
 	return false;
 }
 
-void CheatManager::ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
+void CheatManager::SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
 {
-	if (!character || !cfg->bNoDecoyCooldown || !DecoyExploitsReady())
+	if (!character || !cfg || !DecoyExploitsReady())
+		return;
+	if (!cfg->bNoDecoyCooldown && !cfg->bSetDecoyNum)
 		return;
 	// Same teardown guard as HandleSetDecoyNum: don't write into a character that is
 	// being destroyed or when we're not in a live match (round-end teardown).
 	if (!inMatchCached.load(std::memory_order_acquire) || SafeActorBeingDestroyed(character) ||
 		!IsObjectUsable(character))
 		return;
-	if (GetTickCount64() < decoyQuiesceUntilMs_)
-		return;
+	// Intentionally NOT gated on decoyQuiesceUntilMs_: paintable quiesce is for
+	// MaxDecoySpawnCount writes only. Pausing cooldown sync made clone icons go grey
+	// whenever a decoy was destroyed (5s pause per drop).
 
 	__try
 	{
-		// Only refresh existing cooldown slots — never grow the TArray to match an
-		// inflated MaxDecoySpawnCount, which fights the game's decoy teardown path.
 		character->DecoyCoolTimeDefault = 0.0;
+
+		int desiredSlots = character->DecoyCoolTimes.Num();
+		if (cfg->bSetDecoyNum)
+		{
+			desiredSlots = cfg->iDecoyCount;
+			if (desiredSlots < 0)
+				desiredSlots = 0;
+			if (desiredSlots > 99)
+				desiredSlots = 99;
+		}
+		else if (character->RuntimePaintable && IsObjectUsable(character->RuntimePaintable))
+		{
+			const int maxSpawn = character->RuntimePaintable->MaxDecoySpawnCount;
+			if (maxSpawn > desiredSlots)
+				desiredSlots = maxSpawn;
+		}
+
+		// Grow only within UE-preallocated slack — never reallocate the TArray.
+		while (character->DecoyCoolTimes.Num() < desiredSlots)
+		{
+			if (!character->DecoyCoolTimes.Add(1.0))
+				break;
+		}
+
 		const int slotCount = character->DecoyCoolTimes.Num();
 		for (int j = 0; j < slotCount; ++j)
 		{
 			if (!character->DecoyCoolTimes.IsValidIndex(j))
 				continue;
+			// 1.0 = ready (UseDecoy checks GreaterEqual against threshold).
 			character->DecoyCoolTimes[j] = 1.0;
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
-		PhLog("[EXPLOITS:DECOY-NUM] NoDecoyCooldown fault — skipped frame\n");
+		PhLog("[EXPLOITS:DECOY-NUM] SyncDecoyCooldownState fault — skipped frame\n");
 	}
 }
 
@@ -2024,10 +2084,13 @@ void CheatManager::TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintabl
 	}
 
 	const ULONGLONG now = GetTickCount64();
-	if (lastSpawnedDecoyCount_ > 0 && spawnedCount >= 0 && spawnedCount < lastSpawnedDecoyCount_)
+	// Only quiesce paintable count writes on a full wipe (round end / mass teardown),
+	// not when the player destroys a single clone mid-round — that was causing random
+	// grey cooldown icons because SyncDecoyCooldownState shared this pause window.
+	if (lastSpawnedDecoyCount_ > 0 && spawnedCount == 0)
 	{
 		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
-		PhLog("[EXPLOITS:DECOY] clones cleared — pausing decoy writes for %ums\n",
+		PhLog("[EXPLOITS:DECOY] all clones cleared — pausing paintable writes for %ums\n",
 			static_cast<unsigned>(kDecoyQuiesceMs));
 	}
 
@@ -2464,10 +2527,10 @@ void CheatManager::RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 		1.0, 0.0, 0.0, SDK::EInputActionValueType::Boolean);
 
 	SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 parms{};
-	parms.ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = actionValue;
-	parms.ElapsedTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
-	parms.TriggeredTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
-	parms.SourceAction_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = nullptr;
+	parms.ActionValue = actionValue;
+	parms.ElapsedTime = 0.0f;
+	parms.TriggeredTime = 0.0f;
+	parms.SourceAction = nullptr;
 	hunter->ProcessEvent(fn, &parms);
 }
 
@@ -2676,8 +2739,8 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 		if (baseClass->RuntimePaintable && IsObjectValid(baseClass->RuntimePaintable))
 			TrackDecoyLifecycle(baseClass->RuntimePaintable);
 
-		if (cfg->bNoDecoyCooldown)
-			ApplyNoDecoyCooldown(baseClass);
+		if (cfg->bNoDecoyCooldown || cfg->bSetDecoyNum)
+			SyncDecoyCooldownState(baseClass);
 
 		if (cfg->bSetDecoyNum)
 			HandleSetDecoyNum(baseClass);

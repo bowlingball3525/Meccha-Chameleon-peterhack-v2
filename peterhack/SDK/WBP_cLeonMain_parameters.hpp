@@ -11,192 +11,63 @@
 #include "Basic.hpp"
 
 #include "CoreUObject_structs.hpp"
-#include "ST_cLeonMapData_structs.hpp"
 #include "EN_cLeonMainGamePhase_structs.hpp"
+#include "Engine_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 #include "SlateCore_structs.hpp"
 #include "UMG_structs.hpp"
-#include "Engine_structs.hpp"
 
 
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.UpdateWatchRanking
-// 0x0028 (0x0028 - 0x0000)
-struct WBP_cLeonMain_C_UpdateWatchRanking final
+// Function WBP_cLeonMain.WBP_cLeonMain_C.AddPointpopup
+// 0x0018 (0x0018 - 0x0000)
+struct WBP_cLeonMain_C_AddPointpopup final
 {
 public:
-	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> PlayerStates;                           // 0x0000(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
-	TArray<int32>                                 Points;                                            // 0x0010(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
-	int32                                         UpdateTime;                                        // 0x0020(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class ABP_FirstPersonPlayerState_Online_C*    TargetPlayer;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayer;                                   // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	int32                                         PointValue;                                        // 0x0010(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_UpdateWatchRanking;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_AddPointpopup;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.UpdateDecoyCoolTime
-// 0x0010 (0x0010 - 0x0000)
-struct WBP_cLeonMain_C_UpdateDecoyCoolTime final
-{
-public:
-	TArray<double>                                CoolTimes;                                         // 0x0000(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_UpdateDecoyCoolTime;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerTextUpdate
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_TimerTextUpdate final
-{
-public:
-	int32                                         Time;                                              // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerTextUpdate;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerTextChange
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_TimerTextChange final
-{
-public:
-	int32                                         TextIndex;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerTextChange;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerNumberChange
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_TimerNumberChange final
-{
-public:
-	int32                                         Number;                                            // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerNumberChange;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.SetWatchRankingVisibility
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_SetWatchRankingVisibility final
-{
-public:
-	bool                                          Visibility;                                        // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_SetWatchRankingVisibility;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.SetWaitWidgetText
-// 0x000C (0x000C - 0x0000)
-struct WBP_cLeonMain_C_SetWaitWidgetText final
-{
-public:
-	int32                                         TextIndex;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         AreaInPlayerNum;                                   // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         PlayerNum;                                         // 0x0008(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_SetWaitWidgetText;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.SetPlayerPinImage
-// 0x0030 (0x0030 - 0x0000)
-struct WBP_cLeonMain_C_SetPlayerPinImage final
-{
-public:
-	int32                                         ImageNum;                                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          IsHunter;                                          // 0x0004(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_5[0x3];                                        // 0x0005(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	class UPanelWidget*                           WrapBox;                                           // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Variable;                                 // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          CallFunc_LessEqual_IntInt_ReturnValue;             // 0x0014(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_15[0x3];                                       // 0x0015(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0018(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_1C[0x4];                                       // 0x001C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	class UWBP_HunterOrSurvivorIcon_C*            CallFunc_Create_ReturnValue;                       // 0x0020(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	class UPanelSlot*                             CallFunc_AddChild_ReturnValue;                     // 0x0028(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_SetPlayerPinImage;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.RemainCountChange
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_RemainCountChange final
-{
-public:
-	int32                                         RemainCount;                                       // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_RemainCountChange;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_PreConstruct;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.PlayerNumUpdate
+// Function WBP_cLeonMain.WBP_cLeonMain_C.BulletUpdate
 // 0x0008 (0x0008 - 0x0000)
-struct WBP_cLeonMain_C_PlayerNumUpdate final
+struct WBP_cLeonMain_C_BulletUpdate final
 {
 public:
-	int32                                         Current;                                           // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         max_0;                                             // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         max_0;                                             // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Current;                                           // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_PlayerNumUpdate;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_BulletUpdate;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.NamePlateVisibilityChange
+// Function WBP_cLeonMain.WBP_cLeonMain_C.CanPenterationUpdate
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_NamePlateVisibilityChange final
+struct WBP_cLeonMain_C_CanPenterationUpdate final
 {
 public:
-	bool                                          Visibility;                                        // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsCanPenteration;                                  // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_NamePlateVisibilityChange;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_CanPenterationUpdate;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.MapDataUpdate
-// 0x0028 (0x0028 - 0x0000)
-struct WBP_cLeonMain_C_MapDataUpdate final
-{
-public:
-	struct FST_cLeonMapData                       Mapdata;                                           // 0x0000(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_MapDataUpdate;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.IsHunter
+// Function WBP_cLeonMain.WBP_cLeonMain_C.ClimbingState
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_IsHunter final
+struct WBP_cLeonMain_C_ClimbingState final
 {
 public:
-	bool                                          Hunter;                                            // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_IsHunter;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_ClimbingState;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.InitDecoyWidget
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_InitDecoyWidget final
+// Function WBP_cLeonMain.WBP_cLeonMain_C.eeyan
+// 0x0010 (0x0010 - 0x0000)
+struct WBP_cLeonMain_C_eeyan final
 {
 public:
-	int32                                         Num;                                               // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class FString                                 Name_0;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_InitDecoyWidget;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.HunterNumChange
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_HunterNumChange final
-{
-public:
-	int32                                         HunterNum;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_HunterNumChange;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.GamePhaseChange
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_GamePhaseChange final
-{
-public:
-	EN_cLeonMainGamePhase                         MainGamePhase;                                     // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_GamePhaseChange;
-
-// Function WBP_cLeonMain.WBP_cLeonMain_C.GameModeIndexUpdate
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_cLeonMain_C_GameModeIndexUpdate final
-{
-public:
-	int32                                         Index_0;                                           // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonMain_C_GameModeIndexUpdate;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_eeyan;
 
 // Function WBP_cLeonMain.WBP_cLeonMain_C.ExecuteUbergraph_WBP_cLeonMain
 // 0x0910 (0x0910 - 0x0000)
@@ -218,8 +89,8 @@ public:
 	struct FLinearColor                           Temp_struct_Variable_2;                            // 0x0040(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	struct FLinearColor                           Temp_struct_Variable_3;                            // 0x0050(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	TDelegate<void(int32 HunterNum)>              K2Node_CreateDelegate_OutputDelegate_1;            // 0x0060(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	TDelegate<void(EN_cLeonMainGamePhase MainGamePhase)> K2Node_CreateDelegate_OutputDelegate_2;     // 0x0070(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	TDelegate<void(bool IsCanPenteration)>        K2Node_CreateDelegate_OutputDelegate_3;            // 0x0080(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TDelegate<void(EN_cLeonMainGamePhase MainGamePhase_0)> K2Node_CreateDelegate_OutputDelegate_2;   // 0x0070(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TDelegate<void(bool IsCanPenteration_0)>      K2Node_CreateDelegate_OutputDelegate_3;            // 0x0080(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	TDelegate<void(bool Visibility)>              K2Node_CreateDelegate_OutputDelegate_4;            // 0x0090(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	EN_cLeonMainGamePhase                         Temp_byte_Variable_4;                              // 0x00A0(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_5;                              // 0x00A1(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
@@ -247,7 +118,7 @@ public:
 	TDelegate<void()>                             K2Node_CreateDelegate_OutputDelegate_6;            // 0x010C(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_11C[0x4];                                      // 0x011C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
 	struct FTimerHandle                           CallFunc_K2_SetTimerDelegate_ReturnValue;          // 0x0120(0x0008)(NoDestructor, HasGetValueTypeHash)
-	TDelegate<void(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime)> K2Node_CreateDelegate_OutputDelegate_7; // 0x0128(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	TDelegate<void(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime_0)> K2Node_CreateDelegate_OutputDelegate_7; // 0x0128(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	class UWBP_cLeon_WatchRankingContents_C*      CallFunc_Create_ReturnValue;                       // 0x0138(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
 	bool                                          Temp_bool_Variable_2;                              // 0x0140(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	ESlateVisibility                              Temp_byte_Variable_14;                             // 0x0141(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
@@ -570,53 +441,182 @@ public:
 };
 DUMPER7_ASSERTS_WBP_cLeonMain_C_ExecuteUbergraph_WBP_cLeonMain;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.eeyan
-// 0x0010 (0x0010 - 0x0000)
-struct WBP_cLeonMain_C_eeyan final
+// Function WBP_cLeonMain.WBP_cLeonMain_C.GameModeIndexUpdate
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_GameModeIndexUpdate final
 {
 public:
-	class FString                                 Name_0;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+	int32                                         Index_0;                                           // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_eeyan;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_GameModeIndexUpdate;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.ClimbingState
+// Function WBP_cLeonMain.WBP_cLeonMain_C.GamePhaseChange
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_ClimbingState final
+struct WBP_cLeonMain_C_GamePhaseChange final
 {
 public:
-	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	EN_cLeonMainGamePhase                         MainGamePhase;                                     // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_ClimbingState;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_GamePhaseChange;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.CanPenterationUpdate
+// Function WBP_cLeonMain.WBP_cLeonMain_C.HunterNumChange
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_HunterNumChange final
+{
+public:
+	int32                                         HunterNum;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_HunterNumChange;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.InitDecoyWidget
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_InitDecoyWidget final
+{
+public:
+	int32                                         Num;                                               // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_InitDecoyWidget;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.IsHunter
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonMain_C_CanPenterationUpdate final
+struct WBP_cLeonMain_C_IsHunter final
 {
 public:
-	bool                                          IsCanPenteration;                                  // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          Hunter;                                            // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_CanPenterationUpdate;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_IsHunter;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.BulletUpdate
+// Function WBP_cLeonMain.WBP_cLeonMain_C.MapDataUpdate
+// 0x0028 (0x0028 - 0x0000)
+struct WBP_cLeonMain_C_MapDataUpdate final
+{
+public:
+	struct FST_cLeonMapData                       Mapdata;                                           // 0x0000(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_MapDataUpdate;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.NamePlateVisibilityChange
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonMain_C_NamePlateVisibilityChange final
+{
+public:
+	bool                                          Visibility_0;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_NamePlateVisibilityChange;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.PlayerNumUpdate
 // 0x0008 (0x0008 - 0x0000)
-struct WBP_cLeonMain_C_BulletUpdate final
+struct WBP_cLeonMain_C_PlayerNumUpdate final
 {
 public:
-	int32                                         max_0;                                             // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Current;                                           // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Current;                                           // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         max_0;                                             // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_BulletUpdate;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_PlayerNumUpdate;
 
-// Function WBP_cLeonMain.WBP_cLeonMain_C.AddPointpopup
-// 0x0018 (0x0018 - 0x0000)
-struct WBP_cLeonMain_C_AddPointpopup final
+// Function WBP_cLeonMain.WBP_cLeonMain_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonMain_C_PreConstruct final
 {
 public:
-	class ABP_FirstPersonPlayerState_Online_C*    TargetPlayer;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayer;                                   // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	int32                                         PointValue;                                        // 0x0010(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_cLeonMain_C_AddPointpopup;
+DUMPER7_ASSERTS_WBP_cLeonMain_C_PreConstruct;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.RemainCountChange
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_RemainCountChange final
+{
+public:
+	int32                                         RemainCount;                                       // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_RemainCountChange;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.SetPlayerPinImage
+// 0x0030 (0x0030 - 0x0000)
+struct WBP_cLeonMain_C_SetPlayerPinImage final
+{
+public:
+	int32                                         ImageNum;                                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsHunter;                                          // 0x0004(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_5[0x3];                                        // 0x0005(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	class UPanelWidget*                           WrapBox;                                           // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Variable;                                 // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          CallFunc_LessEqual_IntInt_ReturnValue;             // 0x0014(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_15[0x3];                                       // 0x0015(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0018(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_1C[0x4];                                       // 0x001C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	class UWBP_HunterOrSurvivorIcon_C*            CallFunc_Create_ReturnValue;                       // 0x0020(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	class UPanelSlot*                             CallFunc_AddChild_ReturnValue;                     // 0x0028(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_SetPlayerPinImage;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.SetWaitWidgetText
+// 0x000C (0x000C - 0x0000)
+struct WBP_cLeonMain_C_SetWaitWidgetText final
+{
+public:
+	int32                                         TextIndex;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         AreaInPlayerNum;                                   // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         PlayerNum;                                         // 0x0008(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_SetWaitWidgetText;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.SetWatchRankingVisibility
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonMain_C_SetWatchRankingVisibility final
+{
+public:
+	bool                                          Visibility_0;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_SetWatchRankingVisibility;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerNumberChange
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_TimerNumberChange final
+{
+public:
+	int32                                         Number;                                            // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerNumberChange;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerTextChange
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_TimerTextChange final
+{
+public:
+	int32                                         TextIndex;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerTextChange;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.TimerTextUpdate
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_cLeonMain_C_TimerTextUpdate final
+{
+public:
+	int32                                         Time;                                              // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_TimerTextUpdate;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.UpdateDecoyCoolTime
+// 0x0010 (0x0010 - 0x0000)
+struct WBP_cLeonMain_C_UpdateDecoyCoolTime final
+{
+public:
+	TArray<double>                                CoolTimes;                                         // 0x0000(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_UpdateDecoyCoolTime;
+
+// Function WBP_cLeonMain.WBP_cLeonMain_C.UpdateWatchRanking
+// 0x0028 (0x0028 - 0x0000)
+struct WBP_cLeonMain_C_UpdateWatchRanking final
+{
+public:
+	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> PlayerStates;                           // 0x0000(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
+	TArray<int32>                                 Points;                                            // 0x0010(0x0010)(ConstParm, BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm)
+	int32                                         UpdateTime;                                        // 0x0020(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonMain_C_UpdateWatchRanking;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

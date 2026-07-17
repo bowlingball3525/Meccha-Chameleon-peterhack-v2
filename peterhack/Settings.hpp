@@ -14,6 +14,9 @@ public:
 	bool bBox;
 	bool bSkeleton;
 	bool bDistance;
+	bool bEspOutline;
+	float fEspOutlineThickness;
+	int iEspOutlineMask;
 	bool bHunterAmmo;
 	bool bDecoys;
 	bool bDumpBones;
@@ -23,6 +26,7 @@ public:
 	bool bNoGunCooldown;
 	bool bAntiDetection;
 	bool bMagnetEnabled;
+	bool bMagnetActive;
 	int iMagnetKey; // bind code: keyboard/mouse VK or controller button (Binds::)
 	bool bControllerBinds;
 	int iControllerMenuButton; // bind code for opening the menu (default: pad Back/View)
@@ -61,6 +65,7 @@ public:
 	float colNotVisible[4];
 	float colLines[4];
 	float colDecoy[4];
+	float colEspOutline[4];
 
 	// Quality-of-life overlays (render-thread only).
 	bool bStreamproof;    // exclude the overlay window from screen capture

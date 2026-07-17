@@ -27,15 +27,15 @@ public:
 	class UAnimMontage*                           LastMontage;                                       // 0x02C8(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void Update();
-	void ReceiveBeginPlay();
-	void OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
-	void OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
-	void OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
-	void OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
-	void OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
-	void ExecuteUbergraph_BP_ShowCopy(int32 EntryPoint);
 	void CopyPreset(class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* Survivor);
+	void ExecuteUbergraph_BP_ShowCopy(int32 EntryPoint);
+	void OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
+	void OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
+	void OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
+	void OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
+	void OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName);
+	void ReceiveBeginPlay();
+	void Update();
 
 public:
 	static class UClass* StaticClass()

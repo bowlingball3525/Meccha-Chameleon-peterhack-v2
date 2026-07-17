@@ -16,24 +16,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.SetToggleState
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonToggleSwitch_C_SetToggleState final
-{
-public:
-	bool                                          ToggleState;                                       // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonToggleSwitch_C_SetToggleState;
-
-// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonToggleSwitch_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonToggleSwitch_C_PreConstruct;
-
 // Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.ExecuteUbergraph_WBP_cLeonToggleSwitch
 // 0x0020 (0x0020 - 0x0000)
 struct WBP_cLeonToggleSwitch_C_ExecuteUbergraph_WBP_cLeonToggleSwitch final
@@ -51,6 +33,24 @@ public:
 	bool                                          CallFunc_NotEqual_BoolBool_ReturnValue;            // 0x001D(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_cLeonToggleSwitch_C_ExecuteUbergraph_WBP_cLeonToggleSwitch;
+
+// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonToggleSwitch_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonToggleSwitch_C_PreConstruct;
+
+// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.SetToggleState
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonToggleSwitch_C_SetToggleState final
+{
+public:
+	bool                                          ToggleState_0;                                     // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonToggleSwitch_C_SetToggleState;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

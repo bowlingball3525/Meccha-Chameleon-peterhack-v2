@@ -37,16 +37,16 @@ public:
 	TMulticastInlineDelegate<void(const struct FLinearColor& Color, double Metallic, double Roughness)> UpdateParamaterValues; // 0x03A8(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 
 public:
-	void UpdateDefaultValue(const struct FLinearColor& DefaultColor, double Metallic, double Roughness);
-	void SelectSlide(int32 AddValue);
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void ExecuteUbergraph_WBP_ControllerColorPalet(int32 EntryPoint);
-	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
-	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
-	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
-	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
-	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
 	void AddSliderValue(double Value);
+	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
+	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
+	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
+	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
+	void BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall);
+	void ExecuteUbergraph_WBP_ControllerColorPalet(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime);
+	void SelectSlide(int32 AddValue);
+	void UpdateDefaultValue(const struct FLinearColor& DefaultColor_0, double Metallic, double Roughness);
 
 public:
 	static class UClass* StaticClass()

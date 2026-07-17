@@ -10,10 +10,10 @@
 
 #include "Basic.hpp"
 
-#include "ABP_MainCharacter_PaintMan_low_structs.hpp"
 #include "AnimGraphRuntime_structs.hpp"
 #include "Engine_structs.hpp"
 #include "Engine_classes.hpp"
+#include "ABP_MainCharacter_PaintMan_low_structs.hpp"
 #include "CoreUObject_structs.hpp"
 
 
@@ -110,18 +110,18 @@ public:
 	bool                                          IsCrouch;                                          // 0x1871(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ExecuteUbergraph_ABP_MainCharacter_PaintMan_low(int32 EntryPoint);
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_FE06D8964153EF32B6F59B8372C89E11();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_B30C73B24E9F1E7636DC2D98B204FA1A();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_83A5508D41F00FF9E224B39876A34404();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_613B7BF5474CD8B2601EA798FFBD0F64();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_12D815E0427EFC177AE38FB8BD70E593();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_B6A7ACA04AAAAB8891F8519E1E00E1C7();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_61711BDC484E8FC0A2BBBE97749A630A();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_0E0B782646119C0D3C59E6854F4A99D0();
-	void BlueprintUpdateAnimation(float DeltaTimeX_BlueprintUpdateAnimation);
+	void AnimGraph(struct FPoseLink* AnimGraph_0);
 	void BlueprintInitializeAnimation();
-	void AnimGraph(struct FPoseLink* AnimGraph);
+	void BlueprintUpdateAnimation(float DeltaTimeX);
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_0E0B782646119C0D3C59E6854F4A99D0();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_61711BDC484E8FC0A2BBBE97749A630A();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_LookAt_B6A7ACA04AAAAB8891F8519E1E00E1C7();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_12D815E0427EFC177AE38FB8BD70E593();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_613B7BF5474CD8B2601EA798FFBD0F64();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_83A5508D41F00FF9E224B39876A34404();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_B30C73B24E9F1E7636DC2D98B204FA1A();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low_AnimGraphNode_TransitionResult_FE06D8964153EF32B6F59B8372C89E11();
+	void ExecuteUbergraph_ABP_MainCharacter_PaintMan_low(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

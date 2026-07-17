@@ -17,34 +17,27 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function LBPC_Glue.LBPC_Glue_C.UniqueFillter
-// 0x0150 (0x0150 - 0x0000)
-struct LBPC_Glue_C_UniqueFillter final
+// Function LBPC_Glue.LBPC_Glue_C.ConstraintSetup
+// 0x0018 (0x0018 - 0x0000)
+struct LBPC_Glue_C_ConstraintSetup final
 {
 public:
-	TArray<struct FHitResult>                     HitRezults;                                        // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm, ContainsInstancedReference)
-	TArray<struct FHitResult>                     Out;                                               // 0x0010(0x0010)(Parm, OutParm, ContainsInstancedReference)
-	TArray<struct FHitResult>                     Rezult;                                            // 0x0020(0x0010)(Edit, BlueprintVisible, ContainsInstancedReference)
-	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Array_Index_Variable;                     // 0x0034(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FHitResult                             CallFunc_Array_Get_Item;                           // 0x0040(0x0100)(IsPlainOldData, NoDestructor, ContainsInstancedReference)
-	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0140(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_141[0x3];                                      // 0x0141(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0144(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         CallFunc_Array_AddUnique_ReturnValue;              // 0x0148(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class UPhysicsConstraintComponent*            ConstraintComponent;                               // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	double                                        AngulerLimit;                                      // 0x0008(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_SetAngularSwing2Limit_Swing2LimitAngle_ImplicitCast; // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_SetAngularSwing1Limit_Swing1LimitAngle_ImplicitCast; // 0x0014(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_LBPC_Glue_C_UniqueFillter;
+DUMPER7_ASSERTS_LBPC_Glue_C_ConstraintSetup;
 
-// Function LBPC_Glue.LBPC_Glue_C.ReceiveTick
-// 0x0004 (0x0004 - 0x0000)
-struct LBPC_Glue_C_ReceiveTick final
+// Function LBPC_Glue.LBPC_Glue_C.DoConnect
+// 0x0200 (0x0200 - 0x0000)
+struct LBPC_Glue_C_DoConnect final
 {
 public:
-	float                                         DeltaSeconds_ReceiveTick;                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FHitResult                             HitRezult1;                                        // 0x0000(0x0100)(BlueprintVisible, BlueprintReadOnly, Parm, IsPlainOldData, NoDestructor, ContainsInstancedReference)
+	struct FHitResult                             HitRezult2;                                        // 0x0100(0x0100)(BlueprintVisible, BlueprintReadOnly, Parm, IsPlainOldData, NoDestructor, ContainsInstancedReference)
 };
-DUMPER7_ASSERTS_LBPC_Glue_C_ReceiveTick;
+DUMPER7_ASSERTS_LBPC_Glue_C_DoConnect;
 
 // Function LBPC_Glue.LBPC_Glue_C.ExecuteUbergraph_LBPC_Glue
 // 0x0640 (0x0640 - 0x0000)
@@ -118,27 +111,34 @@ public:
 };
 DUMPER7_ASSERTS_LBPC_Glue_C_ExecuteUbergraph_LBPC_Glue;
 
-// Function LBPC_Glue.LBPC_Glue_C.DoConnect
-// 0x0200 (0x0200 - 0x0000)
-struct LBPC_Glue_C_DoConnect final
+// Function LBPC_Glue.LBPC_Glue_C.ReceiveTick
+// 0x0004 (0x0004 - 0x0000)
+struct LBPC_Glue_C_ReceiveTick final
 {
 public:
-	struct FHitResult                             HitRezult1;                                        // 0x0000(0x0100)(BlueprintVisible, BlueprintReadOnly, Parm, IsPlainOldData, NoDestructor, ContainsInstancedReference)
-	struct FHitResult                             HitRezult2;                                        // 0x0100(0x0100)(BlueprintVisible, BlueprintReadOnly, Parm, IsPlainOldData, NoDestructor, ContainsInstancedReference)
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_LBPC_Glue_C_DoConnect;
+DUMPER7_ASSERTS_LBPC_Glue_C_ReceiveTick;
 
-// Function LBPC_Glue.LBPC_Glue_C.ConstraintSetup
-// 0x0018 (0x0018 - 0x0000)
-struct LBPC_Glue_C_ConstraintSetup final
+// Function LBPC_Glue.LBPC_Glue_C.UniqueFillter
+// 0x0150 (0x0150 - 0x0000)
+struct LBPC_Glue_C_UniqueFillter final
 {
 public:
-	class UPhysicsConstraintComponent*            ConstraintComponent;                               // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	double                                        AngulerLimit;                                      // 0x0008(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_SetAngularSwing2Limit_Swing2LimitAngle_ImplicitCast; // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_SetAngularSwing1Limit_Swing1LimitAngle_ImplicitCast; // 0x0014(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	TArray<struct FHitResult>                     HitRezults;                                        // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, OutParm, ReferenceParm, ContainsInstancedReference)
+	TArray<struct FHitResult>                     Out;                                               // 0x0010(0x0010)(Parm, OutParm, ContainsInstancedReference)
+	TArray<struct FHitResult>                     Rezult;                                            // 0x0020(0x0010)(Edit, BlueprintVisible, ContainsInstancedReference)
+	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Array_Index_Variable;                     // 0x0034(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FHitResult                             CallFunc_Array_Get_Item;                           // 0x0040(0x0100)(IsPlainOldData, NoDestructor, ContainsInstancedReference)
+	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0140(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_141[0x3];                                      // 0x0141(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0144(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Array_AddUnique_ReturnValue;              // 0x0148(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_LBPC_Glue_C_ConstraintSetup;
+DUMPER7_ASSERTS_LBPC_Glue_C_UniqueFillter;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

@@ -16,6 +16,20 @@
 
 SDK_NAMESPACE_START
 
+// Function WBP_ImportMap.WBP_ImportMap_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+
+void UWBP_ImportMap_C::Construct()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ImportMap_C", "Construct");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
 // Function WBP_ImportMap.WBP_ImportMap_C.ExecuteUbergraph_WBP_ImportMap
 // (Final, UbergraphFunction, HasDefaults)
 // Parameters:
@@ -33,20 +47,6 @@ void UWBP_ImportMap_C::ExecuteUbergraph_WBP_ImportMap(int32 EntryPoint)
 	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ImportMap.WBP_ImportMap_C.Construct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-
-void UWBP_ImportMap_C::Construct()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ImportMap_C", "Construct");
-
-	UObject::ProcessEvent(Func, nullptr);
 }
 
 

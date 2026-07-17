@@ -12,15 +12,15 @@ struct CamoSettings
 	int batchPacingMs = 50;
 	float sideSourceMaxUv = 0.08f;
 	float frontBackSourceMaxUv = 0.45f;
-	int frontRegionMode = 1; // 0=paint, 1=fill, 2=skip
+	int frontRegionMode = 0; // 0=paint, 1=fill, 2=skip
 	int sideRegionMode = 0;
 	int backRegionMode = 0;
-	bool autoMaterial = false;
+	bool autoMaterial = true;
 	float metallic = 0.0f;
-	float roughness = 1.0f;
+	float roughness = 0.65f;
 	char fillColorHex[8] = "#FFFFFF";
-	float fillMetallic = 1.0f;
-	float fillRoughness = 0.0f;
+	float fillMetallic = 0.0f;
+	float fillRoughness = 0.65f;
 	int startHotkey = 0x70;     // VK_F1
 	int previewHotkey = 0x71;   // VK_F2
 	int unpreviewHotkey = 0x72; // VK_F3

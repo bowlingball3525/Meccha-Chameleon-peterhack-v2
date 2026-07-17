@@ -16,21 +16,115 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.UpdateSliderBar
-// (Public, HasDefaults, BlueprintCallable, BlueprintEvent)
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.AddSliderValue
+// (BlueprintCallable, BlueprintEvent)
 // Parameters:
-// double                                  NormalizeValue                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerGradientSlider_C::UpdateSliderBar(double NormalizeValue)
+void UWBP_ControllerGradientSlider_C::AddSliderValue(double Value)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "UpdateSliderBar");
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "AddSliderValue");
 
-	Params::WBP_ControllerGradientSlider_C_UpdateSliderBar Parms{};
+	Params::WBP_ControllerGradientSlider_C_AddSliderValue Parms{};
 
-	Parms.NormalizeValue = NormalizeValue;
+	Parms.Value = Value;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+
+void UWBP_ControllerGradientSlider_C::Construct()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "Construct");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.ExecuteUbergraph_WBP_ControllerGradientSlider
+// (Final, UbergraphFunction, HasDefaults)
+// Parameters:
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerGradientSlider_C::ExecuteUbergraph_WBP_ControllerGradientSlider(int32 EntryPoint)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "ExecuteUbergraph_WBP_ControllerGradientSlider");
+
+	Params::WBP_ControllerGradientSlider_C_ExecuteUbergraph_WBP_ControllerGradientSlider Parms{};
+
+	Parms.EntryPoint = EntryPoint;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerGradientSlider_C::PreConstruct(bool IsDesignTime)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "PreConstruct");
+
+	Params::WBP_ControllerGradientSlider_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.SetBarColor
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// const struct FLinearColor&              Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerGradientSlider_C::SetBarColor(const struct FLinearColor& Value)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "SetBarColor");
+
+	Params::WBP_ControllerGradientSlider_C_SetBarColor Parms{};
+
+	Parms.Value = std::move(Value);
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.SetSelectState
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool                                    IsSelect_0                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerGradientSlider_C::SetSelectState(bool IsSelect_0)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "SetSelectState");
+
+	Params::WBP_ControllerGradientSlider_C_SetSelectState Parms{};
+
+	Parms.IsSelect_0 = IsSelect_0;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -58,115 +152,21 @@ void UWBP_ControllerGradientSlider_C::SetSliderValue(double Value, bool UpdateCa
 }
 
 
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.SetSelectState
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.UpdateSliderBar
+// (Public, HasDefaults, BlueprintCallable, BlueprintEvent)
 // Parameters:
-// bool                                    IsSelect                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  NormalizeValue                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerGradientSlider_C::SetSelectState(bool IsSelect)
+void UWBP_ControllerGradientSlider_C::UpdateSliderBar(double NormalizeValue)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "SetSelectState");
+		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "UpdateSliderBar");
 
-	Params::WBP_ControllerGradientSlider_C_SetSelectState Parms{};
+	Params::WBP_ControllerGradientSlider_C_UpdateSliderBar Parms{};
 
-	Parms.IsSelect = IsSelect;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.SetBarColor
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// const struct FLinearColor&              Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerGradientSlider_C::SetBarColor(const struct FLinearColor& Value)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "SetBarColor");
-
-	Params::WBP_ControllerGradientSlider_C_SetBarColor Parms{};
-
-	Parms.Value = std::move(Value);
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerGradientSlider_C::PreConstruct(bool IsDesignTime_PreConstruct)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "PreConstruct");
-
-	Params::WBP_ControllerGradientSlider_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.ExecuteUbergraph_WBP_ControllerGradientSlider
-// (Final, UbergraphFunction, HasDefaults)
-// Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerGradientSlider_C::ExecuteUbergraph_WBP_ControllerGradientSlider(int32 EntryPoint)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "ExecuteUbergraph_WBP_ControllerGradientSlider");
-
-	Params::WBP_ControllerGradientSlider_C_ExecuteUbergraph_WBP_ControllerGradientSlider Parms{};
-
-	Parms.EntryPoint = EntryPoint;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.Construct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-
-void UWBP_ControllerGradientSlider_C::Construct()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "Construct");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_ControllerGradientSlider.WBP_ControllerGradientSlider_C.AddSliderValue
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// double                                  Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerGradientSlider_C::AddSliderValue(double Value)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerGradientSlider_C", "AddSliderValue");
-
-	Params::WBP_ControllerGradientSlider_C_AddSliderValue Parms{};
-
-	Parms.Value = Value;
+	Parms.NormalizeValue = NormalizeValue;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

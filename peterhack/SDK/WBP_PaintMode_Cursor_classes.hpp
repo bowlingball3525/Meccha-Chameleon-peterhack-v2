@@ -79,27 +79,27 @@ public:
 	class UBPGI_Main_C*                           BPGI_Main;                                         // 0x04E0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void UpdateInputDeviceAll(EInputType InputType);
-	void UpdateInputButtonVisibility(EInputType Selection);
-	void Tick(const struct FGeometry& MyGeometry_Tick, float InDeltaTime_Tick);
-	void ShadowState(bool ToggleState);
-	void SetCursorPosition(const struct FVector2D& SetValue);
-	void SelectSlide(int32 AddValue);
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void PaintViewLookUpdate();
-	void OnGBufferColorPicked(const struct FLinearColor& PickedColor, float PickedMetallic, float PickedRoughness);
-	void MetallicOrRoughnessChanged(float NewMetallic, float NewRoughness);
-	void GetViewportPosition(struct FVector2D* Positon);
-	void ExecuteUbergraph_WBP_PaintMode_Cursor(int32 EntryPoint);
-	void Destruct();
-	void Construct();
-	void ColorPickKeep(bool State, bool Commit);
-	void ColorPick();
-	void ColorChanged(const struct FLinearColor& NewColor);
-	void BndEvt__WBP_PaintMode_Cursor_WBP_ImageHoverButton_K2Node_ComponentBoundEvent_1_OnClick__DelegateSignature();
-	void BndEvt__WBP_PaintMode_Cursor_WBP_ControllerColorPalet_K2Node_ComponentBoundEvent_0_UpdateParamaterValues__DelegateSignature(const struct FLinearColor& Color, double Metallic, double Roughness);
-	void AddSliderValue(double Value);
 	void AddCursorPosition(const struct FVector2D& AddValue);
+	void AddSliderValue(double Value);
+	void BndEvt__WBP_PaintMode_Cursor_WBP_ControllerColorPalet_K2Node_ComponentBoundEvent_0_UpdateParamaterValues__DelegateSignature(const struct FLinearColor& Color, double Metallic, double Roughness);
+	void BndEvt__WBP_PaintMode_Cursor_WBP_ImageHoverButton_K2Node_ComponentBoundEvent_1_OnClick__DelegateSignature();
+	void ColorChanged(const struct FLinearColor& NewColor);
+	void ColorPick();
+	void ColorPickKeep(bool State, bool Commit);
+	void Construct();
+	void Destruct();
+	void ExecuteUbergraph_WBP_PaintMode_Cursor(int32 EntryPoint);
+	void GetViewportPosition(struct FVector2D* Positon);
+	void MetallicOrRoughnessChanged(float NewMetallic, float NewRoughness);
+	void OnGBufferColorPicked(const struct FLinearColor& PickedColor, float PickedMetallic, float PickedRoughness);
+	void PaintViewLookUpdate();
+	void PreConstruct(bool IsDesignTime);
+	void SelectSlide(int32 AddValue);
+	void SetCursorPosition(const struct FVector2D& SetValue);
+	void ShadowState(bool ToggleState);
+	void Tick(const struct FGeometry& MyGeometry, float InDeltaTime);
+	void UpdateInputButtonVisibility(EInputType Selection);
+	void UpdateInputDeviceAll(EInputType InputType);
 
 public:
 	static class UClass* StaticClass()

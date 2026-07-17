@@ -16,79 +16,49 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_MapContents.WBP_MapContents_C.SelectUpdate
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function WBP_MapContents.WBP_MapContents_C.BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature
+// (BlueprintEvent)
 
-void UWBP_MapContents_C::SelectUpdate(bool State)
+void UWBP_MapContents_C::BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "SelectUpdate");
-
-	Params::WBP_MapContents_C_SelectUpdate Parms{};
-
-	Parms.State = State;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_MapContents.WBP_MapContents_C.ReUpdate
-// (BlueprintCallable, BlueprintEvent)
-
-void UWBP_MapContents_C::ReUpdate()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "ReUpdate");
+		Func = Class->GetFunction("WBP_MapContents_C", "BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_MapContents.WBP_MapContents_C.PreConstruct
+// Function WBP_MapContents.WBP_MapContents_C.Construct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContents_C::PreConstruct(bool IsDesignTime_PreConstruct)
+void UWBP_MapContents_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_MapContents_C", "Construct");
 
-	Params::WBP_MapContents_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_MapContents.WBP_MapContents_C.OnSuccess_F47348424771535C48E222B9B9CA8A4E
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_MapContents.WBP_MapContents_C.ExecuteUbergraph_WBP_MapContents
+// (Final, UbergraphFunction, HasDefaults)
 // Parameters:
-// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
-// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContents_C::OnSuccess_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
+void UWBP_MapContents_C::ExecuteUbergraph_WBP_MapContents(int32 EntryPoint)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "OnSuccess_F47348424771535C48E222B9B9CA8A4E");
+		Func = Class->GetFunction("WBP_MapContents_C", "ExecuteUbergraph_WBP_MapContents");
 
-	Params::WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E Parms{};
+	Params::WBP_MapContents_C_ExecuteUbergraph_WBP_MapContents Parms{};
 
-	Parms.ItemId = std::move(ItemId);
-	Parms.Details = std::move(Details);
-	Parms.ErrorMessage = std::move(ErrorMessage);
+	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -118,51 +88,81 @@ void UWBP_MapContents_C::OnFailure_F47348424771535C48E222B9B9CA8A4E(const class 
 }
 
 
-// Function WBP_MapContents.WBP_MapContents_C.ExecuteUbergraph_WBP_MapContents
-// (Final, UbergraphFunction, HasDefaults)
+// Function WBP_MapContents.WBP_MapContents_C.OnSuccess_F47348424771535C48E222B9B9CA8A4E
+// (BlueprintCallable, BlueprintEvent)
 // Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
+// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
 
-void UWBP_MapContents_C::ExecuteUbergraph_WBP_MapContents(int32 EntryPoint)
+void UWBP_MapContents_C::OnSuccess_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "ExecuteUbergraph_WBP_MapContents");
+		Func = Class->GetFunction("WBP_MapContents_C", "OnSuccess_F47348424771535C48E222B9B9CA8A4E");
 
-	Params::WBP_MapContents_C_ExecuteUbergraph_WBP_MapContents Parms{};
+	Params::WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E Parms{};
 
-	Parms.EntryPoint = EntryPoint;
+	Parms.ItemId = std::move(ItemId);
+	Parms.Details = std::move(Details);
+	Parms.ErrorMessage = std::move(ErrorMessage);
 
 	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_MapContents.WBP_MapContents_C.Construct
+// Function WBP_MapContents.WBP_MapContents_C.PreConstruct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContents_C::Construct()
+void UWBP_MapContents_C::PreConstruct(bool IsDesignTime)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "Construct");
+		Func = Class->GetFunction("WBP_MapContents_C", "PreConstruct");
+
+	Params::WBP_MapContents_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_MapContents.WBP_MapContents_C.ReUpdate
+// (BlueprintCallable, BlueprintEvent)
+
+void UWBP_MapContents_C::ReUpdate()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_MapContents_C", "ReUpdate");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_MapContents.WBP_MapContents_C.BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature
-// (BlueprintEvent)
+// Function WBP_MapContents.WBP_MapContents_C.SelectUpdate
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContents_C::BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature()
+void UWBP_MapContents_C::SelectUpdate(bool State)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContents_C", "BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature");
+		Func = Class->GetFunction("WBP_MapContents_C", "SelectUpdate");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::WBP_MapContents_C_SelectUpdate Parms{};
+
+	Parms.State = State;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 

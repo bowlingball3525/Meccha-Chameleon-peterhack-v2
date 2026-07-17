@@ -97,6 +97,67 @@ void Menu::Init()
 			ImGui::Checkbox("Roles", &cfg->bRoles);
 			ImGui::Checkbox("Skeleton", &cfg->bSkeleton);
 			ImGui::Checkbox("Distance", &cfg->bDistance);
+			ImGui::Checkbox("Outline", &cfg->bEspOutline);
+			if (cfg->bEspOutline)
+			{
+				ImGui::SliderFloat("Outline thickness", &cfg->fEspOutlineThickness, 1.0f, 6.0f, "%.1f px");
+
+				if (ImGui::ColorButton("##colEspOutline", *(ImVec4*)cfg->colEspOutline))
+					ImGui::OpenPopup("popup_colEspOutline");
+				ImGui::SameLine();
+				ImGui::Text("Outline color / opacity");
+				if (ImGui::BeginPopup("popup_colEspOutline"))
+				{
+					ImGui::ColorPicker4("##pick", cfg->colEspOutline, kColorPickerPopupFlags);
+					ImGui::EndPopup();
+				}
+
+				struct OutlineOption { const char* label; int bit; };
+				static const OutlineOption kOutlineOptions[] = {
+					{ "Box", EspOutlineSection::Box },
+					{ "Lines", EspOutlineSection::Lines },
+					{ "Name", EspOutlineSection::Name },
+					{ "Role", EspOutlineSection::Role },
+					{ "Distance", EspOutlineSection::Distance },
+					{ "Skeleton", EspOutlineSection::Skeleton },
+				};
+				const int outlineOptionCount = (int)(sizeof(kOutlineOptions) / sizeof(kOutlineOptions[0]));
+				int outlineShownCount = 0;
+				for (const auto& opt : kOutlineOptions)
+					if (cfg->iEspOutlineMask & opt.bit)
+						++outlineShownCount;
+
+				char outlinePreview[32];
+				if (outlineShownCount == outlineOptionCount)
+					snprintf(outlinePreview, sizeof(outlinePreview), "All elements");
+				else if (outlineShownCount == 0)
+					snprintf(outlinePreview, sizeof(outlinePreview), "None");
+				else
+					snprintf(outlinePreview, sizeof(outlinePreview), "%d of %d elements", outlineShownCount, outlineOptionCount);
+
+				ImGui::SetNextItemWidth(220.0f);
+				if (ImGui::BeginCombo("Outline on", outlinePreview))
+				{
+					for (const auto& opt : kOutlineOptions)
+					{
+						bool selected = (cfg->iEspOutlineMask & opt.bit) != 0;
+						if (ImGui::Checkbox(opt.label, &selected))
+						{
+							if (selected)
+								cfg->iEspOutlineMask |= opt.bit;
+							else
+								cfg->iEspOutlineMask &= ~opt.bit;
+						}
+					}
+					ImGui::Separator();
+					if (ImGui::Button("All##outline", ImVec2(60, 0)))
+						cfg->iEspOutlineMask = EspOutlineSection::All;
+					ImGui::SameLine();
+					if (ImGui::Button("None##outline", ImVec2(60, 0)))
+						cfg->iEspOutlineMask = 0;
+					ImGui::EndCombo();
+				}
+			}
 			// ImGui::Checkbox("Hunter Ammo", &cfg->bHunterAmmo);
 			ImGui::Checkbox("Decoys", &cfg->bDecoys);
 
@@ -275,9 +336,19 @@ void Menu::Init()
 			ImGui::Checkbox("No Gun Cooldown", &cfg->bNoGunCooldown);
 			ImGui::Checkbox("Infinite Bullets", &cfg->bInfiniteBullets);
 
-			// Master on/off for the magnet so it isn't always active. The Magnet Key
-			// below toggles this same state for quick in-match enabling/disabling.
-			ImGui::Checkbox(ICON_FA_MAGNET " Magnet", &cfg->bMagnetEnabled);
+			// Master enable in menu; Magnet Key toggles bMagnetActive while enabled.
+			if (ImGui::Checkbox(ICON_FA_MAGNET " Magnet", &cfg->bMagnetEnabled))
+			{
+				if (cfg->bMagnetEnabled)
+					cfg->bMagnetActive = true;
+				else
+					cfg->bMagnetActive = false;
+			}
+			if (cfg->bMagnetEnabled)
+			{
+				ImGui::SameLine();
+				ImGui::TextDisabled(cfg->bMagnetActive ? "(active)" : "(inactive — press key to toggle)");
+			}
 
 			// Magnet toggle rebind: click the button, then press any key, mouse
 			// button, or controller button (when Controller Binds is on).
@@ -654,7 +725,7 @@ void Menu::DrawHud()
 		snprintf(b, sizeof(b), "FOV %.0f", cfg->fFovValue);
 		lines.push_back(b);
 	}
-	if (on(HudSection::Magnet) && cfg->bMagnetEnabled)
+	if (on(HudSection::Magnet) && cfg->bMagnetEnabled && cfg->bMagnetActive)
 		lines.push_back(std::string(ICON_FA_MAGNET " Magnet [") + Binds::BindName(cfg->iMagnetKey) + "]");
 	if (on(HudSection::Hunter) && cfg->bInfiniteBullets)
 		lines.push_back("Infinite Bullets");

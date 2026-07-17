@@ -28,13 +28,13 @@ public:
 	TArray<struct FVector>                        AttachPositions;                                   // 0x0258(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance)
 
 public:
-	void UniqueFillter(TArray<struct FHitResult>& HitRezults, TArray<struct FHitResult>* Out);
-	void ReceiveTick(float DeltaSeconds_ReceiveTick);
-	void ReceiveBeginPlay();
-	void ExecuteUbergraph_LBPC_Glue(int32 EntryPoint);
-	void DoConnect(const struct FHitResult& HitRezult1, const struct FHitResult& HitRezult2);
-	void ConstraintSetup(class UPhysicsConstraintComponent* ConstraintComponent);
 	void Connect();
+	void ConstraintSetup(class UPhysicsConstraintComponent* ConstraintComponent);
+	void DoConnect(const struct FHitResult& HitRezult1, const struct FHitResult& HitRezult2);
+	void ExecuteUbergraph_LBPC_Glue(int32 EntryPoint);
+	void ReceiveBeginPlay();
+	void ReceiveTick(float DeltaSeconds);
+	void UniqueFillter(TArray<struct FHitResult>& HitRezults, TArray<struct FHitResult>* Out);
 
 public:
 	static class UClass* StaticClass()

@@ -14,23 +14,23 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.IsChangeImage
-// 0x0058 (0x0058 - 0x0000)
-struct BP_cLeonMapSettings_Main_C_IsChangeImage final
+// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.BPI_InteractStart(Local)
+// 0x0008 (0x0008 - 0x0000)
+struct BP_cLeonMapSettings_Main_C_BPI_InteractStart_Local_ final
 {
 public:
-	bool                                          IsInteract;                                        // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_1[0x7];                                        // 0x0001(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-	class FText                                   OverrideText;                                      // 0x0008(0x0010)(Parm, OutParm)
-	class FText                                   CallFunc_MakeLiteralText_ReturnValue;              // 0x0018(0x0010)()
-	bool                                          CallFunc_IsServer_ReturnValue;                     // 0x0028(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_29[0x7];                                       // 0x0029(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-	TArray<class FString>                         CallFunc_SplitText_ReturnValue;                    // 0x0030(0x0010)(ReferenceParm)
-	int32                                         CallFunc_SelectInt_ReturnValue;                    // 0x0040(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_44[0x4];                                       // 0x0044(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	class FText                                   CallFunc_Conv_StringToText_ReturnValue;            // 0x0048(0x0010)()
+	class ABP_FirstPersonCharacter_Main_C*        First_Person;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_IsChangeImage;
+DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_BPI_InteractStart_Local_;
+
+// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.BPI_InteractStart(Server)
+// 0x0008 (0x0008 - 0x0000)
+struct BP_cLeonMapSettings_Main_C_BPI_InteractStart_Server_ final
+{
+public:
+	class ABP_FirstPersonCharacter_Main_C*        First_Person;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_BPI_InteractStart_Server_;
 
 // Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.ExecuteUbergraph_BP_cLeonMapSettings_Main
 // 0x0050 (0x0050 - 0x0000)
@@ -54,23 +54,23 @@ public:
 };
 DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_ExecuteUbergraph_BP_cLeonMapSettings_Main;
 
-// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.BPI_InteractStart(Server)
-// 0x0008 (0x0008 - 0x0000)
-struct BP_cLeonMapSettings_Main_C_BPI_InteractStart_Server_ final
+// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.IsChangeImage
+// 0x0058 (0x0058 - 0x0000)
+struct BP_cLeonMapSettings_Main_C_IsChangeImage final
 {
 public:
-	class ABP_FirstPersonCharacter_Main_C*        First_Person;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsInteract;                                        // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_1[0x7];                                        // 0x0001(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+	class FText                                   OverrideText;                                      // 0x0008(0x0010)(Parm, OutParm)
+	class FText                                   CallFunc_MakeLiteralText_ReturnValue;              // 0x0018(0x0010)()
+	bool                                          CallFunc_IsServer_ReturnValue;                     // 0x0028(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_29[0x7];                                       // 0x0029(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+	TArray<class FString>                         CallFunc_SplitText_ReturnValue;                    // 0x0030(0x0010)(ReferenceParm)
+	int32                                         CallFunc_SelectInt_ReturnValue;                    // 0x0040(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_44[0x4];                                       // 0x0044(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	class FText                                   CallFunc_Conv_StringToText_ReturnValue;            // 0x0048(0x0010)()
 };
-DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_BPI_InteractStart_Server_;
-
-// Function BP_cLeonMapSettings_Main.BP_cLeonMapSettings_Main_C.BPI_InteractStart(Local)
-// 0x0008 (0x0008 - 0x0000)
-struct BP_cLeonMapSettings_Main_C_BPI_InteractStart_Local_ final
-{
-public:
-	class ABP_FirstPersonCharacter_Main_C*        First_Person;                                      // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_BPI_InteractStart_Local_;
+DUMPER7_ASSERTS_BP_cLeonMapSettings_Main_C_IsChangeImage;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

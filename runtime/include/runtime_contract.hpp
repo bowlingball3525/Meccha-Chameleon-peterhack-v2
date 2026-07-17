@@ -21,7 +21,8 @@ namespace runtime_contract
     constexpr int FallbackOutgoingBatchesPerSecond = 20;
     constexpr int FallbackReplicatedStrokesPerTick = 24;
     constexpr int FallbackRenderTargetWritesPerFrame = 6;
-    constexpr int MinimumNetworkPacingMs = 50;
+    constexpr int MinimumNetworkPacingMs = 25;
+    constexpr int RecommendedNetworkPacingMs = 50;
     constexpr int MaximumManualNetworkPacingMs = 500;
     constexpr std::uint64_t LocalDispatchCpuBudgetUs = 4'000;
     constexpr int SupportedBrushPipelineVersion = 2;
@@ -236,9 +237,8 @@ namespace runtime_contract
                                                 MinimumNetworkPacingMs,
                                                 MaximumManualNetworkPacingMs);
         const int automatic_remote_batch = min_value(requested_batch, min_value(outgoing_strokes, replicated_strokes));
-        const int automatic_remote_delay = max_value(requested_delay,
-                                                     max_value(MinimumNetworkPacingMs,
-                                                               ceil_div(1000, outgoing_batches)));
+        // Honor user-requested pacing; bridge backoff raises delay under live pressure.
+        const int automatic_remote_delay = requested_delay;
         const int local_batch = min_value(InternalNoResendMaxCallsPerTick, render_writes);
         return {automatic_remote_batch,
                 automatic_remote_delay,

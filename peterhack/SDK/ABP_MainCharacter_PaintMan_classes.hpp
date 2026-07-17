@@ -110,18 +110,18 @@ public:
 	bool                                          IsCrouch;                                          // 0x1871(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ExecuteUbergraph_ABP_MainCharacter_PaintMan(int32 EntryPoint);
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_DF0DB5EA4D4EDCA13CF945B0B73635AB();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_CC2808E4433A1C3B59A9D59EB57E4B4F();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_CBC44EE44E91363E569AD5A75059FD7D();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_8EE4E0B947FFA58BAD9AC48D8583C745();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_646B95E14205B82D255FB2A391398207();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_FE2AF8B94AF634BCE7F5B7B9C47DAB87();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_A6F1400B4177B6CC733A57A245F6B442();
-	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_176F1E41460B77828E9160AE79CD2BD0();
-	void BlueprintUpdateAnimation(float DeltaTimeX_BlueprintUpdateAnimation);
+	void AnimGraph(struct FPoseLink* AnimGraph_0);
 	void BlueprintInitializeAnimation();
-	void AnimGraph(struct FPoseLink* AnimGraph);
+	void BlueprintUpdateAnimation(float DeltaTimeX);
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_176F1E41460B77828E9160AE79CD2BD0();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_A6F1400B4177B6CC733A57A245F6B442();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_LookAt_FE2AF8B94AF634BCE7F5B7B9C47DAB87();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_646B95E14205B82D255FB2A391398207();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_8EE4E0B947FFA58BAD9AC48D8583C745();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_CBC44EE44E91363E569AD5A75059FD7D();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_CC2808E4433A1C3B59A9D59EB57E4B4F();
+	void EvaluateGraphExposedInputs_ExecuteUbergraph_ABP_MainCharacter_PaintMan_AnimGraphNode_TransitionResult_DF0DB5EA4D4EDCA13CF945B0B73635AB();
+	void ExecuteUbergraph_ABP_MainCharacter_PaintMan(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

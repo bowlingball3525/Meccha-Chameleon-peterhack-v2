@@ -157,6 +157,14 @@ namespace sdk
     };
     static_assert(sizeof(RuntimePaintableComponent_HitTestAtScreenPosition) == 0x70, "HitTestAtScreenPosition params layout mismatch");
 
+    struct RuntimePaintableComponent_InitializePaint
+    {
+        void* MeshComponent{nullptr};
+        bool ReturnValue{false};
+        std::uint8_t Pad_9[0x7]{};
+    };
+    static_assert(sizeof(RuntimePaintableComponent_InitializePaint) == 0x10, "InitializePaint params layout mismatch");
+
     struct FLinearColor
     {
         float R{0.0f};

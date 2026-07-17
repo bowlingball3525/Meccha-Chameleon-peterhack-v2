@@ -14,6 +14,9 @@ void Settings::InitializeSettings()
 	this->bBox = false;
 	this->bSkeleton = false;
 	this->bDistance = false;
+	this->bEspOutline = false;
+	this->fEspOutlineThickness = 2.0f;
+	this->iEspOutlineMask = EspOutlineSection::All;
 	this->bHunterAmmo = false;
 	this->bDecoys = false;
 	this->bDumpBones = false;
@@ -23,6 +26,7 @@ void Settings::InitializeSettings()
 	this->bNoGunCooldown = false;
 	this->bAntiDetection = false;
 	this->bMagnetEnabled = false;
+	this->bMagnetActive = false;
 	this->iMagnetKey = 0x47; // G
 	this->bControllerBinds = false;
 	this->iControllerMenuButton = Binds::MakePadBind(Gamepad::kDefaultMenuButton);
@@ -35,6 +39,7 @@ void Settings::InitializeSettings()
 	float colNotVisible[4] = { 0.706f, 0.392f, 1.0f, 1.0f };
 	float colLines[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float colDecoy[4] = { 1.0f, 0.6f, 0.0f, 1.0f };
+	float colEspOutline[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	this->bGodmode = false;
 	this->bSpeedhack = false;
 	this->fSpeedMultiplier = 2.0f;
@@ -59,6 +64,7 @@ void Settings::InitializeSettings()
 	memcpy(this->colNotVisible, colNotVisible, sizeof(colNotVisible));
 	memcpy(this->colLines, colLines, sizeof(colLines));
 	memcpy(this->colDecoy, colDecoy, sizeof(colDecoy));
+	memcpy(this->colEspOutline, colEspOutline, sizeof(colEspOutline));
 	this->bStreamproof = false;
 	this->bStatusHud = false;
 	this->bNotifications = true;
@@ -78,7 +84,7 @@ void Settings::SaveSettings()
 		// bDumpBones is a transient runtime command, not a persisted setting - write it as
 		// its inert default so a saved config can't carry a pending bone dump.
 		Settings tmp = *this;
-		tmp.bMagnetEnabled = false;
+		tmp.bMagnetActive = false;
 		tmp.bDumpBones = false;
 		tmp.bDumpDeath = false;
 		fwrite(&tmp, sizeof(tmp), 1, file);
@@ -101,7 +107,7 @@ void Settings::LoadSettings()
 			fclose(file);
 
 			// Never restore the transient command flags from disk - they are not settings.
-			cfg->bMagnetEnabled = false;
+			cfg->bMagnetActive = false;
 			cfg->bDumpBones = false;
 			cfg->bDumpDeath = false;
 			cfg->szAutoLoadProfile[sizeof(cfg->szAutoLoadProfile) - 1] = '\0';
@@ -118,6 +124,12 @@ void Settings::LoadSettings()
 				cfg->iCustomLikes = 0;
 			if (cfg->iCustomKills < 0)
 				cfg->iCustomKills = 0;
+			if (cfg->fEspOutlineThickness < 1.0f)
+				cfg->fEspOutlineThickness = 1.0f;
+			if (cfg->fEspOutlineThickness > 6.0f)
+				cfg->fEspOutlineThickness = 6.0f;
+			if (cfg->iEspOutlineMask < 0)
+				cfg->iEspOutlineMask = EspOutlineSection::All;
 		}
 		else
 		{
@@ -173,7 +185,7 @@ bool Settings::SaveProfile(const std::string& name) const
 		return false;
 
 	Settings tmp = *this;
-	tmp.bMagnetEnabled = false; // transient command flags never persist
+	tmp.bMagnetActive = false; // runtime toggle never persists across save/load
 	tmp.bDumpBones = false;
 	tmp.bDumpDeath = false;
 
@@ -222,7 +234,7 @@ bool Settings::LoadProfile(const std::string& name)
 	bAutoLoadProfile = savedAutoLoad;
 	memcpy(szAutoLoadProfile, savedAutoName, sizeof(szAutoLoadProfile));
 	szAutoLoadProfile[sizeof(szAutoLoadProfile) - 1] = '\0';
-	bMagnetEnabled = false;
+	bMagnetActive = false;
 	bDumpBones = false;
 	bDumpDeath = false;
 	if (!Binds::IsValidBind(iMagnetKey))

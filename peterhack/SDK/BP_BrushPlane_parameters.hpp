@@ -14,15 +14,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function BP_BrushPlane.BP_BrushPlane_C.ReceiveTick
-// 0x0004 (0x0004 - 0x0000)
-struct BP_BrushPlane_C_ReceiveTick final
-{
-public:
-	float                                         DeltaSeconds_ReceiveTick;                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_BrushPlane_C_ReceiveTick;
-
 // Function BP_BrushPlane.BP_BrushPlane_C.ExecuteUbergraph_BP_BrushPlane
 // 0x0080 (0x0080 - 0x0000)
 struct BP_BrushPlane_C_ExecuteUbergraph_BP_BrushPlane final
@@ -51,6 +42,15 @@ public:
 	float                                         CallFunc_SetVariableFloat_InValue_ImplicitCast_1;  // 0x0078(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_BrushPlane_C_ExecuteUbergraph_BP_BrushPlane;
+
+// Function BP_BrushPlane.BP_BrushPlane_C.ReceiveTick
+// 0x0004 (0x0004 - 0x0000)
+struct BP_BrushPlane_C_ReceiveTick final
+{
+public:
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_BrushPlane_C_ReceiveTick;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

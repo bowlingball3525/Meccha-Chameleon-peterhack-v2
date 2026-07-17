@@ -1335,16 +1335,28 @@ void CamoManager::DrawMenu()
 	if (settings.batchLimit > 20)
 		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
 			ICON_FA_TRIANGLE_EXCLAMATION " Batch > 20 is experimental (net overflow risk)");
-	ImGui::SliderInt("Pacing (ms)", &settings.batchPacingMs, 50, 500);
+	ImGui::SliderInt("Pacing (ms)", &settings.batchPacingMs, 25, 500);
+	if (settings.batchPacingMs < 50)
+		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
+			ICON_FA_TRIANGLE_EXCLAMATION " Pacing < 50ms is faster but may throttle or drop strokes online");
 	ImGui::SliderFloat("Side UV", &settings.sideSourceMaxUv, 0.001f, 0.08f, "%.3f");
 	ImGui::SliderFloat("Front/back UV", &settings.frontBackSourceMaxUv, 0.001f, 0.45f, "%.3f");
 
 	ImGui::Separator();
 	ImGui::Checkbox("Auto material", &settings.autoMaterial);
-	if (!settings.autoMaterial)
+	if (settings.autoMaterial)
+	{
+		ImGui::TextDisabled("Reads metallic/roughness from the target's existing paint (in-game match)");
+	}
+	else
 	{
 		ImGui::SliderFloat("Metallic", &settings.metallic, 0.0f, 1.0f);
 		ImGui::SliderFloat("Roughness", &settings.roughness, 0.0f, 1.0f);
+	}
+	if (ImGui::Button("Reset to in-game quality defaults"))
+	{
+		settings.ApplyDefaults();
+		Notify::Info("Camo reset to in-game quality defaults");
 	}
 
 	ImGui::Separator();

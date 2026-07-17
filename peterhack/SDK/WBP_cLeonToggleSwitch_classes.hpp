@@ -36,10 +36,10 @@ public:
 	bool                                          Auto_Switch;                                       // 0x03E1(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void SetToggleState(bool ToggleState);
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void ExecuteUbergraph_WBP_cLeonToggleSwitch(int32 EntryPoint);
 	void Construct();
+	void ExecuteUbergraph_WBP_cLeonToggleSwitch(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime);
+	void SetToggleState(bool ToggleState_0);
 
 public:
 	static class UClass* StaticClass()

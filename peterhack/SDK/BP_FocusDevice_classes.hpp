@@ -38,12 +38,12 @@ public:
 	class AActor*                                 RotationActor;                                     // 0x0348(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnTemplate, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ReceiveBeginPlay();
-	void LookAtLoop();
-	void ExecuteUbergraph_BP_FocusDevice(int32 EntryPoint);
-	void CameraLerp__UpdateFunc();
-	void CameraLerp__FinishedFunc();
 	void BndEvt__BP_SoundDevice_DeviceComonent_K2Node_ComponentBoundEvent_0_OnSignal__DelegateSignature(const struct FST_EventValue& SignalValue);
+	void CameraLerp__FinishedFunc();
+	void CameraLerp__UpdateFunc();
+	void ExecuteUbergraph_BP_FocusDevice(int32 EntryPoint);
+	void LookAtLoop();
+	void ReceiveBeginPlay();
 
 public:
 	static class UClass* StaticClass()

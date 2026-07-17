@@ -14,15 +14,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ReceiveTick
-// 0x0004 (0x0004 - 0x0000)
-struct BP_CountZone_cLeon_C_ReceiveTick final
-{
-public:
-	float                                         DeltaSeconds_ReceiveTick;                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_CountZone_cLeon_C_ReceiveTick;
-
 // Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ExecuteUbergraph_BP_CountZone_cLeon
 // 0x0020 (0x0020 - 0x0000)
 struct BP_CountZone_cLeon_C_ExecuteUbergraph_BP_CountZone_cLeon final
@@ -34,6 +25,15 @@ public:
 	float                                         K2Node_Event_DeltaSeconds;                         // 0x0018(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_CountZone_cLeon_C_ExecuteUbergraph_BP_CountZone_cLeon;
+
+// Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ReceiveTick
+// 0x0004 (0x0004 - 0x0000)
+struct BP_CountZone_cLeon_C_ReceiveTick final
+{
+public:
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_CountZone_cLeon_C_ReceiveTick;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

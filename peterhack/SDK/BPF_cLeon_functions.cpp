@@ -16,33 +16,31 @@
 
 SDK_NAMESPACE_START
 
-// Function BPF_cLeon.BPF_cLeon_C.GetTelepportPointName
-// (Static, Public, HasOutParams, BlueprintCallable, BlueprintEvent)
+// Function BPF_cLeon.BPF_cLeon_C.EqualMapDatas
+// (Static, Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure)
 // Parameters:
-// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          A                                                      (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          B                                                      (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 // class UObject*                          __WorldContext                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-// class FName*                            HunterTelporterName                                    (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// class FName*                            SurvivorTelporterName                                  (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool*                                   Rezult                                                 (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UBPF_cLeon_C::GetTelepportPointName(const struct FST_cLeonMapData& Mapdata, class UObject* __WorldContext, class FName* HunterTelporterName, class FName* SurvivorTelporterName)
+void UBPF_cLeon_C::EqualMapDatas(const struct FST_cLeonMapData& A, const struct FST_cLeonMapData& B, class UObject* __WorldContext, bool* Rezult)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = StaticClass()->GetFunction("BPF_cLeon_C", "GetTelepportPointName");
+		Func = StaticClass()->GetFunction("BPF_cLeon_C", "EqualMapDatas");
 
-	Params::BPF_cLeon_C_GetTelepportPointName Parms{};
+	Params::BPF_cLeon_C_EqualMapDatas Parms{};
 
-	Parms.Mapdata = std::move(Mapdata);
+	Parms.A = std::move(A);
+	Parms.B = std::move(B);
 	Parms.__WorldContext = __WorldContext;
 
 	GetDefaultObj()->ProcessEvent(Func, &Parms);
 
-	if (HunterTelporterName != nullptr)
-		*HunterTelporterName = Parms.HunterTelporterName;
-
-	if (SurvivorTelporterName != nullptr)
-		*SurvivorTelporterName = Parms.SurvivorTelporterName;
+	if (Rezult != nullptr)
+		*Rezult = Parms.Rezult;
 }
 
 
@@ -75,31 +73,33 @@ class FText UBPF_cLeon_C::GetCompressText_cLeon(const class FText& TargetText, i
 }
 
 
-// Function BPF_cLeon.BPF_cLeon_C.EqualMapDatas
-// (Static, Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure)
+// Function BPF_cLeon.BPF_cLeon_C.GetTelepportPointName
+// (Static, Public, HasOutParams, BlueprintCallable, BlueprintEvent)
 // Parameters:
-// const struct FST_cLeonMapData&          A                                                      (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
-// const struct FST_cLeonMapData&          B                                                      (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 // class UObject*                          __WorldContext                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-// bool*                                   Rezult                                                 (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// class FName*                            HunterTelporterName                                    (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// class FName*                            SurvivorTelporterName                                  (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UBPF_cLeon_C::EqualMapDatas(const struct FST_cLeonMapData& A, const struct FST_cLeonMapData& B, class UObject* __WorldContext, bool* Rezult)
+void UBPF_cLeon_C::GetTelepportPointName(const struct FST_cLeonMapData& Mapdata, class UObject* __WorldContext, class FName* HunterTelporterName, class FName* SurvivorTelporterName)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = StaticClass()->GetFunction("BPF_cLeon_C", "EqualMapDatas");
+		Func = StaticClass()->GetFunction("BPF_cLeon_C", "GetTelepportPointName");
 
-	Params::BPF_cLeon_C_EqualMapDatas Parms{};
+	Params::BPF_cLeon_C_GetTelepportPointName Parms{};
 
-	Parms.A = std::move(A);
-	Parms.B = std::move(B);
+	Parms.Mapdata = std::move(Mapdata);
 	Parms.__WorldContext = __WorldContext;
 
 	GetDefaultObj()->ProcessEvent(Func, &Parms);
 
-	if (Rezult != nullptr)
-		*Rezult = Parms.Rezult;
+	if (HunterTelporterName != nullptr)
+		*HunterTelporterName = Parms.HunterTelporterName;
+
+	if (SurvivorTelporterName != nullptr)
+		*SurvivorTelporterName = Parms.SurvivorTelporterName;
 }
 
 

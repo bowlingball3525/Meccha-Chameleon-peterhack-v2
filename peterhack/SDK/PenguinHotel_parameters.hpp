@@ -828,6 +828,16 @@ public:
 };
 DUMPER7_ASSERTS_CustomProgramFunctionLibrary_HashStringMD5;
 
+// Function PenguinHotel.CustomProgramFunctionLibrary.SanitizeInappropriateWords
+// 0x0020 (0x0020 - 0x0000)
+struct CustomProgramFunctionLibrary_SanitizeInappropriateWords final
+{
+public:
+	class FString                                 Source;                                            // 0x0000(0x0010)(Parm, ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FString                                 ReturnValue;                                       // 0x0010(0x0010)(Parm, OutParm, ZeroConstructor, ReturnParm, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+DUMPER7_ASSERTS_CustomProgramFunctionLibrary_SanitizeInappropriateWords;
+
 // Function PenguinHotel.DynamicCapsuleHeightControlInterface.SetDynamicCapsuleCrouching
 // 0x0001 (0x0001 - 0x0000)
 struct DynamicCapsuleHeightControlInterface_SetDynamicCapsuleCrouching final

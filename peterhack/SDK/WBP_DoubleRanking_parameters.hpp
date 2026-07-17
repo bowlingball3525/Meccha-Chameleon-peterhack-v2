@@ -14,15 +14,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_DoubleRanking.WBP_DoubleRanking_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_DoubleRanking_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_DoubleRanking_C_PreConstruct;
-
 // Function WBP_DoubleRanking.WBP_DoubleRanking_C.ExecuteUbergraph_WBP_DoubleRanking
 // 0x00B8 (0x00B8 - 0x0000)
 struct WBP_DoubleRanking_C_ExecuteUbergraph_WBP_DoubleRanking final
@@ -56,6 +47,15 @@ public:
 	class FString                                 CallFunc_Concat_StrStr_ReturnValue_2;              // 0x00A8(0x0010)(ZeroConstructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_DoubleRanking_C_ExecuteUbergraph_WBP_DoubleRanking;
+
+// Function WBP_DoubleRanking.WBP_DoubleRanking_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_DoubleRanking_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_DoubleRanking_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

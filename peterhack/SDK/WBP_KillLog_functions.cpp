@@ -16,23 +16,17 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_KillLog.WBP_KillLog_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function WBP_KillLog.WBP_KillLog_C.AnimationEnd
+// (BlueprintCallable, BlueprintEvent)
 
-void UWBP_KillLog_C::PreConstruct(bool IsDesignTime_PreConstruct)
+void UWBP_KillLog_C::AnimationEnd()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_KillLog_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_KillLog_C", "AnimationEnd");
 
-	Params::WBP_KillLog_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
@@ -56,17 +50,23 @@ void UWBP_KillLog_C::ExecuteUbergraph_WBP_KillLog(int32 EntryPoint)
 }
 
 
-// Function WBP_KillLog.WBP_KillLog_C.AnimationEnd
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_KillLog.WBP_KillLog_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_KillLog_C::AnimationEnd()
+void UWBP_KillLog_C::PreConstruct(bool IsDesignTime)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_KillLog_C", "AnimationEnd");
+		Func = Class->GetFunction("WBP_KillLog_C", "PreConstruct");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::WBP_KillLog_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 

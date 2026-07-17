@@ -29,10 +29,10 @@ public:
 	int32                                         PointValue;                                        // 0x0370(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void FinishEvent();
-	void ExecuteUbergraph_WBP_LookPoint(int32 EntryPoint);
 	void Construct();
+	void ExecuteUbergraph_WBP_LookPoint(int32 EntryPoint);
+	void FinishEvent();
+	void PreConstruct(bool IsDesignTime);
 
 public:
 	static class UClass* StaticClass()

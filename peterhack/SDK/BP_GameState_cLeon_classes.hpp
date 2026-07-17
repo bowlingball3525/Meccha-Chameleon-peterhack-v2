@@ -10,14 +10,14 @@
 
 #include "Basic.hpp"
 
-#include "EN_cLeonGameMode_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
+#include "ST_cLeonSurvivorVariation_structs.hpp"
 #include "Engine_structs.hpp"
 #include "Engine_classes.hpp"
-#include "EN_cLeonGamePhase_structs.hpp"
-#include "ST_cLeonSurvivorVariation_structs.hpp"
-#include "ST_cLeonMapData_structs.hpp"
-#include "EN_cLeonMainGamePhase_structs.hpp"
 #include "CoreUObject_structs.hpp"
+#include "EN_cLeonMainGamePhase_structs.hpp"
+#include "EN_cLeonGamePhase_structs.hpp"
+#include "EN_cLeonGameMode_structs.hpp"
 
 
 SDK_NAMESPACE_START
@@ -58,12 +58,12 @@ public:
 	class UWBP_DoubleRanking_C*                   RankingWidget;                                     // 0x03E0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, InstancedReference, NoDestructor, HasGetValueTypeHash)
 	TMulticastInlineDelegate<void(int32 Index_0)> GameModeIndexUpdate;                               // 0x03E8(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	TMulticastInlineDelegate<void(int32 HunterNum)> HunterNumChange;                                 // 0x03F8(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
-	TMulticastInlineDelegate<void(EN_cLeonMainGamePhase MainGamePhase)> GamePhaseChange;             // 0x0408(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
+	TMulticastInlineDelegate<void(EN_cLeonMainGamePhase MainGamePhase_0)> GamePhaseChange;           // 0x0408(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	EN_cLeonMainGamePhase                         MainGamePhase;                                     // 0x0418(0x0001)(Edit, BlueprintVisible, Net, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, RepNotify, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_419[0x7];                                      // 0x0419(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
 	TMulticastInlineDelegate<void()>              ShowFilledWidget;                                  // 0x0420(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	TMap<class ABP_FirstPersonPlayerState_Online_cLeon_C*, int32> LookState;                         // 0x0430(0x0050)(Edit, BlueprintVisible, DisableEditOnTemplate, DisableEditOnInstance)
-	TMulticastInlineDelegate<void(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime)> UpdateWatchRanking; // 0x0480(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
+	TMulticastInlineDelegate<void(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime_0)> UpdateWatchRanking; // 0x0480(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	TMulticastInlineDelegate<void(class ABP_FirstPersonPlayerState_Online_C* TargetPlayer, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayer, int32 PointValue)> AddPointpopup; // 0x0490(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	int32                                         UpdateTime;                                        // 0x04A0(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_4A4[0x4];                                      // 0x04A4(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
@@ -91,61 +91,61 @@ public:
 	class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* ChickenSearchTarget;                  // 0x05D0(0x0008)(Edit, BlueprintVisible, Net, ZeroConstructor, DisableEditOnTemplate, DisableEditOnInstance, RepNotify, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void Winner(class ABP_FirstPersonPlayerState_Online_C* WinnerPlayerState);
-	void UpdateSend();
-	void UpdateRanking();
-	void UpdateBulletWidget(int32 Current);
-	void SyncRankning_Client_(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& NewPoints, int32 UpdateTime);
-	void SyncRanking_Server_();
-	void ShowPopup_Local_(int32 PopupIndex);
-	void ShowPopup_Client_(int32 PopupIndex);
-	void ShowPointAddPopup(class ABP_FirstPersonPlayerState_Online_cLeon_C* TargetPlayerState, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState, int32 Point);
-	void ShowDeathWidget(class APlayerState* TargetPlayerState);
-	void ShowAllSurvivors();
-	void SetTimerTextIndex(int32 TimerTextIndex);
-	void SetTimerNumber(int32 TimerNumber);
-	void SetSyncRankingLoopState(bool State);
-	void SetMaxTimerTime(int32 MaxTimerTime);
-	void SetCopyTarget();
-	void SetChickenAlpha();
-	void ReceiveBeginPlay();
-	void RankingWidgetUpdate(bool IsShow);
-	void PlayTeleportMovie();
-	void OnRep_TimerTextIndex();
-	void OnRep_TimerNumber();
-	void OnRep_NeedModId();
-	void OnRep_MainGamePhase();
-	void OnRep_LiveSurvivors_PlayerState();
-	void OnRep_JoinPlayerState();
-	void OnRep_HuntersPlayerState();
-	void OnRep_GameMode();
-	void OnRep_Filter_Mosaic();
-	void OnRep_Filter_Monochrome();
-	void OnRep_Filter_Horror();
-	void OnRep_CurrentPreviewMapData();
-	void OnRep_ChickenSearchTarget();
-	void ModStateUpdate();
-	void ModDownloadWait();
-	void MaxPlayerChange(int32 Current, int32 max_0);
-	void KillLog(class ABP_FirstPersonPlayerState_Online_cLeon_C* HunterPlayerState, class ABP_FirstPersonPlayerState_Online_cLeon_C* SurvivorPlayerState);
-	void IsLivePlayerState(const class ABP_FirstPersonPlayerState_Online_cLeon_C*& ItemToFind, bool* IsLive);
-	void InitPlayerState();
-	void GetRandomMapData(struct FST_cLeonMapData* ReturnMapArray);
-	void GetDoubleRanking(TMap<class ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*, int32>* ReturnMap);
-	void GetAllMapDatas(TArray<struct FST_cLeonMapData>* ReturnMapArray);
-	void GameEndSurvivorStop();
-	void ForceStart();
-	void ForceModeWidgetReset();
-	void FocusChicken();
-	void ExecuteUbergraph_BP_GameState_cLeon(int32 EntryPoint);
-	void EEYAN_Activate();
-	void CountUIReset();
-	void Complete();
-	void ClearWatchRanking();
-	void BodyTypeSelectWidget();
-	void AllHunterStencilOff();
-	void AddToViewDatas(class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState, const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points);
 	void AddToViewDataForce(class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState, const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points);
+	void AddToViewDatas(class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState, const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points);
+	void AllHunterStencilOff();
+	void BodyTypeSelectWidget();
+	void ClearWatchRanking();
+	void Complete();
+	void CountUIReset();
+	void EEYAN_Activate();
+	void ExecuteUbergraph_BP_GameState_cLeon(int32 EntryPoint);
+	void FocusChicken();
+	void ForceModeWidgetReset();
+	void ForceStart();
+	void GameEndSurvivorStop();
+	void GetAllMapDatas(TArray<struct FST_cLeonMapData>* ReturnMapArray);
+	void GetDoubleRanking(TMap<class ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*, int32>* ReturnMap);
+	void GetRandomMapData(struct FST_cLeonMapData* ReturnMapArray);
+	void InitPlayerState();
+	void IsLivePlayerState(const class ABP_FirstPersonPlayerState_Online_cLeon_C*& ItemToFind, bool* IsLive);
+	void KillLog(class ABP_FirstPersonPlayerState_Online_cLeon_C* HunterPlayerState, class ABP_FirstPersonPlayerState_Online_cLeon_C* SurvivorPlayerState);
+	void MaxPlayerChange(int32 Current, int32 max_0);
+	void ModDownloadWait();
+	void ModStateUpdate();
+	void OnRep_ChickenSearchTarget();
+	void OnRep_CurrentPreviewMapData();
+	void OnRep_Filter_Horror();
+	void OnRep_Filter_Monochrome();
+	void OnRep_Filter_Mosaic();
+	void OnRep_GameMode();
+	void OnRep_HuntersPlayerState();
+	void OnRep_JoinPlayerState();
+	void OnRep_LiveSurvivors_PlayerState();
+	void OnRep_MainGamePhase();
+	void OnRep_NeedModId();
+	void OnRep_TimerNumber();
+	void OnRep_TimerTextIndex();
+	void PlayTeleportMovie();
+	void RankingWidgetUpdate(bool IsShow);
+	void ReceiveBeginPlay();
+	void SetChickenAlpha();
+	void SetCopyTarget();
+	void SetMaxTimerTime(int32 MaxTimerTime_0);
+	void SetSyncRankingLoopState(bool State);
+	void SetTimerNumber(int32 TimerNumber_0);
+	void SetTimerTextIndex(int32 TimerTextIndex_0);
+	void ShowAllSurvivors();
+	void ShowDeathWidget(class APlayerState* TargetPlayerState);
+	void ShowPointAddPopup(class ABP_FirstPersonPlayerState_Online_cLeon_C* TargetPlayerState, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState, int32 Point);
+	void ShowPopup_Client_(int32 PopupIndex);
+	void ShowPopup_Local_(int32 PopupIndex);
+	void SyncRanking_Server_();
+	void SyncRankning_Client_(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& NewPoints, int32 UpdateTime_0);
+	void UpdateBulletWidget(int32 Current);
+	void UpdateRanking();
+	void UpdateSend();
+	void Winner(class ABP_FirstPersonPlayerState_Online_C* WinnerPlayerState);
 
 public:
 	static class UClass* StaticClass()

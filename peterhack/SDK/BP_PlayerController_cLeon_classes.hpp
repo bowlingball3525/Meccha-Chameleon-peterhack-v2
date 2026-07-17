@@ -27,7 +27,7 @@ public:
 	double                                        CameraFadeValue;                                   // 0x0788(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	bool                                          IsCanPenteration;                                  // 0x0790(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_791[0x7];                                      // 0x0791(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-	TMulticastInlineDelegate<void(bool IsCanPenteration)> CanPenterationUpdate;                      // 0x0798(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
+	TMulticastInlineDelegate<void(bool IsCanPenteration_0)> CanPenterationUpdate;                    // 0x0798(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	TMulticastInlineDelegate<void(bool Visibility)> NamePlateVisibilityChange;                       // 0x07A8(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	bool                                          IsPlayMovie;                                       // 0x07B8(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	bool                                          WatchRankingVisibility;                            // 0x07B9(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
@@ -42,24 +42,24 @@ public:
 	bool                                          WidgetVisibileState;                               // 0x07E9(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void TeleportMovie();
-	void ReceiveTick(float DeltaSeconds_ReceiveTick);
-	void ReceiveBeginPlay();
-	void OnNamePlateVisibilityChange(bool Visibility);
-	class AActor* NearSurvivor_IgnoreSelf(const struct FVector& Location, const struct FVector& Direction, float* OutDotProduct);
-	void InpActEvt_U_K2Node_InputDebugKeyEvent_0(const struct FKey& Key, const struct FInputActionValue& ActionValue);
-	void InpActEvt_Three_K2Node_InputKeyEvent_3(const struct FKey& Key);
-	void InpActEvt_Six_K2Node_InputKeyEvent_2(const struct FKey& Key);
-	void InpActEvt_G_K2Node_InputKeyEvent_1(const struct FKey& Key);
-	void InpActEvt_Ctrl_Shift_H_K2Node_InputKeyEvent_0(const struct FKey& Key);
-	void GetPawnCentorLocation(struct FVector* ReturnLocation);
-	void Finish();
-	void ExecuteUbergraph_BP_PlayerController_cLeon(int32 EntryPoint);
-	void EEYAN_State(bool State);
-	void ChoseBodyClose();
-	void CameraReset();
-	void AddMainWidgets();
 	void AddBodyTypeSesttings();
+	void AddMainWidgets();
+	void CameraReset();
+	void ChoseBodyClose();
+	void EEYAN_State(bool State);
+	void ExecuteUbergraph_BP_PlayerController_cLeon(int32 EntryPoint);
+	void Finish();
+	void GetPawnCentorLocation(struct FVector* ReturnLocation);
+	void InpActEvt_Ctrl_Shift_H_K2Node_InputKeyEvent_0(const struct FKey& Key);
+	void InpActEvt_G_K2Node_InputKeyEvent_1(const struct FKey& Key);
+	void InpActEvt_Six_K2Node_InputKeyEvent_2(const struct FKey& Key);
+	void InpActEvt_Three_K2Node_InputKeyEvent_3(const struct FKey& Key);
+	void InpActEvt_U_K2Node_InputDebugKeyEvent_0(const struct FKey& Key, const struct FInputActionValue& ActionValue);
+	class AActor* NearSurvivor_IgnoreSelf(const struct FVector& Location, const struct FVector& Direction, float* OutDotProduct);
+	void OnNamePlateVisibilityChange(bool Visibility);
+	void ReceiveBeginPlay();
+	void ReceiveTick(float DeltaSeconds);
+	void TeleportMovie();
 
 public:
 	static class UClass* StaticClass()

@@ -122,8 +122,8 @@ namespace
 			s.batchLimit = 1;
 		if (s.batchLimit > 32)
 			s.batchLimit = 32;
-		if (s.batchPacingMs < 50)
-			s.batchPacingMs = 50;
+		if (s.batchPacingMs < 25)
+			s.batchPacingMs = 25;
 		if (s.batchPacingMs > 500)
 			s.batchPacingMs = 500;
 	}
@@ -147,15 +147,15 @@ void CamoSettings::ApplyDefaults()
 	batchPacingMs = 50;
 	sideSourceMaxUv = 0.08f;
 	frontBackSourceMaxUv = 0.45f;
-	frontRegionMode = 1;
+	frontRegionMode = 0;
 	sideRegionMode = 0;
 	backRegionMode = 0;
-	autoMaterial = false;
+	autoMaterial = true;
 	metallic = 0.0f;
-	roughness = 1.0f;
+	roughness = 0.65f;
 	strcpy_s(fillColorHex, "#FFFFFF");
-	fillMetallic = 1.0f;
-	fillRoughness = 0.0f;
+	fillMetallic = 0.0f;
+	fillRoughness = 0.65f;
 	startHotkey = 0x70; // VK_F1
 	previewHotkey = 0x71;
 	unpreviewHotkey = 0x72;

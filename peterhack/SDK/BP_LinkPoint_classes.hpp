@@ -43,10 +43,10 @@ public:
 	struct FGuid                                  UniqueID;                                          // 0x0398(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void UserConstructionScript();
-	void ReceiveBeginPlay();
-	void MakePole(class UInstancedStaticMeshComponent* InstancedStaticMeshComp);
 	void ExecuteUbergraph_BP_LinkPoint(int32 EntryPoint);
+	void MakePole(class UInstancedStaticMeshComponent* InstancedStaticMeshComp);
+	void ReceiveBeginPlay();
+	void UserConstructionScript();
 
 public:
 	static class UClass* StaticClass()

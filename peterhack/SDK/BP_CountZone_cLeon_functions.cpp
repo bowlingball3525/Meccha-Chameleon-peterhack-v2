@@ -16,26 +16,6 @@
 
 SDK_NAMESPACE_START
 
-// Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ReceiveTick
-// (Event, Public, BlueprintEvent)
-// Parameters:
-// float                                   DeltaSeconds_ReceiveTick                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void ABP_CountZone_cLeon_C::ReceiveTick(float DeltaSeconds_ReceiveTick)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_CountZone_cLeon_C", "ReceiveTick");
-
-	Params::BP_CountZone_cLeon_C_ReceiveTick Parms{};
-
-	Parms.DeltaSeconds_ReceiveTick = DeltaSeconds_ReceiveTick;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
 // Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ExecuteUbergraph_BP_CountZone_cLeon
 // (Final, UbergraphFunction, HasDefaults)
 // Parameters:
@@ -51,6 +31,26 @@ void ABP_CountZone_cLeon_C::ExecuteUbergraph_BP_CountZone_cLeon(int32 EntryPoint
 	Params::BP_CountZone_cLeon_C_ExecuteUbergraph_BP_CountZone_cLeon Parms{};
 
 	Parms.EntryPoint = EntryPoint;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function BP_CountZone_cLeon.BP_CountZone_cLeon_C.ReceiveTick
+// (Event, Public, BlueprintEvent)
+// Parameters:
+// float                                   DeltaSeconds                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void ABP_CountZone_cLeon_C::ReceiveTick(float DeltaSeconds)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_CountZone_cLeon_C", "ReceiveTick");
+
+	Params::BP_CountZone_cLeon_C_ReceiveTick Parms{};
+
+	Parms.DeltaSeconds = DeltaSeconds;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

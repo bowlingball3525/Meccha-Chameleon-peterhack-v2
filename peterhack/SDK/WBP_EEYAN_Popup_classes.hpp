@@ -29,10 +29,10 @@ public:
 	class FString                                 Name_0;                                            // 0x0368(0x0010)(Edit, BlueprintVisible, ZeroConstructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void ExecuteUbergraph_WBP_EEYAN_Popup(int32 EntryPoint);
-	void End();
 	void Construct();
+	void End();
+	void ExecuteUbergraph_WBP_EEYAN_Popup(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime);
 
 public:
 	static class UClass* StaticClass()

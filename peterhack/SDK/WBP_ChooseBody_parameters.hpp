@@ -16,25 +16,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_ChooseBody.WBP_ChooseBody_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_ChooseBody_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ChooseBody_C_PreConstruct;
-
-// Function WBP_ChooseBody.WBP_ChooseBody_C.OnClickWithClass
-// 0x0010 (0x0010 - 0x0000)
-struct WBP_ChooseBody_C_OnClickWithClass final
-{
-public:
-	class UWBP_BodySelect_C*                      SelfObject;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	class UClass*                                 BodyClass;                                         // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ChooseBody_C_OnClickWithClass;
-
 // Function WBP_ChooseBody.WBP_ChooseBody_C.ExecuteUbergraph_WBP_ChooseBody
 // 0x00C8 (0x00C8 - 0x0000)
 struct WBP_ChooseBody_C_ExecuteUbergraph_WBP_ChooseBody final
@@ -76,6 +57,25 @@ public:
 	bool                                          CallFunc_EqualEqual_ClassClass_ReturnValue;        // 0x00C1(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_ChooseBody_C_ExecuteUbergraph_WBP_ChooseBody;
+
+// Function WBP_ChooseBody.WBP_ChooseBody_C.OnClickWithClass
+// 0x0010 (0x0010 - 0x0000)
+struct WBP_ChooseBody_C_OnClickWithClass final
+{
+public:
+	class UWBP_BodySelect_C*                      SelfObject;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	class UClass*                                 BodyClass;                                         // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ChooseBody_C_OnClickWithClass;
+
+// Function WBP_ChooseBody.WBP_ChooseBody_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_ChooseBody_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ChooseBody_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

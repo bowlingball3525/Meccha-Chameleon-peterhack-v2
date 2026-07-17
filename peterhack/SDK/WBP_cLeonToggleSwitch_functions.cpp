@@ -16,43 +16,17 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.SetToggleState
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// bool                                    ToggleState                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_cLeonToggleSwitch_C::SetToggleState(bool ToggleState)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "SetToggleState");
-
-	Params::WBP_cLeonToggleSwitch_C_SetToggleState Parms{};
-
-	Parms.ToggleState = ToggleState;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.PreConstruct
+// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.Construct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_cLeonToggleSwitch_C::PreConstruct(bool IsDesignTime_PreConstruct)
+void UWBP_cLeonToggleSwitch_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "Construct");
 
-	Params::WBP_cLeonToggleSwitch_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
@@ -76,17 +50,43 @@ void UWBP_cLeonToggleSwitch_C::ExecuteUbergraph_WBP_cLeonToggleSwitch(int32 Entr
 }
 
 
-// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.Construct
+// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.PreConstruct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_cLeonToggleSwitch_C::Construct()
+void UWBP_cLeonToggleSwitch_C::PreConstruct(bool IsDesignTime)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "Construct");
+		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "PreConstruct");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::WBP_cLeonToggleSwitch_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_cLeonToggleSwitch.WBP_cLeonToggleSwitch_C.SetToggleState
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool                                    ToggleState_0                                          (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_cLeonToggleSwitch_C::SetToggleState(bool ToggleState_0)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_cLeonToggleSwitch_C", "SetToggleState");
+
+	Params::WBP_cLeonToggleSwitch_C_SetToggleState Parms{};
+
+	Parms.ToggleState_0 = ToggleState_0;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 

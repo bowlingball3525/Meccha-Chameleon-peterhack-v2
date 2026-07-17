@@ -26,9 +26,9 @@ public:
 	class UMaterialInstanceDynamic*               DynamicMaterial;                                   // 0x0350(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void SetCoolTime(double NormalizeValue);
-	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void ExecuteUbergraph_WBP_DecoyCoolTimeIcon(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime);
+	void SetCoolTime(double NormalizeValue);
 
 public:
 	static class UClass* StaticClass()

@@ -16,148 +16,40 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.UpdateDefaultValue
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.AddSliderValue
 // (BlueprintCallable, BlueprintEvent)
 // Parameters:
-// const struct FLinearColor&              DefaultColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// double                                  Metallic                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// double                                  Roughness                                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerColorPalet_C::UpdateDefaultValue(const struct FLinearColor& DefaultColor, double Metallic, double Roughness)
+void UWBP_ControllerColorPalet_C::AddSliderValue(double Value)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "UpdateDefaultValue");
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "AddSliderValue");
 
-	Params::WBP_ControllerColorPalet_C_UpdateDefaultValue Parms{};
+	Params::WBP_ControllerColorPalet_C_AddSliderValue Parms{};
 
-	Parms.DefaultColor = std::move(DefaultColor);
-	Parms.Metallic = Metallic;
-	Parms.Roughness = Roughness;
+	Parms.Value = Value;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.SelectSlide
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// int32                                   AddValue                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerColorPalet_C::SelectSlide(int32 AddValue)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "SelectSlide");
-
-	Params::WBP_ControllerColorPalet_C_SelectSlide Parms{};
-
-	Parms.AddValue = AddValue;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerColorPalet_C::PreConstruct(bool IsDesignTime_PreConstruct)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "PreConstruct");
-
-	Params::WBP_ControllerColorPalet_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.ExecuteUbergraph_WBP_ControllerColorPalet
-// (Final, UbergraphFunction, HasDefaults)
-// Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerColorPalet_C::ExecuteUbergraph_WBP_ControllerColorPalet(int32 EntryPoint)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "ExecuteUbergraph_WBP_ControllerColorPalet");
-
-	Params::WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet Parms{};
-
-	Parms.EntryPoint = EntryPoint;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature
 // (BlueprintEvent)
 // Parameters:
 // const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
+void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature");
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature");
 
-	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature Parms{};
-
-	Parms.ChangedColor = std::move(ChangedColor);
-	Parms.UpdateCall = UpdateCall;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature
-// (BlueprintEvent)
-// Parameters:
-// const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature");
-
-	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature Parms{};
-
-	Parms.ChangedColor = std::move(ChangedColor);
-	Parms.UpdateCall = UpdateCall;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature
-// (BlueprintEvent)
-// Parameters:
-// const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature");
-
-	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature Parms{};
+	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature Parms{};
 
 	Parms.ChangedColor = std::move(ChangedColor);
 	Parms.UpdateCall = UpdateCall;
@@ -188,20 +80,20 @@ void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_Controlle
 }
 
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature
 // (BlueprintEvent)
 // Parameters:
 // const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
+void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature");
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature");
 
-	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature Parms{};
+	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature Parms{};
 
 	Parms.ChangedColor = std::move(ChangedColor);
 	Parms.UpdateCall = UpdateCall;
@@ -210,21 +102,129 @@ void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_Controlle
 }
 
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.AddSliderValue
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature
+// (BlueprintEvent)
 // Parameters:
-// double                                  Value                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ControllerColorPalet_C::AddSliderValue(double Value)
+void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "AddSliderValue");
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature");
 
-	Params::WBP_ControllerColorPalet_C_AddSliderValue Parms{};
+	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature Parms{};
 
-	Parms.Value = Value;
+	Parms.ChangedColor = std::move(ChangedColor);
+	Parms.UpdateCall = UpdateCall;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature
+// (BlueprintEvent)
+// Parameters:
+// const struct FLinearColor&              ChangedColor                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    UpdateCall                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerColorPalet_C::BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature(const struct FLinearColor& ChangedColor, bool UpdateCall)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature");
+
+	Params::WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature Parms{};
+
+	Parms.ChangedColor = std::move(ChangedColor);
+	Parms.UpdateCall = UpdateCall;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.ExecuteUbergraph_WBP_ControllerColorPalet
+// (Final, UbergraphFunction, HasDefaults)
+// Parameters:
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerColorPalet_C::ExecuteUbergraph_WBP_ControllerColorPalet(int32 EntryPoint)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "ExecuteUbergraph_WBP_ControllerColorPalet");
+
+	Params::WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet Parms{};
+
+	Parms.EntryPoint = EntryPoint;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerColorPalet_C::PreConstruct(bool IsDesignTime)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "PreConstruct");
+
+	Params::WBP_ControllerColorPalet_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime = IsDesignTime;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.SelectSlide
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// int32                                   AddValue                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerColorPalet_C::SelectSlide(int32 AddValue)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "SelectSlide");
+
+	Params::WBP_ControllerColorPalet_C_SelectSlide Parms{};
+
+	Parms.AddValue = AddValue;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.UpdateDefaultValue
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// const struct FLinearColor&              DefaultColor_0                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Metallic                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Roughness                                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ControllerColorPalet_C::UpdateDefaultValue(const struct FLinearColor& DefaultColor_0, double Metallic, double Roughness)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ControllerColorPalet_C", "UpdateDefaultValue");
+
+	Params::WBP_ControllerColorPalet_C_UpdateDefaultValue Parms{};
+
+	Parms.DefaultColor_0 = std::move(DefaultColor_0);
+	Parms.Metallic = Metallic;
+	Parms.Roughness = Roughness;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

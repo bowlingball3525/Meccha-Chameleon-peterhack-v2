@@ -16,21 +16,21 @@
 
 SDK_NAMESPACE_START
 
-// Function BP_BrushPlane.BP_BrushPlane_C.ReceiveTick
-// (Event, Public, BlueprintEvent)
+// Function BP_BrushPlane.BP_BrushPlane_C.ExecuteUbergraph_BP_BrushPlane
+// (Final, UbergraphFunction)
 // Parameters:
-// float                                   DeltaSeconds_ReceiveTick                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_BrushPlane_C::ReceiveTick(float DeltaSeconds_ReceiveTick)
+void ABP_BrushPlane_C::ExecuteUbergraph_BP_BrushPlane(int32 EntryPoint)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_BrushPlane_C", "ReceiveTick");
+		Func = Class->GetFunction("BP_BrushPlane_C", "ExecuteUbergraph_BP_BrushPlane");
 
-	Params::BP_BrushPlane_C_ReceiveTick Parms{};
+	Params::BP_BrushPlane_C_ExecuteUbergraph_BP_BrushPlane Parms{};
 
-	Parms.DeltaSeconds_ReceiveTick = DeltaSeconds_ReceiveTick;
+	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -50,21 +50,21 @@ void ABP_BrushPlane_C::ReceiveBeginPlay()
 }
 
 
-// Function BP_BrushPlane.BP_BrushPlane_C.ExecuteUbergraph_BP_BrushPlane
-// (Final, UbergraphFunction)
+// Function BP_BrushPlane.BP_BrushPlane_C.ReceiveTick
+// (Event, Public, BlueprintEvent)
 // Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// float                                   DeltaSeconds                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_BrushPlane_C::ExecuteUbergraph_BP_BrushPlane(int32 EntryPoint)
+void ABP_BrushPlane_C::ReceiveTick(float DeltaSeconds)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_BrushPlane_C", "ExecuteUbergraph_BP_BrushPlane");
+		Func = Class->GetFunction("BP_BrushPlane_C", "ReceiveTick");
 
-	Params::BP_BrushPlane_C_ExecuteUbergraph_BP_BrushPlane Parms{};
+	Params::BP_BrushPlane_C_ReceiveTick Parms{};
 
-	Parms.EntryPoint = EntryPoint;
+	Parms.DeltaSeconds = DeltaSeconds;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

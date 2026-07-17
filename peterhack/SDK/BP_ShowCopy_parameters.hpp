@@ -17,50 +17,14 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8
+// Function BP_ShowCopy.BP_ShowCopy_C.CopyPreset
 // 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8 final
+struct BP_ShowCopy_C_CopyPreset final
 {
 public:
-	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* Survivor;                             // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8;
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8
-// 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8 final
-{
-public:
-	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_ShowCopy_C_OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8;
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8
-// 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8 final
-{
-public:
-	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8;
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8
-// 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8 final
-{
-public:
-	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8;
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8
-// 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8 final
-{
-public:
-	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8;
+DUMPER7_ASSERTS_BP_ShowCopy_C_CopyPreset;
 
 // Function BP_ShowCopy.BP_ShowCopy_C.ExecuteUbergraph_BP_ShowCopy
 // 0x0130 (0x0130 - 0x0000)
@@ -108,14 +72,50 @@ public:
 };
 DUMPER7_ASSERTS_BP_ShowCopy_C_ExecuteUbergraph_BP_ShowCopy;
 
-// Function BP_ShowCopy.BP_ShowCopy_C.CopyPreset
+// Function BP_ShowCopy.BP_ShowCopy_C.OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8
 // 0x0008 (0x0008 - 0x0000)
-struct BP_ShowCopy_C_CopyPreset final
+struct BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8 final
 {
 public:
-	class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* Survivor;                             // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_BP_ShowCopy_C_CopyPreset;
+DUMPER7_ASSERTS_BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8;
+
+// Function BP_ShowCopy.BP_ShowCopy_C.OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8
+// 0x0008 (0x0008 - 0x0000)
+struct BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8 final
+{
+public:
+	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8;
+
+// Function BP_ShowCopy.BP_ShowCopy_C.OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8
+// 0x0008 (0x0008 - 0x0000)
+struct BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8 final
+{
+public:
+	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8;
+
+// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8
+// 0x0008 (0x0008 - 0x0000)
+struct BP_ShowCopy_C_OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8 final
+{
+public:
+	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_ShowCopy_C_OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8;
+
+// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8
+// 0x0008 (0x0008 - 0x0000)
+struct BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8 final
+{
+public:
+	class FName                                   NotifyName;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

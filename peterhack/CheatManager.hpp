@@ -88,7 +88,7 @@ private:
 	void HandleChangeName(SDK::APawn* myPlayer);
 	void HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
 	void ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	void ApplyNoDecoyCooldown(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
+	void SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
 	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
 	void TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintable);
 	void HandleReturnToMainLobby(SDK::APlayerController* playerController);

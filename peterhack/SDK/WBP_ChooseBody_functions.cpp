@@ -16,21 +16,21 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_ChooseBody.WBP_ChooseBody_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Function WBP_ChooseBody.WBP_ChooseBody_C.ExecuteUbergraph_WBP_ChooseBody
+// (Final, UbergraphFunction, HasDefaults)
 // Parameters:
-// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ChooseBody_C::PreConstruct(bool IsDesignTime_PreConstruct)
+void UWBP_ChooseBody_C::ExecuteUbergraph_WBP_ChooseBody(int32 EntryPoint)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChooseBody_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_ChooseBody_C", "ExecuteUbergraph_WBP_ChooseBody");
 
-	Params::WBP_ChooseBody_C_PreConstruct Parms{};
+	Params::WBP_ChooseBody_C_ExecuteUbergraph_WBP_ChooseBody Parms{};
 
-	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -58,21 +58,21 @@ void UWBP_ChooseBody_C::OnClickWithClass(class UWBP_BodySelect_C* SelfObject, cl
 }
 
 
-// Function WBP_ChooseBody.WBP_ChooseBody_C.ExecuteUbergraph_WBP_ChooseBody
-// (Final, UbergraphFunction, HasDefaults)
+// Function WBP_ChooseBody.WBP_ChooseBody_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
 // Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ChooseBody_C::ExecuteUbergraph_WBP_ChooseBody(int32 EntryPoint)
+void UWBP_ChooseBody_C::PreConstruct(bool IsDesignTime)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChooseBody_C", "ExecuteUbergraph_WBP_ChooseBody");
+		Func = Class->GetFunction("WBP_ChooseBody_C", "PreConstruct");
 
-	Params::WBP_ChooseBody_C_ExecuteUbergraph_WBP_ChooseBody Parms{};
+	Params::WBP_ChooseBody_C_PreConstruct Parms{};
 
-	Parms.EntryPoint = EntryPoint;
+	Parms.IsDesignTime = IsDesignTime;
 
 	UObject::ProcessEvent(Func, &Parms);
 }

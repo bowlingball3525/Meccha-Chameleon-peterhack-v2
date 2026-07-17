@@ -44,14 +44,14 @@ public:
 	bool                                          ShowSidePalet;                                     // 0x03D8(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void UpdateSliderBar(double NormalizeValue);
-	void SetSliderValue(double Value, bool UpdateCall);
-	void SetSelectState(bool IsSelect);
-	void SetBarColor(const struct FLinearColor& Value);
-	void PreConstruct(bool IsDesignTime_PreConstruct);
-	void ExecuteUbergraph_WBP_ControllerGradientSlider(int32 EntryPoint);
-	void Construct();
 	void AddSliderValue(double Value);
+	void Construct();
+	void ExecuteUbergraph_WBP_ControllerGradientSlider(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime);
+	void SetBarColor(const struct FLinearColor& Value);
+	void SetSelectState(bool IsSelect_0);
+	void SetSliderValue(double Value, bool UpdateCall);
+	void UpdateSliderBar(double NormalizeValue);
 
 public:
 	static class UClass* StaticClass()
