@@ -17,24 +17,25 @@
 SDK_NAMESPACE_START
 
 // BlueprintGeneratedClass BP_FirstPersonCharacter_cLeon_Character_Survivor.BP_FirstPersonCharacter_cLeon_Character_Survivor_C
-// 0x0020 (0x0D00 - 0x0CE0)
-class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C : public ABP_FirstPersonCharacter_cLeon_Character_C
+// 0x0030 (0x0D10 - 0x0CE0)
+#pragma pack(push, 0x1)
+class SDK_ALIGN(0x10) ABP_FirstPersonCharacter_cLeon_Character_Survivor_C : public ABP_FirstPersonCharacter_cLeon_Character_C
 {
 public:
-	struct FPointerToUberGraphFrame               UberGraphFrame_BP_FirstPersonCharacter_cLeon_Character_Survivor_C; // 0x0CD8(0x0008)(ZeroConstructor, Transient, DuplicateTransient)
-	double                                        FilledValue;                                       // 0x0CE0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         PreStencil;                                        // 0x0CE8(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_CEC[0x4];                                      // 0x0CEC(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	TArray<class UCapsuleComponent*>              OverlapCheckCapsules;                              // 0x0CF0(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
+	struct FPointerToUberGraphFrame               UberGraphFrame_BP_FirstPersonCharacter_cLeon_Character_Survivor_C; // 0x0CE0(0x0008)(ZeroConstructor, Transient, DuplicateTransient)
+	double                                        FilledValue;                                       // 0x0CE8(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         PreStencil;                                        // 0x0CF0(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_CF4[0x4];                                      // 0x0CF4(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	TArray<class UCapsuleComponent*>              OverlapCheckCapsules;                              // 0x0CF8(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
 
 public:
-	void IsOverlap(int32* OverlapCountRezult);
-	void PlayerControllerSetup();
-	void ReceiveTick(float DeltaSeconds);
-	void OverlapCheck();
-	void ReceiveBeginPlay();
-	void SetStencilValue_Server_(int32 StencilValue);
 	void ExecuteUbergraph_BP_FirstPersonCharacter_cLeon_Character_Survivor(int32 EntryPoint);
+	void SetStencilValue_Server_(int32 StencilValue);
+	void ReceiveBeginPlay();
+	void OverlapCheck();
+	void ReceiveTick(float DeltaSeconds);
+	void PlayerControllerSetup();
+	void IsOverlap(int32* OverlapCountRezult);
 
 public:
 	static class UClass* StaticClass()
@@ -50,6 +51,7 @@ public:
 		return GetDefaultObjImpl<ABP_FirstPersonCharacter_cLeon_Character_Survivor_C>();
 	}
 };
+#pragma pack(pop)
 DUMPER7_ASSERTS_ABP_FirstPersonCharacter_cLeon_Character_Survivor_C;
 
 SDK_NAMESPACE_END

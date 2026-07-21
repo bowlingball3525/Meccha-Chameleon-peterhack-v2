@@ -17,24 +17,23 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature
-// 0x0030 (0x0030 - 0x0000)
-struct WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature final
-{
-public:
-	class UWBP_MapContents_C*                     SelfWidget;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	struct FST_cLeonMapData                       Mapdata;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature;
-
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.SelectUpdate
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature final
+struct WBP_MapContentsWithRandom_C_SelectUpdate final
 {
 public:
-	bool                                          NewState;                                          // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature;
+DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_SelectUpdate;
+
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_MapContentsWithRandom_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_PreConstruct;
 
 // Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.ExecuteUbergraph_WBP_MapContentsWithRandom
 // 0x0080 (0x0080 - 0x0000)
@@ -72,23 +71,24 @@ public:
 };
 DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_ExecuteUbergraph_WBP_MapContentsWithRandom;
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.PreConstruct
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature
 // 0x0001 (0x0001 - 0x0000)
-struct WBP_MapContentsWithRandom_C_PreConstruct final
+struct WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature final
 {
 public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          NewState;                                          // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_PreConstruct;
+DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature;
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.SelectUpdate
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_MapContentsWithRandom_C_SelectUpdate final
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature
+// 0x0030 (0x0030 - 0x0000)
+struct WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature final
 {
 public:
-	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class UWBP_MapContents_C*                     SelfWidget;                                        // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	struct FST_cLeonMapData                       Mapdata;                                           // 0x0008(0x0028)(BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_SelectUpdate;
+DUMPER7_ASSERTS_WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

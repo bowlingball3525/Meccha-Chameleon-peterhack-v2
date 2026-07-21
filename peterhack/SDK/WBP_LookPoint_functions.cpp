@@ -16,15 +16,35 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_LookPoint.WBP_LookPoint_C.Construct
+// Function WBP_LookPoint.WBP_LookPoint_C.PreConstruct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_LookPoint_C::Construct()
+void UWBP_LookPoint_C::PreConstruct(bool IsDesignTime_PreConstruct)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_LookPoint_C", "Construct");
+		Func = Class->GetFunction("WBP_LookPoint_C", "PreConstruct");
+
+	Params::WBP_LookPoint_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_LookPoint.WBP_LookPoint_C.FinishEvent
+// (BlueprintCallable, BlueprintEvent)
+
+void UWBP_LookPoint_C::FinishEvent()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_LookPoint_C", "FinishEvent");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -50,37 +70,17 @@ void UWBP_LookPoint_C::ExecuteUbergraph_WBP_LookPoint(int32 EntryPoint)
 }
 
 
-// Function WBP_LookPoint.WBP_LookPoint_C.FinishEvent
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_LookPoint.WBP_LookPoint_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
 
-void UWBP_LookPoint_C::FinishEvent()
+void UWBP_LookPoint_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_LookPoint_C", "FinishEvent");
+		Func = Class->GetFunction("WBP_LookPoint_C", "Construct");
 
 	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_LookPoint.WBP_LookPoint_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_LookPoint_C::PreConstruct(bool IsDesignTime)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_LookPoint_C", "PreConstruct");
-
-	Params::WBP_LookPoint_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime = IsDesignTime;
-
-	UObject::ProcessEvent(Func, &Parms);
 }
 
 

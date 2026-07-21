@@ -16,6 +16,28 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function BPC_RayPositions.BPC_RayPositions_C.ExecuteUbergraph_BPC_RayPositions
+// 0x0004 (0x0004 - 0x0000)
+struct BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions final
+{
+public:
+	int32                                         EntryPoint;                                        // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions;
+
+// Function BPC_RayPositions.BPC_RayPositions_C.GetRayPositions
+// 0x0090 (0x0090 - 0x0000)
+struct BPC_RayPositions_C_GetRayPositions final
+{
+public:
+	TArray<struct FVector>                        VectorArray;                                       // 0x0000(0x0010)(Parm, OutParm)
+	bool                                          ReturnVector;                                      // 0x0010(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_11[0xF];                                       // 0x0011(0x000F)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FTransform                             CallFunc_GetTransform_ReturnValue;                 // 0x0020(0x0060)(ConstParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	TArray<struct FVector>                        CallFunc_LocalToWorldTransform_ReturnValue;        // 0x0080(0x0010)(ReferenceParm)
+};
+DUMPER7_ASSERTS_BPC_RayPositions_C_GetRayPositions;
+
 // Function BPC_RayPositions.BPC_RayPositions_C.SetUpTransforms
 // 0x00C0 (0x00C0 - 0x0000)
 struct BPC_RayPositions_C_SetUpTransforms final
@@ -36,28 +58,6 @@ public:
 	int32                                         CallFunc_Array_Add_ReturnValue;                    // 0x00B0(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BPC_RayPositions_C_SetUpTransforms;
-
-// Function BPC_RayPositions.BPC_RayPositions_C.GetRayPositions
-// 0x0090 (0x0090 - 0x0000)
-struct BPC_RayPositions_C_GetRayPositions final
-{
-public:
-	TArray<struct FVector>                        VectorArray;                                       // 0x0000(0x0010)(Parm, OutParm)
-	bool                                          ReturnVector;                                      // 0x0010(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_11[0xF];                                       // 0x0011(0x000F)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FTransform                             CallFunc_GetTransform_ReturnValue;                 // 0x0020(0x0060)(ConstParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	TArray<struct FVector>                        CallFunc_LocalToWorldTransform_ReturnValue;        // 0x0080(0x0010)(ReferenceParm)
-};
-DUMPER7_ASSERTS_BPC_RayPositions_C_GetRayPositions;
-
-// Function BPC_RayPositions.BPC_RayPositions_C.ExecuteUbergraph_BPC_RayPositions
-// 0x0004 (0x0004 - 0x0000)
-struct BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions final
-{
-public:
-	int32                                         EntryPoint;                                        // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

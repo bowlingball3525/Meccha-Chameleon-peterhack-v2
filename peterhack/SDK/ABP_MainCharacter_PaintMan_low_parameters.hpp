@@ -17,24 +17,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function ABP_MainCharacter_PaintMan_low.ABP_MainCharacter_PaintMan_low_C.AnimGraph
-// 0x0010 (0x0010 - 0x0000)
-struct ABP_MainCharacter_PaintMan_low_C_AnimGraph final
-{
-public:
-	struct FPoseLink                              AnimGraph_0;                                       // 0x0000(0x0010)(Parm, OutParm, NoDestructor)
-};
-DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan_low_C_AnimGraph;
-
-// Function ABP_MainCharacter_PaintMan_low.ABP_MainCharacter_PaintMan_low_C.BlueprintUpdateAnimation
-// 0x0004 (0x0004 - 0x0000)
-struct ABP_MainCharacter_PaintMan_low_C_BlueprintUpdateAnimation final
-{
-public:
-	float                                         DeltaTimeX;                                        // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan_low_C_BlueprintUpdateAnimation;
-
 // Function ABP_MainCharacter_PaintMan_low.ABP_MainCharacter_PaintMan_low_C.ExecuteUbergraph_ABP_MainCharacter_PaintMan_low
 // 0x0280 (0x0280 - 0x0000)
 struct ABP_MainCharacter_PaintMan_low_C_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low final
@@ -102,6 +84,24 @@ public:
 	float                                         CallFunc_VLerp_Alpha_ImplicitCast;                 // 0x0270(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan_low_C_ExecuteUbergraph_ABP_MainCharacter_PaintMan_low;
+
+// Function ABP_MainCharacter_PaintMan_low.ABP_MainCharacter_PaintMan_low_C.BlueprintUpdateAnimation
+// 0x0004 (0x0004 - 0x0000)
+struct ABP_MainCharacter_PaintMan_low_C_BlueprintUpdateAnimation final
+{
+public:
+	float                                         DeltaTimeX_BlueprintUpdateAnimation;               // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan_low_C_BlueprintUpdateAnimation;
+
+// Function ABP_MainCharacter_PaintMan_low.ABP_MainCharacter_PaintMan_low_C.AnimGraph
+// 0x0010 (0x0010 - 0x0000)
+struct ABP_MainCharacter_PaintMan_low_C_AnimGraph final
+{
+public:
+	struct FPoseLink                              AnimGraph;                                         // 0x0000(0x0010)(Parm, OutParm, NoDestructor)
+};
+DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan_low_C_AnimGraph;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

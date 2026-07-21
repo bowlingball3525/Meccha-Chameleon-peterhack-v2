@@ -30,15 +30,15 @@ public:
 	int32                                         CurrentIndex;                                      // 0x02E8(0x0004)(Edit, BlueprintVisible, Net, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, RepNotify, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void CheckLoop();
-	void ExecuteUbergraph_BP_RandomObject_SingleUniqueType(int32 EntryPoint);
-	void HideCall();
-	void IndexUpdate();
-	void OnRep_CurrentIndex();
-	void RandomCall();
-	void ReceiveBeginPlay();
-	void SetIndex(int32 Index_0, bool* Error);
 	void UserConstructionScript();
+	void SetIndex(int32 Index_0, bool* Error);
+	void ReceiveBeginPlay();
+	void RandomCall();
+	void OnRep_CurrentIndex();
+	void IndexUpdate();
+	void HideCall();
+	void ExecuteUbergraph_BP_RandomObject_SingleUniqueType(int32 EntryPoint);
+	void CheckLoop();
 
 public:
 	static class UClass* StaticClass()

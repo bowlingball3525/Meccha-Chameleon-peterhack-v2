@@ -16,15 +16,106 @@
 
 SDK_NAMESPACE_START
 
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.CheckLoop
-// (BlueprintCallable, BlueprintEvent)
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.UserConstructionScript
+// (Event, Public, BlueprintCallable, BlueprintEvent)
 
-void ABP_RandomObject_RandomScale_C::CheckLoop()
+void ABP_RandomObject_RandomScale_C::UserConstructionScript()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "CheckLoop");
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "UserConstructionScript");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.SpawnSet
+// (Public, BlueprintCallable, BlueprintEvent)
+
+void ABP_RandomObject_RandomScale_C::SpawnSet()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "SpawnSet");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.SetIndex
+// (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool*                                   Error                                                  (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void ABP_RandomObject_RandomScale_C::SetIndex(bool* Error)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "SetIndex");
+
+	Params::BP_RandomObject_RandomScale_C_SetIndex Parms{};
+
+	UObject::ProcessEvent(Func, &Parms);
+
+	if (Error != nullptr)
+		*Error = Parms.Error;
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.ReceiveBeginPlay
+// (Event, Protected, BlueprintEvent)
+
+void ABP_RandomObject_RandomScale_C::ReceiveBeginPlay()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "ReceiveBeginPlay");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.OnRep_Seed
+// (BlueprintCallable, BlueprintEvent)
+
+void ABP_RandomObject_RandomScale_C::OnRep_Seed()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "OnRep_Seed");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.OnRep_CurrentIndex
+// (BlueprintCallable, BlueprintEvent)
+
+void ABP_RandomObject_RandomScale_C::OnRep_CurrentIndex()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "OnRep_CurrentIndex");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.IndexUpdate
+// (BlueprintCallable, BlueprintEvent)
+
+void ABP_RandomObject_RandomScale_C::IndexUpdate()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "IndexUpdate");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -50,106 +141,15 @@ void ABP_RandomObject_RandomScale_C::ExecuteUbergraph_BP_RandomObject_RandomScal
 }
 
 
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.IndexUpdate
+// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.CheckLoop
 // (BlueprintCallable, BlueprintEvent)
 
-void ABP_RandomObject_RandomScale_C::IndexUpdate()
+void ABP_RandomObject_RandomScale_C::CheckLoop()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "IndexUpdate");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.OnRep_CurrentIndex
-// (BlueprintCallable, BlueprintEvent)
-
-void ABP_RandomObject_RandomScale_C::OnRep_CurrentIndex()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "OnRep_CurrentIndex");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.OnRep_Seed
-// (BlueprintCallable, BlueprintEvent)
-
-void ABP_RandomObject_RandomScale_C::OnRep_Seed()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "OnRep_Seed");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.ReceiveBeginPlay
-// (Event, Protected, BlueprintEvent)
-
-void ABP_RandomObject_RandomScale_C::ReceiveBeginPlay()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "ReceiveBeginPlay");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.SetIndex
-// (Public, HasOutParams, BlueprintCallable, BlueprintEvent)
-// Parameters:
-// bool*                                   Error                                                  (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void ABP_RandomObject_RandomScale_C::SetIndex(bool* Error)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "SetIndex");
-
-	Params::BP_RandomObject_RandomScale_C_SetIndex Parms{};
-
-	UObject::ProcessEvent(Func, &Parms);
-
-	if (Error != nullptr)
-		*Error = Parms.Error;
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.SpawnSet
-// (Public, BlueprintCallable, BlueprintEvent)
-
-void ABP_RandomObject_RandomScale_C::SpawnSet()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "SpawnSet");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function BP_RandomObject_RandomScale.BP_RandomObject_RandomScale_C.UserConstructionScript
-// (Event, Public, BlueprintCallable, BlueprintEvent)
-
-void ABP_RandomObject_RandomScale_C::UserConstructionScript()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "UserConstructionScript");
+		Func = Class->GetFunction("BP_RandomObject_RandomScale_C", "CheckLoop");
 
 	UObject::ProcessEvent(Func, nullptr);
 }

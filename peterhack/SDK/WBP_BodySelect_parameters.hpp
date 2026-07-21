@@ -16,6 +16,24 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_BodySelect.WBP_BodySelect_C.SetSelectState
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_BodySelect_C_SetSelectState final
+{
+public:
+	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_BodySelect_C_SetSelectState;
+
+// Function WBP_BodySelect.WBP_BodySelect_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_BodySelect_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_BodySelect_C_PreConstruct;
+
 // Function WBP_BodySelect.WBP_BodySelect_C.ExecuteUbergraph_WBP_BodySelect
 // 0x0018 (0x0018 - 0x0000)
 struct WBP_BodySelect_C_ExecuteUbergraph_WBP_BodySelect final
@@ -28,24 +46,6 @@ public:
 	struct FLinearColor                           CallFunc_SelectColor_ReturnValue;                  // 0x0008(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_BodySelect_C_ExecuteUbergraph_WBP_BodySelect;
-
-// Function WBP_BodySelect.WBP_BodySelect_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_BodySelect_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_BodySelect_C_PreConstruct;
-
-// Function WBP_BodySelect.WBP_BodySelect_C.SetSelectState
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_BodySelect_C_SetSelectState final
-{
-public:
-	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_BodySelect_C_SetSelectState;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

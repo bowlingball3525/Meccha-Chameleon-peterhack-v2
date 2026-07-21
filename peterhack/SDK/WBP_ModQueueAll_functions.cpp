@@ -16,116 +16,141 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature
-// (BlueprintEvent)
-
-void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature
-// (BlueprintEvent)
-
-void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
-// (BlueprintEvent)
-
-void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.CheckInstalledItems
-// (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
-// Parameters:
-// bool*                                   ReturnInstalled                                        (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// bool*                                   ReturnDownloading                                      (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_ModQueueAll_C::CheckInstalledItems(bool* ReturnInstalled, bool* ReturnDownloading)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "CheckInstalledItems");
-
-	Params::WBP_ModQueueAll_C_CheckInstalledItems Parms{};
-
-	UObject::ProcessEvent(Func, &Parms);
-
-	if (ReturnInstalled != nullptr)
-		*ReturnInstalled = Parms.ReturnInstalled;
-
-	if (ReturnDownloading != nullptr)
-		*ReturnDownloading = Parms.ReturnDownloading;
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.Construct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-
-void UWBP_ModQueueAll_C::Construct()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "Construct");
-
-	UObject::ProcessEvent(Func, nullptr);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.DownloadCheck
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.UpdateWait
 // (BlueprintCallable, BlueprintEvent)
 
-void UWBP_ModQueueAll_C::DownloadCheck()
+void UWBP_ModQueueAll_C::UpdateWait()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "DownloadCheck");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "UpdateWait");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.ExecuteUbergraph_WBP_ModQueueAll
-// (Final, UbergraphFunction, HasDefaults)
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
 // Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ModQueueAll_C::ExecuteUbergraph_WBP_ModQueueAll(int32 EntryPoint)
+void UWBP_ModQueueAll_C::PreConstruct(bool IsDesignTime_PreConstruct)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "ExecuteUbergraph_WBP_ModQueueAll");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "PreConstruct");
 
-	Params::WBP_ModQueueAll_C_ExecuteUbergraph_WBP_ModQueueAll Parms{};
+	Params::WBP_ModQueueAll_C_PreConstruct Parms{};
 
-	Parms.EntryPoint = EntryPoint;
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnSuccess_F78BBAD84186A9297376358454884094
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
+// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+
+void UWBP_ModQueueAll_C::OnSuccess_F78BBAD84186A9297376358454884094(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnSuccess_F78BBAD84186A9297376358454884094");
+
+	Params::WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094 Parms{};
+
+	Parms.ItemId = std::move(ItemId);
+	Parms.Details = std::move(Details);
+	Parms.ErrorMessage = std::move(ErrorMessage);
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnReturn
+// (Event, Public, BlueprintEvent)
+
+void UWBP_ModQueueAll_C::OnReturn()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnReturn");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnFailure_F78BBAD84186A9297376358454884094
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
+// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+
+void UWBP_ModQueueAll_C::OnFailure_F78BBAD84186A9297376358454884094(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnFailure_F78BBAD84186A9297376358454884094");
+
+	Params::WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094 Parms{};
+
+	Parms.ItemId = std::move(ItemId);
+	Parms.Details = std::move(Details);
+	Parms.ErrorMessage = std::move(ErrorMessage);
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// class FName                             SessionName                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    bWasSuccessful                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ModQueueAll_C::OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F(class FName SessionName, bool bWasSuccessful)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F");
+
+	Params::WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F Parms{};
+
+	Parms.SessionName = SessionName;
+	Parms.bWasSuccessful = bWasSuccessful;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnCallFailed_20A1B5B44A276C069768D3A60A80535F
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// class FName                             SessionName                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    bWasSuccessful                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_ModQueueAll_C::OnCallFailed_20A1B5B44A276C069768D3A60A80535F(class FName SessionName, bool bWasSuccessful)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnCallFailed_20A1B5B44A276C069768D3A60A80535F");
+
+	Params::WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F Parms{};
+
+	Parms.SessionName = SessionName;
+	Parms.bWasSuccessful = bWasSuccessful;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
@@ -156,141 +181,116 @@ void UWBP_ModQueueAll_C::GetWaitPlayers(class FString* ReturnNames, bool* Comple
 }
 
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnCallFailed_20A1B5B44A276C069768D3A60A80535F
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.ExecuteUbergraph_WBP_ModQueueAll
+// (Final, UbergraphFunction, HasDefaults)
 // Parameters:
-// class FName                             SessionName                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// bool                                    bWasSuccessful                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ModQueueAll_C::OnCallFailed_20A1B5B44A276C069768D3A60A80535F(class FName SessionName, bool bWasSuccessful)
+void UWBP_ModQueueAll_C::ExecuteUbergraph_WBP_ModQueueAll(int32 EntryPoint)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnCallFailed_20A1B5B44A276C069768D3A60A80535F");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "ExecuteUbergraph_WBP_ModQueueAll");
 
-	Params::WBP_ModQueueAll_C_OnCallFailed_20A1B5B44A276C069768D3A60A80535F Parms{};
+	Params::WBP_ModQueueAll_C_ExecuteUbergraph_WBP_ModQueueAll Parms{};
 
-	Parms.SessionName = SessionName;
-	Parms.bWasSuccessful = bWasSuccessful;
+	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.DownloadCheck
 // (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// class FName                             SessionName                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-// bool                                    bWasSuccessful                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ModQueueAll_C::OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F(class FName SessionName, bool bWasSuccessful)
+void UWBP_ModQueueAll_C::DownloadCheck()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F");
-
-	Params::WBP_ModQueueAll_C_OnDestroySessionComplete_20A1B5B44A276C069768D3A60A80535F Parms{};
-
-	Parms.SessionName = SessionName;
-	Parms.bWasSuccessful = bWasSuccessful;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnFailure_F78BBAD84186A9297376358454884094
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
-// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-
-void UWBP_ModQueueAll_C::OnFailure_F78BBAD84186A9297376358454884094(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnFailure_F78BBAD84186A9297376358454884094");
-
-	Params::WBP_ModQueueAll_C_OnFailure_F78BBAD84186A9297376358454884094 Parms{};
-
-	Parms.ItemId = std::move(ItemId);
-	Parms.Details = std::move(Details);
-	Parms.ErrorMessage = std::move(ErrorMessage);
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnReturn
-// (Event, Public, BlueprintEvent)
-
-void UWBP_ModQueueAll_C::OnReturn()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnReturn");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "DownloadCheck");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.OnSuccess_F78BBAD84186A9297376358454884094
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// const class FString&                    ItemId                                                 (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-// const struct FSteamWorkshopItemDetails& Details                                                (BlueprintVisible, BlueprintReadOnly, Parm)
-// const class FString&                    ErrorMessage                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-
-void UWBP_ModQueueAll_C::OnSuccess_F78BBAD84186A9297376358454884094(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "OnSuccess_F78BBAD84186A9297376358454884094");
-
-	Params::WBP_ModQueueAll_C_OnSuccess_F78BBAD84186A9297376358454884094 Parms{};
-
-	Parms.ItemId = std::move(ItemId);
-	Parms.Details = std::move(Details);
-	Parms.ErrorMessage = std::move(ErrorMessage);
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.PreConstruct
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.Construct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ModQueueAll_C::PreConstruct(bool IsDesignTime)
+void UWBP_ModQueueAll_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "Construct");
 
-	Params::WBP_ModQueueAll_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime = IsDesignTime;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_ModQueueAll.WBP_ModQueueAll_C.UpdateWait
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.CheckInstalledItems
+// (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool*                                   ReturnInstalled                                        (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool*                                   ReturnDownloading                                      (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ModQueueAll_C::UpdateWait()
+void UWBP_ModQueueAll_C::CheckInstalledItems(bool* ReturnInstalled, bool* ReturnDownloading)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ModQueueAll_C", "UpdateWait");
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "CheckInstalledItems");
+
+	Params::WBP_ModQueueAll_C_CheckInstalledItems Parms{};
+
+	UObject::ProcessEvent(Func, &Parms);
+
+	if (ReturnInstalled != nullptr)
+		*ReturnInstalled = Parms.ReturnInstalled;
+
+	if (ReturnDownloading != nullptr)
+		*ReturnDownloading = Parms.ReturnDownloading;
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
+// (BlueprintEvent)
+
+void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_UINavButtonBase_209_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature
+// (BlueprintEvent)
+
+void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_K2Node_ComponentBoundEvent_1_PushEnd__DelegateSignature");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
+// Function WBP_ModQueueAll.WBP_ModQueueAll_C.BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature
+// (BlueprintEvent)
+
+void UWBP_ModQueueAll_C::BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_ModQueueAll_C", "BndEvt__WBP_ModQueueAll_LongTapButton_OnAnimation_1_K2Node_ComponentBoundEvent_2_PushEnd__DelegateSignature");
 
 	UObject::ProcessEvent(Func, nullptr);
 }

@@ -16,31 +16,23 @@
 
 SDK_NAMESPACE_START
 
-// Function BPC_RayPositions.BPC_RayPositions_C.SetUpTransforms
-// (Public, HasDefaults, BlueprintCallable, BlueprintEvent)
+// Function BPC_RayPositions.BPC_RayPositions_C.ExecuteUbergraph_BPC_RayPositions
+// (Final, UbergraphFunction)
+// Parameters:
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UBPC_RayPositions_C::SetUpTransforms()
+void UBPC_RayPositions_C::ExecuteUbergraph_BPC_RayPositions(int32 EntryPoint)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BPC_RayPositions_C", "SetUpTransforms");
+		Func = Class->GetFunction("BPC_RayPositions_C", "ExecuteUbergraph_BPC_RayPositions");
 
-	UObject::ProcessEvent(Func, nullptr);
-}
+	Params::BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions Parms{};
 
+	Parms.EntryPoint = EntryPoint;
 
-// Function BPC_RayPositions.BPC_RayPositions_C.ReceiveBeginPlay
-// (Event, Public, BlueprintEvent)
-
-void UBPC_RayPositions_C::ReceiveBeginPlay()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BPC_RayPositions_C", "ReceiveBeginPlay");
-
-	UObject::ProcessEvent(Func, nullptr);
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 
@@ -65,23 +57,31 @@ void UBPC_RayPositions_C::GetRayPositions(TArray<struct FVector>* VectorArray)
 }
 
 
-// Function BPC_RayPositions.BPC_RayPositions_C.ExecuteUbergraph_BPC_RayPositions
-// (Final, UbergraphFunction)
-// Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function BPC_RayPositions.BPC_RayPositions_C.ReceiveBeginPlay
+// (Event, Public, BlueprintEvent)
 
-void UBPC_RayPositions_C::ExecuteUbergraph_BPC_RayPositions(int32 EntryPoint)
+void UBPC_RayPositions_C::ReceiveBeginPlay()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BPC_RayPositions_C", "ExecuteUbergraph_BPC_RayPositions");
+		Func = Class->GetFunction("BPC_RayPositions_C", "ReceiveBeginPlay");
 
-	Params::BPC_RayPositions_C_ExecuteUbergraph_BPC_RayPositions Parms{};
+	UObject::ProcessEvent(Func, nullptr);
+}
 
-	Parms.EntryPoint = EntryPoint;
 
-	UObject::ProcessEvent(Func, &Parms);
+// Function BPC_RayPositions.BPC_RayPositions_C.SetUpTransforms
+// (Public, HasDefaults, BlueprintCallable, BlueprintEvent)
+
+void UBPC_RayPositions_C::SetUpTransforms()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BPC_RayPositions_C", "SetUpTransforms");
+
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 

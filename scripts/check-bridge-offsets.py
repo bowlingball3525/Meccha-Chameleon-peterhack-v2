@@ -26,7 +26,7 @@ bridge = {
     "Controller_ControlRotation": 0x0320,
     "PlayerController_PlayerCameraManager": 0x0360,
     "BP_FirstPersonCharacter_RuntimePaintable": 0x0B68,
-    "RuntimePaintable_CurrentBrushSettings": 0x0170,
+    "RuntimePaintable_CurrentBrushSettings": 0x01A8,
     "SceneCapture2D_CaptureComponent2D": 0x02B8,
     "SceneCaptureComponent_CaptureSource": 0x0241,
     "SceneCaptureComponent_CaptureFlags": 0x0242,

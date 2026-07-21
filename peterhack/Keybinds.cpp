@@ -7,6 +7,15 @@
 
 namespace
 {
+	bool s_keyDown[256]{};
+
+	bool KeyDown(int vk)
+	{
+		if (vk <= 0 || vk >= 256)
+			return false;
+		return (GetAsyncKeyState(vk) & 0x8000) != 0;
+	}
+
 	// Identity of the bind currently being recorded (only one at a time,
 	// across every tab). Identified by the bound variable's address, which is
 	// stable because binds live in the settings objects.
@@ -62,7 +71,17 @@ namespace Binds
 			return Gamepad::Pressed(PadMask(code), allowReservedPad);
 		if (code <= 0 || code >= 256)
 			return false;
-		return (GetAsyncKeyState(code) & 1) != 0;
+		const bool down = KeyDown(code);
+		const bool edge = down && !s_keyDown[code];
+		s_keyDown[code] = down;
+		return edge;
+	}
+
+	void SyncKeyState(int code)
+	{
+		if (IsPadBind(code) || code <= 0 || code >= 256)
+			return;
+		s_keyDown[code] = KeyDown(code);
 	}
 
 	const char* BindName(int code)
@@ -101,10 +120,8 @@ namespace Binds
 
 	void ClearKeyEdges()
 	{
-		for (int vk = 0x01; vk <= 0x06; ++vk)
-			(void)GetAsyncKeyState(vk);
-		for (int vk = 0x08; vk <= 0xFE; ++vk)
-			(void)GetAsyncKeyState(vk);
+		for (int vk = 0x01; vk <= 0xFE; ++vk)
+			SyncKeyState(vk);
 	}
 
 	bool RecorderRow(const char* label, int& bindCode, bool allowPad, bool allowMouse)

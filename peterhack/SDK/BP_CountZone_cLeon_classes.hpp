@@ -27,8 +27,8 @@ public:
 	TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*> CurrentOverlappingCharacters;          // 0x02C0(0x0010)(Edit, BlueprintVisible, DisableEditOnTemplate, DisableEditOnInstance)
 
 public:
+	void ReceiveTick(float DeltaSeconds_ReceiveTick);
 	void ExecuteUbergraph_BP_CountZone_cLeon(int32 EntryPoint);
-	void ReceiveTick(float DeltaSeconds);
 
 public:
 	static class UClass* StaticClass()

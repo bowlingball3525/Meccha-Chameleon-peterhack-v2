@@ -16,17 +16,43 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_BodySelect.WBP_BodySelect_C.BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
-// (BlueprintEvent)
+// Function WBP_BodySelect.WBP_BodySelect_C.SetSelectState
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_BodySelect_C::BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature()
+void UWBP_BodySelect_C::SetSelectState(bool State)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_BodySelect_C", "BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature");
+		Func = Class->GetFunction("WBP_BodySelect_C", "SetSelectState");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::WBP_BodySelect_C_SetSelectState Parms{};
+
+	Parms.State = State;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_BodySelect.WBP_BodySelect_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void UWBP_BodySelect_C::PreConstruct(bool IsDesignTime_PreConstruct)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_BodySelect_C", "PreConstruct");
+
+	Params::WBP_BodySelect_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 
@@ -50,43 +76,17 @@ void UWBP_BodySelect_C::ExecuteUbergraph_WBP_BodySelect(int32 EntryPoint)
 }
 
 
-// Function WBP_BodySelect.WBP_BodySelect_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function WBP_BodySelect.WBP_BodySelect_C.BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
+// (BlueprintEvent)
 
-void UWBP_BodySelect_C::PreConstruct(bool IsDesignTime)
+void UWBP_BodySelect_C::BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_BodySelect_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_BodySelect_C", "BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature");
 
-	Params::WBP_BodySelect_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime = IsDesignTime;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_BodySelect.WBP_BodySelect_C.SetSelectState
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_BodySelect_C::SetSelectState(bool State)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_BodySelect_C", "SetSelectState");
-
-	Params::WBP_BodySelect_C_SetSelectState Parms{};
-
-	Parms.State = State;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 

@@ -16,57 +16,55 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature
-// (BlueprintEvent)
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.SelectUpdate
+// (BlueprintCallable, BlueprintEvent)
 // Parameters:
-// class UWBP_MapContents_C*               SelfWidget                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
+// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContentsWithRandom_C::BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature(class UWBP_MapContents_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)
+void UWBP_MapContentsWithRandom_C::SelectUpdate(bool State)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature");
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "SelectUpdate");
 
-	Params::WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature Parms{};
+	Params::WBP_MapContentsWithRandom_C_SelectUpdate Parms{};
 
-	Parms.SelfWidget = SelfWidget;
-	Parms.Mapdata = std::move(Mapdata);
+	Parms.State = State;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature
-// (BlueprintEvent)
-// Parameters:
-// bool                                    NewState                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void UWBP_MapContentsWithRandom_C::BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature(bool NewState)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature");
-
-	Params::WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature Parms{};
-
-	Parms.NewState = NewState;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.Construct
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.PreConstruct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContentsWithRandom_C::Construct()
+void UWBP_MapContentsWithRandom_C::PreConstruct(bool IsDesignTime_PreConstruct)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "Construct");
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "PreConstruct");
+
+	Params::WBP_MapContentsWithRandom_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.ForceUpdate
+// (BlueprintCallable, BlueprintEvent)
+
+void UWBP_MapContentsWithRandom_C::ForceUpdate()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "ForceUpdate");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -92,55 +90,57 @@ void UWBP_MapContentsWithRandom_C::ExecuteUbergraph_WBP_MapContentsWithRandom(in
 }
 
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.ForceUpdate
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
 
-void UWBP_MapContentsWithRandom_C::ForceUpdate()
+void UWBP_MapContentsWithRandom_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "ForceUpdate");
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "Construct");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature
+// (BlueprintEvent)
 // Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// bool                                    NewState                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_MapContentsWithRandom_C::PreConstruct(bool IsDesignTime)
+void UWBP_MapContentsWithRandom_C::BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature(bool NewState)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature");
 
-	Params::WBP_MapContentsWithRandom_C_PreConstruct Parms{};
+	Params::WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature Parms{};
 
-	Parms.IsDesignTime = IsDesignTime;
+	Parms.NewState = NewState;
 
 	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.SelectUpdate
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_MapContentsWithRandom.WBP_MapContentsWithRandom_C.BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature
+// (BlueprintEvent)
 // Parameters:
-// bool                                    State                                                  (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// class UWBP_MapContents_C*               SelfWidget                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+// const struct FST_cLeonMapData&          Mapdata                                                (BlueprintVisible, BlueprintReadOnly, Parm, HasGetValueTypeHash)
 
-void UWBP_MapContentsWithRandom_C::SelectUpdate(bool State)
+void UWBP_MapContentsWithRandom_C::BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature(class UWBP_MapContents_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "SelectUpdate");
+		Func = Class->GetFunction("WBP_MapContentsWithRandom_C", "BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature");
 
-	Params::WBP_MapContentsWithRandom_C_SelectUpdate Parms{};
+	Params::WBP_MapContentsWithRandom_C_BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature Parms{};
 
-	Parms.State = State;
+	Parms.SelfWidget = SelfWidget;
+	Parms.Mapdata = std::move(Mapdata);
 
 	UObject::ProcessEvent(Func, &Parms);
 }

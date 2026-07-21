@@ -16,6 +16,27 @@
 
 SDK_NAMESPACE_START
 
+// Function BP_cLeonHunterLotteryArea.BP_cLeonHunterLotteryArea_C.GetOverlapCharacters
+// (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
+// Parameters:
+// TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*>*ReturnCharacters                                       (Parm, OutParm)
+
+void ABP_cLeonHunterLotteryArea_C::GetOverlapCharacters(TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*>* ReturnCharacters)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_cLeonHunterLotteryArea_C", "GetOverlapCharacters");
+
+	Params::BP_cLeonHunterLotteryArea_C_GetOverlapCharacters Parms{};
+
+	UObject::ProcessEvent(Func, &Parms);
+
+	if (ReturnCharacters != nullptr)
+		*ReturnCharacters = std::move(Parms.ReturnCharacters);
+}
+
+
 // Function BP_cLeonHunterLotteryArea.BP_cLeonHunterLotteryArea_C.GetLotteryedControllers
 // (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
 // Parameters:
@@ -37,27 +58,6 @@ void ABP_cLeonHunterLotteryArea_C::GetLotteryedControllers(int32 MaxNum, TArray<
 
 	if (Controllers != nullptr)
 		*Controllers = std::move(Parms.Controllers);
-}
-
-
-// Function BP_cLeonHunterLotteryArea.BP_cLeonHunterLotteryArea_C.GetOverlapCharacters
-// (Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent)
-// Parameters:
-// TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*>*ReturnCharacters                                       (Parm, OutParm)
-
-void ABP_cLeonHunterLotteryArea_C::GetOverlapCharacters(TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*>* ReturnCharacters)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_cLeonHunterLotteryArea_C", "GetOverlapCharacters");
-
-	Params::BP_cLeonHunterLotteryArea_C_GetOverlapCharacters Parms{};
-
-	UObject::ProcessEvent(Func, &Parms);
-
-	if (ReturnCharacters != nullptr)
-		*ReturnCharacters = std::move(Parms.ReturnCharacters);
 }
 
 

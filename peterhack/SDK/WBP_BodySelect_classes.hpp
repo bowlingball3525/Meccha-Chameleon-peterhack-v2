@@ -31,10 +31,10 @@ public:
 	class UTexture2D*                             Texture;                                           // 0x0958(0x0008)(Edit, BlueprintVisible, ZeroConstructor, NoDestructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature();
-	void ExecuteUbergraph_WBP_BodySelect(int32 EntryPoint);
-	void PreConstruct(bool IsDesignTime);
 	void SetSelectState(bool State);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	void ExecuteUbergraph_WBP_BodySelect(int32 EntryPoint);
+	void BndEvt__WBP_BodySelect_NavButton_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature();
 
 public:
 	static class UClass* StaticClass()

@@ -37,15 +37,15 @@ public:
 	double                                        Acceleration_Scale;                                // 0x0108(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void UpdateDefaultMoveSpeed(double Speed);
-	void ResetWalkSpeed();
-	void ReceiveTick(float DeltaSeconds_ReceiveTick);
-	void ReceiveBeginPlay();
-	void MoveStart(double MoveTime, const struct FVector& Direction, double SpeedScale, double AccelerationScale, bool LockMovementState);
-	void MoeveStop();
-	void GetLockMovementState(bool* State);
-	void GetAniamtionState(bool* State);
 	void ExecuteUbergraph_BPC_ForceMoveCharacter(int32 EntryPoint);
+	void GetAniamtionState(bool* State);
+	void GetLockMovementState(bool* State);
+	void MoeveStop();
+	void MoveStart(double MoveTime, const struct FVector& Direction_0, double SpeedScale_0, double AccelerationScale, bool LockMovementState);
+	void ReceiveBeginPlay();
+	void ReceiveTick(float DeltaSeconds);
+	void ResetWalkSpeed();
+	void UpdateDefaultMoveSpeed(double Speed);
 
 public:
 	static class UClass* StaticClass()

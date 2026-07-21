@@ -1,7 +1,25 @@
 #include "includes.hpp"
-#include "SDK/BP_GameState_cLeon_classes.hpp"
+#include "SDK/BP_GameState_LINK_classes.hpp"
 #include "OverlayWindow.hpp"
 #include "SDK/EnhancedInput_classes.hpp"
+
+namespace SDK::Params
+{
+	struct BP_FirstPersonCharacter_cLeon_Character_Hunter_C_AntiChatTrace final
+	{
+		FVector End{};
+		ABP_FirstPersonCharacter_Main_C* Target{nullptr};
+	};
+
+	struct BP_FirstPersonCharacter_cLeon_Character_Hunter_C_SpawnShotEffect_Server_ final
+	{
+		FVector Endpoint{};
+		bool IsHit{false};
+		std::uint8_t Pad_19[0x7]{};
+		FRotator HitRotation{};
+		std::int32_t Seed{0};
+	};
+}
 
 #include <cmath>
 
@@ -23,6 +41,40 @@ ResizeBuffers oResizeBuffers = NULL;
 typedef void(__fastcall* tProcessEvent)(SDK::UObject*, SDK::UFunction*, void*);
 tProcessEvent oProcessEvent = nullptr;
 
+template<typename ClassType>
+static SDK::UFunction* SafeGetClassFunction(const char* className, const char* functionName)
+{
+	__try
+	{
+		SDK::UClass* cls = ClassType::StaticClass();
+		if (!cls)
+			return nullptr;
+		return cls->GetFunction(className, functionName);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return nullptr;
+	}
+}
+
+static bool ProcessEventHookTargetLooksValid(void* target)
+{
+	if (!target)
+		return false;
+	__try
+	{
+		const auto* bytes = reinterpret_cast<const std::uint8_t*>(target);
+		// UE ProcessEvent prologue typically starts with stack/reg saves, not int3/zeros.
+		if (bytes[0] == 0xCC || bytes[0] == 0x00)
+			return false;
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return false;
+	}
+}
+
 namespace Process
 {
 	DWORD ID;
@@ -37,7 +89,22 @@ namespace Process
 static bool IsGameWindowFocused()
 {
 	const HWND fg = GetForegroundWindow();
-	return fg && Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg));
+	if (!fg)
+		return false;
+	if (Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg)))
+		return true;
+	DWORD pid = 0;
+	GetWindowThreadProcessId(fg, &pid);
+	return pid == GetCurrentProcessId();
+}
+
+static bool CamoUsesPadHotkeys()
+{
+	if (!g_camo || !g_camo->settings.hotkeysEnabled)
+		return false;
+	const auto& s = g_camo->settings;
+	return Binds::IsPadBind(s.startHotkey) || Binds::IsPadBind(s.previewHotkey) ||
+		Binds::IsPadBind(s.unpreviewHotkey) || Binds::IsPadBind(s.stopHotkey);
 }
 
 // Resolve a bundled asset (e.g. the icon font) that ships next to peterhack.dll.
@@ -302,78 +369,63 @@ static DWORD FindGameThreadId()
 static void InitKickFunctionPointers()
 {
 	if (!g_fnKickLINK)
-		g_fnKickLINK = SDK::ABP_FirstPersonCharacter_LINK_C::StaticClass()->GetFunction("BP_FirstPersonCharacter_LINK_C", "Kick");
+		g_fnKickLINK = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_LINK_C>(
+			"BP_FirstPersonCharacter_LINK_C", "Kick");
 
 	if (!g_fnKickOnline)
-		g_fnKickOnline = SDK::ABP_FirstPersonPlayerState_Online_C::StaticClass()->GetFunction("BP_FirstPersonPlayerState_Online_C", "Kick");
+		g_fnKickOnline = SafeGetClassFunction<SDK::ABP_FirstPersonPlayerState_Online_C>(
+			"BP_FirstPersonPlayerState_Online_C", "Kick");
 
 	if (!g_fnClientWasKicked)
-		g_fnClientWasKicked = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientWasKicked");
+		g_fnClientWasKicked = SafeGetClassFunction<SDK::APlayerController>(
+			"PlayerController", "ClientWasKicked");
 
 	if (!g_fnClientReturnToMainMenuWithTextReason)
-		g_fnClientReturnToMainMenuWithTextReason = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientReturnToMainMenuWithTextReason");
+		g_fnClientReturnToMainMenuWithTextReason = SafeGetClassFunction<SDK::APlayerController>(
+			"PlayerController", "ClientReturnToMainMenuWithTextReason");
 
 	if (!g_fnOnRepBodyVisibility)
-		g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
+		g_fnOnRepBodyVisibility = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "OnRep_BodyVisibility");
 
 	if (!g_fnDeathPlayer)
-		g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
+		g_fnDeathPlayer = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "DeathPlayer");
 	if (!g_fnRagdoll)
-		g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
+		g_fnRagdoll = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "Ragdoll");
 	if (!g_fnGoToSpectate)
-		g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
+		g_fnGoToSpectate = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "GoToSpectate");
 	if (!g_fnShowDeathWidget)
-		g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
+		g_fnShowDeathWidget = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "ShowDeathWidget");
 	if (!g_fnDeathEvent)
-		g_fnDeathEvent = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		g_fnDeathEvent = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_Main_C", "DeathEvent");
 	if (!g_fnDeathUIShowAndAwait)
-		g_fnDeathUIShowAndAwait = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		g_fnDeathUIShowAndAwait = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_Main_C", "DeathUIShowAndAwait");
 	if (!g_fnSpawnDeathSplash)
-		g_fnSpawnDeathSplash = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-			"BP_FirstPersonCharacter_cLeon_Character_C", "SpawnDeathSplash");
+		g_fnSpawnDeathSplash = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "SpawnDeathSplash");
 	if (!g_fnSetSpectatingState)
-		g_fnSetSpectatingState = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		g_fnSetSpectatingState = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_Main_C", "SetSpectatingState");
 	if (!g_fnGameStateShowDeathWidget)
-		g_fnGameStateShowDeathWidget = SDK::ABP_GameState_cLeon_C::StaticClass()->GetFunction(
-			"BP_GameState_cLeon_C", "ShowDeathWidget");
+		g_fnGameStateShowDeathWidget = SafeGetClassFunction<SDK::ABP_GameState_LINK_C>(
+			"BP_GameState_LINK_C", "ShowDeathWidget");
 	if (!g_fnKillPlayer)
-		g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnKillPlayer = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
 	if (!g_fnClientRestart)
-		g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
+		g_fnClientRestart = SafeGetClassFunction<SDK::APlayerController>(
+			"PlayerController", "ClientRestart");
 }
 
 void ForceRefreshGodmodeFunctionPointers()
 {
-	g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
-	g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
-	g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
-	g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
-	g_fnDeathEvent = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_Main_C", "DeathEvent");
-	g_fnDeathUIShowAndAwait = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_Main_C", "DeathUIShowAndAwait");
-	g_fnSpawnDeathSplash = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "SpawnDeathSplash");
-	g_fnSetSpectatingState = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_Main_C", "SetSpectatingState");
-	g_fnGameStateShowDeathWidget = SDK::ABP_GameState_cLeon_C::StaticClass()->GetFunction(
-		"BP_GameState_cLeon_C", "ShowDeathWidget");
-	g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
-	g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
+	InitKickFunctionPointers();
 }
 
 static void EnsureGodmodeFunctionPointers()
@@ -418,67 +470,52 @@ struct GodmodeClientRestartParms
 };
 struct GodmodeKillPlayerParms
 {
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter;
-	SDK::ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState;
+	SDK::ABP_FirstPersonCharacter_Main_C* FirstpersonCharacter;
+	SDK::ABP_FirstPersonPlayerState_Online_C* SourcePlayerState;
 };
 
 void InitCombatFunctionPointers()
 {
 	if (!g_fnLineTraceSingle)
-		g_fnLineTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+		g_fnLineTraceSingle = SafeGetClassFunction<SDK::UKismetSystemLibrary>(
 			"KismetSystemLibrary", "LineTraceSingle");
 	if (!g_fnSphereTraceSingle)
-		g_fnSphereTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
+		g_fnSphereTraceSingle = SafeGetClassFunction<SDK::UKismetSystemLibrary>(
 			"KismetSystemLibrary", "SphereTraceSingle");
 	if (!g_fnAntiChatTrace)
-		g_fnAntiChatTrace = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnAntiChatTrace = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "AntiChatTrace");
 	if (!g_fnSpawnShotEffectServer)
-		g_fnSpawnShotEffectServer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnSpawnShotEffectServer = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Server)");
 	if (!g_fnSpawnShotEffectLocal)
-		g_fnSpawnShotEffectLocal = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnSpawnShotEffectLocal = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Local)");
 	if (!g_fnSpawnShotEffectClient)
-		g_fnSpawnShotEffectClient = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnSpawnShotEffectClient = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Client)");
 	if (!g_fnShakeStart)
-		g_fnShakeStart = SDK::UBPC_CameraShake_C::StaticClass()->GetFunction("BPC_CameraShake_C", "ShakeStart");
+		g_fnShakeStart = SafeGetClassFunction<SDK::UBPC_CameraShake_C>("BPC_CameraShake_C", "ShakeStart");
 	if (!g_fnItemShakeStart)
-		g_fnItemShakeStart = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
+		g_fnItemShakeStart = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_Main_C", "ItemShakeStart");
 	if (!g_fnHunterInpActShot)
-		g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnHunterInpActShot = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
+			"BP_FirstPersonCharacter_Main_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_18");
+	if (!g_fnHunterInpActShot)
+		g_fnHunterInpActShot = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
 	if (!g_fnKillPlayer)
-		g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
+		g_fnKillPlayer = SafeGetClassFunction<SDK::ABP_FirstPersonCharacter_Main_C>(
 			"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
 	if (!g_fnClientRestart)
-		g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
+		g_fnClientRestart = SafeGetClassFunction<SDK::APlayerController>(
+			"PlayerController", "ClientRestart");
 }
 
 void ForceRefreshCombatFunctionPointers()
 {
-	g_fnLineTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
-		"KismetSystemLibrary", "LineTraceSingle");
-	g_fnSphereTraceSingle = SDK::UKismetSystemLibrary::StaticClass()->GetFunction(
-		"KismetSystemLibrary", "SphereTraceSingle");
-	g_fnAntiChatTrace = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "AntiChatTrace");
-	g_fnSpawnShotEffectServer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Server)");
-	g_fnSpawnShotEffectLocal = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Local)");
-	g_fnSpawnShotEffectClient = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "SpawnShotEffect(Client)");
-	g_fnShakeStart = SDK::UBPC_CameraShake_C::StaticClass()->GetFunction("BPC_CameraShake_C", "ShakeStart");
-	g_fnItemShakeStart = SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_Main_C", "ItemShakeStart");
-	g_fnHunterInpActShot = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3");
-	g_fnKillPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", "KillPlayer");
-	g_fnClientRestart = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientRestart");
+	InitCombatFunctionPointers();
 }
 
 static void RefreshCombatFunctionPointersIfStale()
@@ -503,21 +540,7 @@ static void RefreshCombatFunctionPointersIfStale()
 
 void ForceRefreshKickFunctionPointers()
 {
-	g_fnKickLINK = SDK::ABP_FirstPersonCharacter_LINK_C::StaticClass()->GetFunction("BP_FirstPersonCharacter_LINK_C", "Kick");
-	g_fnKickOnline = SDK::ABP_FirstPersonPlayerState_Online_C::StaticClass()->GetFunction("BP_FirstPersonPlayerState_Online_C", "Kick");
-	g_fnClientWasKicked = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientWasKicked");
-	g_fnClientReturnToMainMenuWithTextReason = SDK::APlayerController::StaticClass()->GetFunction("PlayerController", "ClientReturnToMainMenuWithTextReason");
-	g_fnOnRepBodyVisibility = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
-	g_fnDeathPlayer = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "DeathPlayer");
-	g_fnRagdoll = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "Ragdoll");
-	g_fnGoToSpectate = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "GoToSpectate");
-	g_fnShowDeathWidget = SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()->GetFunction(
-		"BP_FirstPersonCharacter_cLeon_Character_C", "ShowDeathWidget");
-	ForceRefreshGodmodeFunctionPointers();
+	InitKickFunctionPointers();
 }
 
 static void RefreshKickFunctionPointersIfStale()
@@ -546,6 +569,68 @@ static bool LooksLikeUserPtr(const void* p)
 {
 	const uintptr_t v = reinterpret_cast<uintptr_t>(p);
 	return v >= 0x10000 && v < 0x0000FFFF00000000ull;
+}
+
+static constexpr bool kVerboseProcessEventLogging = false;
+
+static void VerboseLogProcessEvent(SDK::UObject* obj, SDK::UFunction* fn)
+{
+	if (!kVerboseProcessEventLogging)
+		return;
+	if (!fn || !LooksLikeUserPtr(fn))
+		return;
+	if (obj && !LooksLikeUserPtr(obj))
+		obj = nullptr;
+
+	static std::mutex peMutex;
+	static std::unordered_map<uintptr_t, std::string> nameCache;
+	static std::unordered_map<uintptr_t, ULONGLONG> lastHotMs;
+	static std::unordered_map<uintptr_t, bool> loggedCold;
+
+	const uintptr_t fnKey = reinterpret_cast<uintptr_t>(fn);
+	const ULONGLONG now = GetTickCount64();
+
+	std::string fnName;
+	std::string objName;
+	{
+		std::lock_guard<std::mutex> lock(peMutex);
+		auto& cached = nameCache[fnKey];
+		if (cached.empty())
+			cached = fn->GetName();
+		fnName = cached;
+	}
+	if (obj)
+		objName = obj->GetName();
+
+	if (fnName.empty())
+		return;
+
+	if (PhNameLooksInteresting(fnName))
+	{
+		std::lock_guard<std::mutex> lock(peMutex);
+		auto& last = lastHotMs[fnKey];
+		if (now - last < 250)
+			return;
+		last = now;
+		PhLog("[PE] %s.%s obj=%s (%p)\n",
+		      objName.empty() ? "?" : objName.c_str(),
+		      fnName.c_str(),
+		      obj ? "ok" : "null",
+		      obj);
+		return;
+	}
+
+	bool firstCold = false;
+	{
+		std::lock_guard<std::mutex> lock(peMutex);
+		firstCold = loggedCold.emplace(fnKey, true).second;
+	}
+	if (firstCold)
+	{
+		PhLog("[PE] (first) %s.%s\n",
+		      objName.empty() ? "?" : objName.c_str(),
+		      fnName.c_str());
+	}
 }
 
 static void SafeForwardProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
@@ -604,8 +689,8 @@ static SDK::FVector ExtendTraceEnd(const SDK::FVector& start, const SDK::FVector
 static void PatchHitResultForRedirect(SDK::FHitResult& hit, const SDK::FVector& start, const SDK::FVector& end)
 {
 	auto* target = g_combatRedirect.target;
-	auto* leon = target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass())
-		? static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(target)
+	auto* leon = target->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass())
+		? static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(target)
 		: nullptr;
 	SDK::UPrimitiveComponent* meshComp = (leon && leon->Mesh) ? leon->Mesh : nullptr;
 
@@ -651,6 +736,7 @@ static void PatchHitResultForRedirect(SDK::FHitResult& hit, const SDK::FVector& 
 static thread_local bool s_combatTracePending = false;
 static thread_local bool s_silentShotPending = false;
 static thread_local SDK::UObject* s_silentShotObject = nullptr;
+static thread_local bool s_killPlayerInvokedThisShot = false;
 
 static bool IsLocalCombatPawn(const void* object)
 {
@@ -663,10 +749,10 @@ static bool IsLocalCombatPawn(const void* object)
 	return localBody && object == localBody;
 }
 
-static bool InputActionValueActuated(const SDK::FInputActionValue& value, float triggeredTime)
+static bool InputActionValueActuated(const SDK::FInputActionValue& value, float /*triggeredTime*/)
 {
-	if (triggeredTime > 0.0f)
-		return true;
+	// Boolean IA_Shot: only treat a press (>= 0.5) as a shot. Release/completed events
+	// can still carry TriggeredTime and were re-arming redirect without a real shot.
 	const double raw = *reinterpret_cast<const double*>(&value);
 	return raw >= 0.5;
 }
@@ -720,12 +806,14 @@ static bool IsHunterShotFunction(SDK::UObject* object, SDK::UFunction* fn)
 {
 	if (!object || !fn || !IsLocalCombatPawn(object))
 		return false;
-	if (!object->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()))
+	if (!object->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 		return false;
 	if (g_fnHunterInpActShot && fn == g_fnHunterInpActShot)
 		return true;
 
 	static const char* kShotEvents[] = {
+		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_18",
+		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_17",
 		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3",
 		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_2",
 		"InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_4",
@@ -736,7 +824,7 @@ static bool IsHunterShotFunction(SDK::UObject* object, SDK::UFunction* fn)
 				"BP_FirstPersonCharacter_cLeon_Character_Hunter_C", eventName, &g_fnHunterInpActShot))
 			return true;
 		if (FunctionPointerMatchesLive(object, fn,
-				"BP_FirstPersonCharacter_cLeon_Character_C", eventName, &g_fnHunterInpActShot))
+				"BP_FirstPersonCharacter_Main_C", eventName, &g_fnHunterInpActShot))
 			return true;
 	}
 	return false;
@@ -788,6 +876,7 @@ static bool TryArmSilentAimShot(SDK::UObject* pObject, SDK::UFunction* pFunction
 		return false;
 
 	CheatManager::ArmCombatShotRedirect(g_combatRedirect.silentTarget, g_combatRedirect.silentHit);
+	s_killPlayerInvokedThisShot = false;
 	s_silentShotPending = true;
 	s_silentShotObject = pObject;
 	return true;
@@ -803,11 +892,12 @@ static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFuncti
 	if (CombatRedirectLive() && IsKillPlayerFunction(pObject, pFunction) && pParms &&
 		pObject && IsLocalCombatPawn(pObject) &&
 		g_combatRedirect.target &&
-		g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 	{
 		auto* parms = static_cast<GodmodeKillPlayerParms*>(pParms);
 		parms->FirstpersonCharacter =
-			static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(g_combatRedirect.target);
+			static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(g_combatRedirect.target);
+		s_killPlayerInvokedThisShot = true;
 	}
 
 	if (!CombatRedirectLive())
@@ -826,9 +916,9 @@ static void CombatPreProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFuncti
 		auto* parms = static_cast<SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_AntiChatTrace*>(pParms);
 		parms->End = g_combatRedirect.hitLocation;
 		if (!parms->Target &&
-			g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+			g_combatRedirect.target->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 		{
-			parms->Target = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(g_combatRedirect.target);
+			parms->Target = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(g_combatRedirect.target);
 		}
 		return;
 	}
@@ -847,11 +937,19 @@ static void CombatPostProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunct
 	{
 		s_silentShotPending = false;
 		s_silentShotObject = nullptr;
-		if (cfg && cfg->bSilentAim && g_combatRedirect.silentReady && g_combatRedirect.silentTarget &&
+		s_combatTracePending = false;
+
+		CheatManager::DisarmCombatShotRedirect();
+
+		// The game's shot handler may already invoke KillPlayer after our trace patch.
+		// Calling it again on spam-fire was double-killing and could lock out further hits.
+		if (!s_killPlayerInvokedThisShot &&
+			cfg && cfg->bSilentAim && g_combatRedirect.silentReady && g_combatRedirect.silentTarget &&
 			cheat && CheatManager::IsObjectValid(g_combatRedirect.silentTarget))
 		{
 			cheat->ExecuteSilentAimKill(static_cast<SDK::APawn*>(pObject), g_combatRedirect.silentTarget);
 		}
+		s_killPlayerInvokedThisShot = false;
 	}
 
 	if (!s_combatTracePending || !pFunction || !pParms)
@@ -964,17 +1062,8 @@ static bool TryBlockExploitProcessEvent(SDK::UObject* pObject, SDK::UFunction* p
 
 	if (cfg->bForceCharacterVisibility && pFunction == g_fnOnRepBodyVisibility && pObject)
 	{
-		__try
-		{
-			if (CheatManager::IsObjectValid(pObject) &&
-				pObject->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
-			{
-				static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(pObject)->BodyVisibility = true;
-			}
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER)
-		{
-		}
+		// Legacy BodyVisibility hook — no-op on current Main character layout.
+		(void)pObject;
 	}
 
 	if (cfg->bPreventKick &&
@@ -1026,6 +1115,8 @@ static void TryApplyMenuInputLock(CheatManager* mgr, bool menuOpen)
 
 void __fastcall hkProcessEvent(SDK::UObject* pObject, SDK::UFunction* pFunction, void* pParms)
 {
+	VerboseLogProcessEvent(pObject, pFunction);
+
 	if (g_inGameThreadFlush)
 	{
 		if (TryBlockExploitProcessEvent(pObject, pFunction, pParms))
@@ -1380,7 +1471,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain3* pSwapChain, UINT SyncInterval, UINT
 
 	// Sample the controller once per frame; every pad bind (menu, magnet, camo
 	// hotkeys, recorder capture) does edge detection off this single poll.
-	Gamepad::Poll(cfg->bControllerBinds);
+	Gamepad::Poll(cfg->bControllerBinds || CamoUsesPadHotkeys());
 	Gamepad::SetReservedButton(Binds::IsPadBind(cfg->iControllerMenuButton)
 		? Binds::PadMask(cfg->iControllerMenuButton) : 0);
 
@@ -1825,15 +1916,28 @@ DWORD MainThread(HMODULE Module)
 	}
 
 	void* tProcessEvent = reinterpret_cast<void*>(SDK::InSDKUtils::GetImageBase() + SDK::Offsets::ProcessEvent);
-	if (MH_CreateHook(tProcessEvent, hkProcessEvent, (LPVOID*)&oProcessEvent) != MH_OK)
+	if (!ProcessEventHookTargetLooksValid(tProcessEvent))
+	{
+		PhLog("ProcessEvent hook target looks invalid at %p (offset 0x%X)\n",
+			tProcessEvent, SDK::Offsets::ProcessEvent);
+	}
+	else if (MH_CreateHook(tProcessEvent, hkProcessEvent, (LPVOID*)&oProcessEvent) != MH_OK)
 	{
 		PhLog("Failed to hook ProcessEvent!\n");
 	}
 
 	MH_EnableHook(MH_ALL_HOOKS);
-	InitKickFunctionPointers();
-	InitCombatFunctionPointers();
-	ForceRefreshGodmodeFunctionPointers();
+	PhLog("[INIT] ImageBase=%p ProcessEvent=%p (offset 0x%X)\n",
+	      reinterpret_cast<void*>(SDK::InSDKUtils::GetImageBase()),
+	      tProcessEvent,
+	      SDK::Offsets::ProcessEvent);
+	PhLog("[INIT] GObjects=0x%X GNames=0x%X GWorld=0x%X\n",
+	      SDK::Offsets::GObjects,
+	      SDK::Offsets::GNames,
+	      SDK::Offsets::GWorld);
+	PhLog("[INIT] Hooks enabled: ExecuteCommandLists Present ResizeBuffers ProcessEvent\n");
+	// Resolve UFunction pointers lazily on the game thread (Refresh*IfStale in TryRunGameThreadInit).
+	// Eager StaticClass lookups here crashed on the new Shipping build when legacy BP classes are absent.
 
 	// poll for the END key to be pressed to unload the DLL
 	while (bRunning)

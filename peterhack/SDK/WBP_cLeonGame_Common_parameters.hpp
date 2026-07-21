@@ -14,6 +14,15 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_cLeonGame_Common.WBP_cLeonGame_Common_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeonGame_Common_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeonGame_Common_C_PreConstruct;
+
 // Function WBP_cLeonGame_Common.WBP_cLeonGame_Common_C.ExecuteUbergraph_WBP_cLeonGame_Common
 // 0x0078 (0x0078 - 0x0000)
 struct WBP_cLeonGame_Common_C_ExecuteUbergraph_WBP_cLeonGame_Common final
@@ -47,15 +56,6 @@ public:
 	int32                                         CallFunc_Array_Add_ReturnValue;                    // 0x0074(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_cLeonGame_Common_C_ExecuteUbergraph_WBP_cLeonGame_Common;
-
-// Function WBP_cLeonGame_Common.WBP_cLeonGame_Common_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeonGame_Common_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeonGame_Common_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

@@ -11,9 +11,9 @@
 #include "Basic.hpp"
 
 #include "Engine_structs.hpp"
-#include "EN_InputJudgementType_structs.hpp"
-#include "UINavigation_structs.hpp"
 #include "ST_SimpleSaveDatas_structs.hpp"
+#include "UINavigation_structs.hpp"
+#include "EN_InputJudgementType_structs.hpp"
 
 
 SDK_NAMESPACE_START

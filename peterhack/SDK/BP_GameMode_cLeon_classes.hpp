@@ -10,8 +10,8 @@
 
 #include "Basic.hpp"
 
-#include "Engine_structs.hpp"
 #include "BP_FirstPersonGameMode_V2_classes.hpp"
+#include "Engine_structs.hpp"
 #include "EN_cLeonBodyType_structs.hpp"
 #include "EN_cLeonGameMode_structs.hpp"
 
@@ -53,62 +53,62 @@ public:
 	int32                                         ChickenAnswerTime;                                 // 0x0440(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void BodyChange(EN_cLeonBodyType TargetBody, class ABP_PlayerController_cLeon_C* TargetController, const struct FTransform& OverrideSpawnTransform, bool KeepBody, bool BodyVisibility, class ABP_FirstPersonCharacter_cLeon_Character_C** CreateCharacter);
-	void ChangeSpectateBody_Chicken_(bool KeepBody);
-	void CheckAnswerTimeMinus();
-	void ChickenSearchStop();
-	void ChickenTeleport_BackHome();
-	void ChickenTeleport_GotoMap();
-	void ControllerArrayToPlayerState(TArray<class ABP_PlayerController_cLeon_C*>& PlayerController, TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>* PlayerStateArray);
-	void CountDownStart();
-	void ExecuteUbergraph_BP_GameMode_cLeon(int32 EntryPoint);
-	void GameEnd();
-	void GameEndCheck();
-	void GameStart();
-	void GameStartWait();
-	void GameStateCheck(bool* IsGameEnd, class FName* WinnerRole);
-	void GameTimerClear();
-	void GetCheckAnswersTime(int32* CheckAnswersTime_0);
-	void GetChickenWinnerPlayer(class ABP_FirstPersonPlayerState_Online_cLeon_C** WinnerPlayerState);
-	void GetDoubleWinnerPlayer(class ABP_FirstPersonCharacter_cLeon_Character_Hunter_C** WinnerPlayerActor);
-	void GetGameModeIndex(int32* GameModeIndex_0);
-	void GetGameTime(int32* TimerDefault_0);
-	void GetHunterWaitTime(int32* HunterWaitTime_0);
-	void GetMapIndex(int32* SelectMapIndex, class UBP_cLeonMapData_C** SelectMapDatas, int32* GameMapIndex, class UBP_cLeonMapData_C** GameMapDatas);
-	void GetMaxBulletNum(int32* MaxBulletValue);
-	void GetMaxHunterNum(int32* MaxHunterNum_0);
-	void GetRandomLiveSurvivor(class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C** SearchTargetSurvivor);
-	void HunterWaitTimerMinus();
-	void IsEndGame();
-	void K2_OnLogout(class AController* ExitingController);
-	void K2_OnRestartPlayer(class AController* NewPlayer);
-	void K2_PostLogin(class APlayerController* NewPlayer);
-	void KillPlayer(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState);
-	void ModComplete();
-	void ReceiveBeginPlay();
-	void RemoveGamePlayer(bool IsLogout, class AController* Controller);
-	void RoleTeleportDouble_1();
-	void RoleTeleportDouble_2();
-	void RoleTeleportSurvivor(bool BodyVisibility);
-	void SetCheckAnswersTime(int32 CheckAnswersTime_0);
-	void SetFoundTarget();
-	void SetGameModeIndex(int32 GameModeIndex_0);
-	void SetGameTime(int32 TimerDefault_0);
-	void SetHunterWaitTime(int32 HunterWaitTime_0);
-	void SetMapIndex(int32 MapIndex);
-	void SetMaxHunterNum(int32 MaxHunterNum_0);
-	void SetRole_Basic_();
-	void SetRole_Double_();
-	void StartCheckAnswers(bool IsHunterWin);
-	void StartGameCheck();
-	void SurvivorToHunter(class ABP_PlayerController_cLeon_C* TargetController);
-	void TeleportHunter();
-	void TeleportLobby();
-	void TimerMinus();
-	void TimerMinusChickenPhase_1();
-	void TimerMinusChickenPhase_2();
-	void TimerMinusChickenPhase_3();
 	void WinnerCheck();
+	void TimerMinusChickenPhase_3();
+	void TimerMinusChickenPhase_2();
+	void TimerMinusChickenPhase_1();
+	void TimerMinus();
+	void TeleportLobby();
+	void TeleportHunter();
+	void SurvivorToHunter(class ABP_PlayerController_cLeon_C* TargetController);
+	void StartGameCheck();
+	void StartCheckAnswers(bool IsHunterWin);
+	void SetRole_Double_();
+	void SetRole_Basic_();
+	void SetMaxHunterNum(int32 MaxHunterNum);
+	void SetMapIndex(int32 MapIndex);
+	void SetHunterWaitTime(int32 HunterWaitTime);
+	void SetGameTime(int32 TimerDefault);
+	void SetGameModeIndex(int32 GameModeIndex);
+	void SetFoundTarget();
+	void SetCheckAnswersTime(int32 CheckAnswersTime);
+	void RoleTeleportSurvivor(bool BodyVisibility);
+	void RoleTeleportDouble_2();
+	void RoleTeleportDouble_1();
+	void RemoveGamePlayer(bool IsLogout, class AController* Controller);
+	void ReceiveBeginPlay();
+	void ModComplete();
+	void KillPlayer(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState);
+	void K2_PostLogin(class APlayerController* NewPlayer_K2_PostLogin);
+	void K2_OnRestartPlayer(class AController* NewPlayer_K2_OnRestartPlayer);
+	void K2_OnLogout(class AController* ExitingController_K2_OnLogout);
+	void IsEndGame();
+	void HunterWaitTimerMinus();
+	void GetRandomLiveSurvivor(class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C** SearchTargetSurvivor);
+	void GetMaxHunterNum(int32* MaxHunterNum);
+	void GetMaxBulletNum(int32* MaxBulletValue);
+	void GetMapIndex(int32* SelectMapIndex, class UBP_cLeonMapData_C** SelectMapDatas, int32* GameMapIndex, class UBP_cLeonMapData_C** GameMapDatas);
+	void GetHunterWaitTime(int32* HunterWaitTime);
+	void GetGameTime(int32* TimerDefault);
+	void GetGameModeIndex(int32* GameModeIndex);
+	void GetDoubleWinnerPlayer(class ABP_FirstPersonCharacter_cLeon_Character_Hunter_C** WinnerPlayerActor);
+	void GetChickenWinnerPlayer(class ABP_FirstPersonPlayerState_Online_cLeon_C** WinnerPlayerState);
+	void GetCheckAnswersTime(int32* CheckAnswersTime);
+	void GameTimerClear();
+	void GameStateCheck(bool* IsGameEnd, class FName* WinnerRole);
+	void GameStartWait();
+	void GameStart();
+	void GameEndCheck();
+	void GameEnd();
+	void ExecuteUbergraph_BP_GameMode_cLeon(int32 EntryPoint);
+	void CountDownStart();
+	void ControllerArrayToPlayerState(TArray<class ABP_PlayerController_cLeon_C*>& PlayerController, TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>* PlayerStateArray);
+	void ChickenTeleport_GotoMap();
+	void ChickenTeleport_BackHome();
+	void ChickenSearchStop();
+	void CheckAnswerTimeMinus();
+	void ChangeSpectateBody_Chicken_(bool KeepBody);
+	void BodyChange(EN_cLeonBodyType TargetBody, class ABP_PlayerController_cLeon_C* TargetController, const struct FTransform& OverrideSpawnTransform, bool KeepBody, bool BodyVisibility, class ABP_FirstPersonCharacter_cLeon_Character_C** CreateCharacter);
 
 public:
 	static class UClass* StaticClass()

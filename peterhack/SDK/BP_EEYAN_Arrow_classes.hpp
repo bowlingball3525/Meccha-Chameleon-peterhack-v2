@@ -26,9 +26,9 @@ public:
 	class UWBP_SelectEEYAN_C*                     MyWidget;                                          // 0x02B8(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, InstancedReference, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void DeleteCall();
-	void ExecuteUbergraph_BP_EEYAN_Arrow(int32 EntryPoint);
 	void ReceiveBeginPlay();
+	void ExecuteUbergraph_BP_EEYAN_Arrow(int32 EntryPoint);
+	void DeleteCall();
 
 public:
 	static class UClass* StaticClass()

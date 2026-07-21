@@ -28,9 +28,9 @@ public:
 	class FString                                 SurvivorName;                                      // 0x0368(0x0010)(Edit, BlueprintVisible, ZeroConstructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void AnimationEnd();
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void ExecuteUbergraph_WBP_KillLog(int32 EntryPoint);
-	void PreConstruct(bool IsDesignTime);
+	void AnimationEnd();
 
 public:
 	static class UClass* StaticClass()

@@ -118,9 +118,9 @@ void UUltraDynamicSky_Functions_C::Get_Day_of_the_Week_·_𝖴𝖣𝖲(class UOb
 // (Static, Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure)
 // Parameters:
 // class UObject*                          __WorldContext                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-// double*                                 Time_of_Day                                            (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double*                                 Time_Of_Day                                            (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UUltraDynamicSky_Functions_C::Get_Time_of_Day_·_𝖴𝖣𝖲(class UObject* __WorldContext, double* Time_of_Day)
+void UUltraDynamicSky_Functions_C::Get_Time_of_Day_·_𝖴𝖣𝖲(class UObject* __WorldContext, double* Time_Of_Day)
 {
 	static class UFunction* Func = nullptr;
 
@@ -133,8 +133,8 @@ void UUltraDynamicSky_Functions_C::Get_Time_of_Day_·_𝖴𝖣𝖲(class UObject
 
 	GetDefaultObj()->ProcessEvent(Func, &Parms);
 
-	if (Time_of_Day != nullptr)
-		*Time_of_Day = Parms.Time_of_Day;
+	if (Time_Of_Day != nullptr)
+		*Time_Of_Day = Parms.Time_Of_Day;
 }
 
 
@@ -267,10 +267,10 @@ void UUltraDynamicSky_Functions_C::Set_Date_and_Time_·_𝖴𝖣𝖲(const struc
 // Function UltraDynamicSky_Functions.UltraDynamicSky_Functions_C.Set Time of Day · 𝖴𝖣𝖲
 // (Static, Public, BlueprintCallable, BlueprintEvent)
 // Parameters:
-// double                                  Time_of_Day                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Time_Of_Day                                            (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // class UObject*                          __WorldContext                                         (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 
-void UUltraDynamicSky_Functions_C::Set_Time_of_Day_·_𝖴𝖣𝖲(double Time_of_Day, class UObject* __WorldContext)
+void UUltraDynamicSky_Functions_C::Set_Time_of_Day_·_𝖴𝖣𝖲(double Time_Of_Day, class UObject* __WorldContext)
 {
 	static class UFunction* Func = nullptr;
 
@@ -279,7 +279,7 @@ void UUltraDynamicSky_Functions_C::Set_Time_of_Day_·_𝖴𝖣𝖲(double Time_o
 
 	Params::UltraDynamicSky_Functions_C_Set_Time_of_Day_·_𝖴𝖣𝖲 Parms{};
 
-	Parms.Time_of_Day = Time_of_Day;
+	Parms.Time_Of_Day = Time_Of_Day;
 	Parms.__WorldContext = __WorldContext;
 
 	GetDefaultObj()->ProcessEvent(Func, &Parms);

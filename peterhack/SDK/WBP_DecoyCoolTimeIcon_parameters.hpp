@@ -14,6 +14,24 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_DecoyCoolTimeIcon.WBP_DecoyCoolTimeIcon_C.SetCoolTime
+// 0x0008 (0x0008 - 0x0000)
+struct WBP_DecoyCoolTimeIcon_C_SetCoolTime final
+{
+public:
+	double                                        NormalizeValue;                                    // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_DecoyCoolTimeIcon_C_SetCoolTime;
+
+// Function WBP_DecoyCoolTimeIcon.WBP_DecoyCoolTimeIcon_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_DecoyCoolTimeIcon_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_DecoyCoolTimeIcon_C_PreConstruct;
+
 // Function WBP_DecoyCoolTimeIcon.WBP_DecoyCoolTimeIcon_C.ExecuteUbergraph_WBP_DecoyCoolTimeIcon
 // 0x0020 (0x0020 - 0x0000)
 struct WBP_DecoyCoolTimeIcon_C_ExecuteUbergraph_WBP_DecoyCoolTimeIcon final
@@ -27,24 +45,6 @@ public:
 	float                                         CallFunc_SetScalarParameterValue_Value_ImplicitCast; // 0x0018(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_DecoyCoolTimeIcon_C_ExecuteUbergraph_WBP_DecoyCoolTimeIcon;
-
-// Function WBP_DecoyCoolTimeIcon.WBP_DecoyCoolTimeIcon_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_DecoyCoolTimeIcon_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_DecoyCoolTimeIcon_C_PreConstruct;
-
-// Function WBP_DecoyCoolTimeIcon.WBP_DecoyCoolTimeIcon_C.SetCoolTime
-// 0x0008 (0x0008 - 0x0000)
-struct WBP_DecoyCoolTimeIcon_C_SetCoolTime final
-{
-public:
-	double                                        NormalizeValue;                                    // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_DecoyCoolTimeIcon_C_SetCoolTime;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

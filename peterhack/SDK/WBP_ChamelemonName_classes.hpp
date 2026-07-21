@@ -28,11 +28,11 @@ public:
 	class ABP_GameState_cLeon_C*                  As_BP_Game_State_C_Leon;                           // 0x0360(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnTemplate, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void CheckEvent();
-	void Construct();
-	void ExecuteUbergraph_WBP_ChamelemonName(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void NumUpdate();
-	void PreConstruct(bool IsDesignTime);
+	void ExecuteUbergraph_WBP_ChamelemonName(int32 EntryPoint);
+	void Construct();
+	void CheckEvent();
 
 public:
 	static class UClass* StaticClass()

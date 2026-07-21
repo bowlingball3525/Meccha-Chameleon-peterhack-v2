@@ -10,8 +10,8 @@
 
 #include "Basic.hpp"
 
-#include "ST_cLeonMapData_structs.hpp"
 #include "Engine_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 #include "UMG_structs.hpp"
 #include "UMG_classes.hpp"
 #include "SlateCore_structs.hpp"
@@ -28,20 +28,20 @@ public:
 	class UWBP_RandomToggle_C*                    WBP_RandomToggle;                                  // 0x0348(0x0008)(BlueprintVisible, ExportObject, BlueprintReadOnly, ZeroConstructor, DisableEditOnInstance, InstancedReference, RepSkip, NoDestructor, PersistentInstance, HasGetValueTypeHash)
 	class UWBP_MapContents_C*                     WBP_MapContents;                                   // 0x0350(0x0008)(BlueprintVisible, ExportObject, BlueprintReadOnly, ZeroConstructor, DisableEditOnInstance, InstancedReference, RepSkip, NoDestructor, PersistentInstance, HasGetValueTypeHash)
 	TMulticastInlineDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, const struct FST_cLeonMapData& Mapdata)> SelectMap; // 0x0358(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
-	TMulticastInlineDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, bool RandomState_0)> RandomStateChange; // 0x0368(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
+	TMulticastInlineDelegate<void(class UWBP_MapContentsWithRandom_C* SelfWidget, bool RandomState)> RandomStateChange; // 0x0368(0x0010)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, BlueprintAssignable, BlueprintCallable)
 	struct FST_cLeonMapData                       C_Leon_Map_Data;                                   // 0x0378(0x0028)(Edit, BlueprintVisible, ExposeOnSpawn, HasGetValueTypeHash)
 	bool                                          RandomState;                                       // 0x03A0(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, ExposeOnSpawn, HasGetValueTypeHash)
 	uint8                                         Pad_3A1[0x3];                                      // 0x03A1(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
 	struct FSlateColor                            Text_Color;                                        // 0x03A4(0x0014)(Edit, BlueprintVisible, ExposeOnSpawn)
 
 public:
-	void BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature(class UWBP_MapContents_C* SelfWidget, const struct FST_cLeonMapData& Mapdata);
-	void BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature(bool NewState);
-	void Construct();
-	void ExecuteUbergraph_WBP_MapContentsWithRandom(int32 EntryPoint);
-	void ForceUpdate();
-	void PreConstruct(bool IsDesignTime);
 	void SelectUpdate(bool State);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	void ForceUpdate();
+	void ExecuteUbergraph_WBP_MapContentsWithRandom(int32 EntryPoint);
+	void Construct();
+	void BndEvt__WBP_MapContentsWithRandom_WBP_RandomToggle_K2Node_ComponentBoundEvent_0_UpdateRandomState__DelegateSignature(bool NewState);
+	void BndEvt__WBP_MapContentsWithRandom_WBP_MapContents_K2Node_ComponentBoundEvent_1_SelectMap__DelegateSignature(class UWBP_MapContents_C* SelfWidget, const struct FST_cLeonMapData& Mapdata);
 
 public:
 	static class UClass* StaticClass()

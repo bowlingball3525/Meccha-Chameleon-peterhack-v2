@@ -82,6 +82,15 @@ public:
 		std::string materialFailure;
 		double materialMetallic = -1.0;
 		double materialRoughness = -1.0;
+		double materialEmissive = -1.0;
+		std::string paintTargetChannel;
+		int packedWireChannelByte = -1;
+		int packedWireStrokeBytes = -1;
+		int bridgeWireRevision = -1;
+		std::string localRouteMode;
+		int localVisualSyncDegraded = -1;
+		std::string lastFailure;
+		int serverStrokesSent = -1;
 	};
 
 	CamoDiagnostics Diagnostics() const;
@@ -100,6 +109,14 @@ public:
 		bool terminal = false; // stage is a done/failed/cancelled marker
 		std::string stage;
 		std::string message;
+		int wireChannelByte = -1;
+		int wireStrokeBytes = -1;
+		int serverBatchLimit = -1;
+		int serverStrokesSent = -1;
+		int localBatchLimit = -1;
+		int batchRequested = -1;
+		int paintTargetChannelValue = -1;
+		std::string paintTargetChannel;
 	};
 
 	CamoProgress ReadProgress() const;
@@ -153,6 +170,8 @@ private:
 
 	std::atomic<bool> bridgeUsesHello_{ false };
 
+	std::atomic<int> bridgeWireEncodingRevision_{ -1 };
+
 	std::atomic<ULONGLONG> lastBridgePingOkMs_{ 0 };
 
 
@@ -195,6 +214,8 @@ private:
 
 	bool BridgeModuleLoaded() const;
 
+	bool TryReloadBridgeModuleIfDiskUpdated();
+
 	bool PingBridge(int timeoutMs = 1500);
 
 	bool TcpRequest(const std::string& requestJson, std::string& responseOut, int timeoutMs);
@@ -208,6 +229,8 @@ private:
 	void UpdateDiagnostics(const std::string& response, CamoJobKind kind, bool ok);
 
 	void DrawDiagnostics();
+	void RefreshDiagnosticsFromProgress();
+	void SeedDiagnosticsForJob(CamoJobKind kind);
 
 	void SetStatus(const std::string& text);
 

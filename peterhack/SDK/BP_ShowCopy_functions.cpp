@@ -16,99 +16,47 @@
 
 SDK_NAMESPACE_START
 
-// Function BP_ShowCopy.BP_ShowCopy_C.CopyPreset
+// Function BP_ShowCopy.BP_ShowCopy_C.Update
 // (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C*Survivor                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 
-void ABP_ShowCopy_C::CopyPreset(class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* Survivor)
+void ABP_ShowCopy_C::Update()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "CopyPreset");
+		Func = Class->GetFunction("BP_ShowCopy_C", "Update");
 
-	Params::BP_ShowCopy_C_CopyPreset Parms{};
-
-	Parms.Survivor = Survivor;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function BP_ShowCopy.BP_ShowCopy_C.ExecuteUbergraph_BP_ShowCopy
-// (Final, UbergraphFunction, HasDefaults)
-// Parameters:
-// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function BP_ShowCopy.BP_ShowCopy_C.ReceiveBeginPlay
+// (Event, Protected, BlueprintEvent)
 
-void ABP_ShowCopy_C::ExecuteUbergraph_BP_ShowCopy(int32 EntryPoint)
+void ABP_ShowCopy_C::ReceiveBeginPlay()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "ExecuteUbergraph_BP_ShowCopy");
+		Func = Class->GetFunction("BP_ShowCopy_C", "ReceiveBeginPlay");
 
-	Params::BP_ShowCopy_C_ExecuteUbergraph_BP_ShowCopy Parms{};
-
-	Parms.EntryPoint = EntryPoint;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function BP_ShowCopy.BP_ShowCopy_C.OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8
+// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8
 // (BlueprintCallable, BlueprintEvent)
 // Parameters:
 // class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_ShowCopy_C::OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
+void ABP_ShowCopy_C::OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8");
+		Func = Class->GetFunction("BP_ShowCopy_C", "OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8");
 
-	Params::BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
-
-	Parms.NotifyName = NotifyName;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void ABP_ShowCopy_C::OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8");
-
-	Params::BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
-
-	Parms.NotifyName = NotifyName;
-
-	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function BP_ShowCopy.BP_ShowCopy_C.OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8
-// (BlueprintCallable, BlueprintEvent)
-// Parameters:
-// class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-
-void ABP_ShowCopy_C::OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8");
-
-	Params::BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
+	Params::BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
 
 	Parms.NotifyName = NotifyName;
 
@@ -136,19 +84,19 @@ void ABP_ShowCopy_C::OnNotifyBegin_B4C244954CE7898DEF0913A0CF8A49C8(class FName 
 }
 
 
-// Function BP_ShowCopy.BP_ShowCopy_C.OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8
+// Function BP_ShowCopy.BP_ShowCopy_C.OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8
 // (BlueprintCallable, BlueprintEvent)
 // Parameters:
 // class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_ShowCopy_C::OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
+void ABP_ShowCopy_C::OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8");
+		Func = Class->GetFunction("BP_ShowCopy_C", "OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8");
 
-	Params::BP_ShowCopy_C_OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
+	Params::BP_ShowCopy_C_OnInterrupted_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
 
 	Parms.NotifyName = NotifyName;
 
@@ -156,31 +104,83 @@ void ABP_ShowCopy_C::OnNotifyEnd_B4C244954CE7898DEF0913A0CF8A49C8(class FName No
 }
 
 
-// Function BP_ShowCopy.BP_ShowCopy_C.ReceiveBeginPlay
-// (Event, Protected, BlueprintEvent)
+// Function BP_ShowCopy.BP_ShowCopy_C.OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_ShowCopy_C::ReceiveBeginPlay()
+void ABP_ShowCopy_C::OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "ReceiveBeginPlay");
+		Func = Class->GetFunction("BP_ShowCopy_C", "OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::BP_ShowCopy_C_OnCompleted_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
+
+	Parms.NotifyName = NotifyName;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function BP_ShowCopy.BP_ShowCopy_C.Update
+// Function BP_ShowCopy.BP_ShowCopy_C.OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8
 // (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// class FName                             NotifyName                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void ABP_ShowCopy_C::Update()
+void ABP_ShowCopy_C::OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8(class FName NotifyName)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_ShowCopy_C", "Update");
+		Func = Class->GetFunction("BP_ShowCopy_C", "OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::BP_ShowCopy_C_OnBlendOut_B4C244954CE7898DEF0913A0CF8A49C8 Parms{};
+
+	Parms.NotifyName = NotifyName;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function BP_ShowCopy.BP_ShowCopy_C.ExecuteUbergraph_BP_ShowCopy
+// (Final, UbergraphFunction, HasDefaults)
+// Parameters:
+// int32                                   EntryPoint                                             (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+
+void ABP_ShowCopy_C::ExecuteUbergraph_BP_ShowCopy(int32 EntryPoint)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_ShowCopy_C", "ExecuteUbergraph_BP_ShowCopy");
+
+	Params::BP_ShowCopy_C_ExecuteUbergraph_BP_ShowCopy Parms{};
+
+	Parms.EntryPoint = EntryPoint;
+
+	UObject::ProcessEvent(Func, &Parms);
+}
+
+
+// Function BP_ShowCopy.BP_ShowCopy_C.CopyPreset
+// (BlueprintCallable, BlueprintEvent)
+// Parameters:
+// class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C*Survivor                                               (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
+
+void ABP_ShowCopy_C::CopyPreset(class ABP_FirstPersonCharacter_cLeon_Character_Survivor_C* Survivor)
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_ShowCopy_C", "CopyPreset");
+
+	Params::BP_ShowCopy_C_CopyPreset Parms{};
+
+	Parms.Survivor = Survivor;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 

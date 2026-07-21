@@ -10,29 +10,29 @@
 
 #include "Basic.hpp"
 
+#include "RadialStorm_CoverageBrush_structs.hpp"
+#include "CoreUObject_structs.hpp"
+#include "UDS_SkyMode_structs.hpp"
 #include "UDS_RenderingFeatureLevel_structs.hpp"
+#include "UDS_SkyLightMode_structs.hpp"
+#include "UDS_Post_Process_Stage_structs.hpp"
+#include "UDS_Project_Mode_structs.hpp"
 #include "Engine_structs.hpp"
 #include "Engine_classes.hpp"
-#include "UDS_Post_Process_Stage_structs.hpp"
-#include "UDS_RunContext_structs.hpp"
-#include "UDS_SkyMode_structs.hpp"
 #include "UDS_ColorMode_structs.hpp"
-#include "CoreUObject_structs.hpp"
-#include "RadialStorm_CoverageBrush_structs.hpp"
-#include "UDS_Project_Mode_structs.hpp"
-#include "UDS_SkyLightMode_structs.hpp"
 #include "UDS_VolRT_Mode_structs.hpp"
 #include "UDS_CityPresets_structs.hpp"
 #include "UDS_PropertyType_structs.hpp"
 #include "UDS_LensFlareType_structs.hpp"
 #include "UDS_FogColorMode_structs.hpp"
-#include "UDS_Space_Planet_structs.hpp"
 #include "UDS_CachedProperties_structs.hpp"
-#include "UDS_DateAndTime_structs.hpp"
-#include "UDS_Modifier_Float_Property_structs.hpp"
-#include "UDS_Modifier_Color_Property_structs.hpp"
-#include "UDS_Cache_Group_structs.hpp"
 #include "UDS_Planet_Lightsource_structs.hpp"
+#include "UDS_Space_Planet_structs.hpp"
+#include "UDS_DateAndTime_structs.hpp"
+#include "UDS_RunContext_structs.hpp"
+#include "UDS_Modifier_Color_Property_structs.hpp"
+#include "UDS_Modifier_Float_Property_structs.hpp"
+#include "UDS_Cache_Group_structs.hpp"
 #include "UDS_Space_Parent_structs.hpp"
 
 
@@ -68,7 +68,7 @@ public:
 	double                                        Cloud_Wisps_Opacity__Clear_;                       // 0x0358(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, Interp, NoDestructor, HasGetValueTypeHash)
 	bool                                          Refresh_Settings;                                  // 0x0360(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_361[0x7];                                      // 0x0361(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-	double                                        Time_of_Day;                                       // 0x0368(0x0008)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, Interp, NoDestructor, HasGetValueTypeHash)
+	double                                        Time_Of_Day;                                       // 0x0368(0x0008)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, Interp, NoDestructor, HasGetValueTypeHash)
 	EUDS_SkyMode                                  Sky_Mode;                                          // 0x0370(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	EUDS_ColorMode                                Color_Mode;                                        // 0x0371(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	EUDS_Project_Mode                             Project_Mode;                                      // 0x0372(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
@@ -997,7 +997,7 @@ public:
 	void Apply_Starting_Modifiers();
 	void Apply_System_Time();
 	void Apply_Volumetric_Mode(EUDS_VolRT_Mode Mode);
-	void Approximate_Real_Sun_Moon_and_Stars(double Time_of_Day_0, bool Only_Calculate_Sun, struct FVector* Sun_Vector, struct FVector* Moon_Vector, double* Real_Phase, struct FVector* Phase_Alignment, struct FLinearColor* Celestial_Yaw, double* Celestial_Orbit);
+	void Approximate_Real_Sun_Moon_and_Stars(double Time_Of_Day_0, bool Only_Calculate_Sun, struct FVector* Sun_Vector, struct FVector* Moon_Vector, double* Real_Phase, struct FVector* Phase_Alignment, struct FLinearColor* Celestial_Yaw, double* Celestial_Orbit);
 	void Cache_Color(EUDS_CachedProperties Property, const struct FLinearColor& Set_Value, double Change_Tolerance);
 	void Cache_Float(EUDS_CachedProperties Property, double Set_Value, double Change_Tolerance);
 	void Cache_Global_Fog_Material_Properties();

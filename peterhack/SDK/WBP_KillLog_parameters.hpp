@@ -16,6 +16,15 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_KillLog.WBP_KillLog_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_KillLog_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_KillLog_C_PreConstruct;
+
 // Function WBP_KillLog.WBP_KillLog_C.ExecuteUbergraph_WBP_KillLog
 // 0x0078 (0x0078 - 0x0000)
 struct WBP_KillLog_C_ExecuteUbergraph_WBP_KillLog final
@@ -33,15 +42,6 @@ public:
 	struct FWidgetAnimationHandle                 CallFunc_PlayAnimation_ReturnValue;                // 0x0068(0x0010)(NoDestructor, ContainsInstancedReference, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_KillLog_C_ExecuteUbergraph_WBP_KillLog;
-
-// Function WBP_KillLog.WBP_KillLog_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_KillLog_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_KillLog_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

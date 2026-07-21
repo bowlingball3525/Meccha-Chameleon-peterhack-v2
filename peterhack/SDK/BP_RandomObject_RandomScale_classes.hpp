@@ -31,15 +31,15 @@ public:
 	TMap<class AActor*, struct FVector>           DefaultScale;                                      // 0x0348(0x0050)(Edit, BlueprintVisible, DisableEditOnTemplate, DisableEditOnInstance)
 
 public:
-	void CheckLoop();
-	void ExecuteUbergraph_BP_RandomObject_RandomScale(int32 EntryPoint);
-	void IndexUpdate();
-	void OnRep_CurrentIndex();
-	void OnRep_Seed();
-	void ReceiveBeginPlay();
-	void SetIndex(bool* Error);
-	void SpawnSet();
 	void UserConstructionScript();
+	void SpawnSet();
+	void SetIndex(bool* Error);
+	void ReceiveBeginPlay();
+	void OnRep_Seed();
+	void OnRep_CurrentIndex();
+	void IndexUpdate();
+	void ExecuteUbergraph_BP_RandomObject_RandomScale(int32 EntryPoint);
+	void CheckLoop();
 
 public:
 	static class UClass* StaticClass()

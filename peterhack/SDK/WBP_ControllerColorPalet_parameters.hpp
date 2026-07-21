@@ -16,54 +16,98 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.AddSliderValue
-// 0x0008 (0x0008 - 0x0000)
-struct WBP_ControllerColorPalet_C_AddSliderValue final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.UpdateDefaultValue
+// 0x0028 (0x0028 - 0x0000)
+struct WBP_ControllerColorPalet_C_UpdateDefaultValue final
 {
 public:
-	double                                        Value;                                             // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           DefaultColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Metallic;                                          // 0x0010(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Roughness;                                         // 0x0018(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Emissive;                                          // 0x0020(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_AddSliderValue;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_UpdateDefaultValue;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature
-// 0x0014 (0x0014 - 0x0000)
-struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.SelectSlide
+// 0x0004 (0x0004 - 0x0000)
+struct WBP_ControllerColorPalet_C_SelectSlide final
 {
 public:
-	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         AddValue;                                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_SelectSlide;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature
-// 0x0014 (0x0014 - 0x0000)
-struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_ControllerColorPalet_C_PreConstruct final
 {
 public:
-	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_PreConstruct;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature
-// 0x0014 (0x0014 - 0x0000)
-struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.ExecuteUbergraph_WBP_ControllerColorPalet
+// 0x0168 (0x0168 - 0x0000)
+struct WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet final
 {
 public:
-	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         EntryPoint;                                        // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Array_Index_Variable;                     // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Subtract_IntInt_ReturnValue;              // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_Event_IsDesignTime;                         // 0x0010(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_11[0x3];                                       // 0x0011(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         K2Node_CustomEvent_AddValue;                       // 0x0014(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	class UWBP_ControllerGradientSlider_C*        CallFunc_Array_Get_Item;                           // 0x0018(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x0020(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_WrapSnap_Integer__ReturnValue;            // 0x0024(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         CallFunc_Array_Length_ReturnValue_1;               // 0x0028(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_5;         // 0x002C(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall_5;           // 0x003C(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_3D[0x3];                                       // 0x003D(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	double                                        K2Node_CustomEvent_Value;                          // 0x0040(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           CallFunc_RGBLinearToHSV_ReturnValue;               // 0x0048(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_BreakColor_R;                             // 0x0058(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_BreakColor_G;                             // 0x005C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_BreakColor_B;                             // 0x0060(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_BreakColor_A;                             // 0x0064(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        CallFunc_Divide_DoubleDouble_ReturnValue;          // 0x0068(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           K2Node_CustomEvent_DefaultColor;                   // 0x0070(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        K2Node_CustomEvent_Metallic;                       // 0x0080(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        K2Node_CustomEvent_Roughness;                      // 0x0088(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        K2Node_CustomEvent_Emissive;                       // 0x0090(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_4;         // 0x0098(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall_4;           // 0x00A8(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_A9[0x3];                                       // 0x00A9(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_3;         // 0x00AC(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall_3;           // 0x00BC(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_BD[0x3];                                       // 0x00BD(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_2;         // 0x00C0(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall_2;           // 0x00D0(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_D1[0x3];                                       // 0x00D1(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_1;         // 0x00D4(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall_1;           // 0x00E4(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          CallFunc_EqualEqual_IntInt_ReturnValue;            // 0x00E5(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_E6[0x2];                                       // 0x00E6(0x0002)(Fixing Size After Last Property [ Dumper-7 ])
+	double                                        CallFunc_Multiply_DoubleDouble_ReturnValue;        // 0x00E8(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           CallFunc_MakeColor_ReturnValue;                    // 0x00F0(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           CallFunc_HSVToRGBLinear_ReturnValue;               // 0x0100(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0110(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0114(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_115[0x3];                                      // 0x0115(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         CallFunc_Add_IntInt_ReturnValue_1;                 // 0x0118(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor;           // 0x011C(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          K2Node_ComponentBoundEvent_UpdateCall;             // 0x012C(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_12D[0x3];                                      // 0x012D(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	TArray<class UWBP_ControllerGradientSlider_C*> K2Node_MakeArray_Array;                           // 0x0130(0x0010)(ReferenceParm, ContainsInstancedReference)
+	double                                        CallFunc_Divide_DoubleDouble_A_ImplicitCast;       // 0x0140(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        CallFunc_SetSliderValue_Value_ImplicitCast;        // 0x0148(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        CallFunc_SetSliderValue_Value_ImplicitCast_1;      // 0x0150(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_MakeColor_R_ImplicitCast;                 // 0x0158(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_MakeColor_B_ImplicitCast;                 // 0x015C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         CallFunc_MakeColor_G_ImplicitCast;                 // 0x0160(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature;
-
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature
-// 0x0014 (0x0014 - 0x0000)
-struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature final
-{
-public:
-	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet;
 
 // Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature
 // 0x0014 (0x0014 - 0x0000)
@@ -75,94 +119,64 @@ public:
 };
 DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_V_K2Node_ComponentBoundEvent_2_UpdateValue__DelegateSignature;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.ExecuteUbergraph_WBP_ControllerColorPalet
-// 0x0150 (0x0150 - 0x0000)
-struct WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature
+// 0x0014 (0x0014 - 0x0000)
+struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature final
 {
 public:
-	int32                                         EntryPoint;                                        // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Array_Index_Variable;                     // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         Temp_int_Loop_Counter_Variable;                    // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	int32                                         CallFunc_Add_IntInt_ReturnValue;                   // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_Event_IsDesignTime;                         // 0x0010(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_11[0x3];                                       // 0x0011(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         K2Node_CustomEvent_AddValue;                       // 0x0014(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	TArray<class UWBP_ControllerGradientSlider_C*> K2Node_MakeArray_Array;                           // 0x0018(0x0010)(ReferenceParm, ContainsInstancedReference)
-	class UWBP_ControllerGradientSlider_C*        CallFunc_Array_Get_Item;                           // 0x0028(0x0008)(ZeroConstructor, InstancedReference, NoDestructor, HasGetValueTypeHash)
-	int32                                         CallFunc_Array_Length_ReturnValue;                 // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          CallFunc_Less_IntInt_ReturnValue;                  // 0x0034(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_35[0x3];                                       // 0x0035(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CallFunc_Add_IntInt_ReturnValue_1;                 // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_4;         // 0x003C(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_ComponentBoundEvent_UpdateCall_4;           // 0x004C(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_4D[0x3];                                       // 0x004D(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CallFunc_WrapSnap_Integer__ReturnValue;            // 0x0050(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_54[0x4];                                       // 0x0054(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	double                                        K2Node_CustomEvent_Value;                          // 0x0058(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FLinearColor                           CallFunc_RGBLinearToHSV_ReturnValue;               // 0x0060(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_BreakColor_R;                             // 0x0070(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_BreakColor_G;                             // 0x0074(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_BreakColor_B;                             // 0x0078(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_BreakColor_A;                             // 0x007C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        CallFunc_Divide_DoubleDouble_ReturnValue;          // 0x0080(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          CallFunc_EqualEqual_IntInt_ReturnValue;            // 0x0088(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_89[0x3];                                       // 0x0089(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FLinearColor                           K2Node_CustomEvent_DefaultColor;                   // 0x008C(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_9C[0x4];                                       // 0x009C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	double                                        K2Node_CustomEvent_Metallic;                       // 0x00A0(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        K2Node_CustomEvent_Roughness;                      // 0x00A8(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_3;         // 0x00B0(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_ComponentBoundEvent_UpdateCall_3;           // 0x00C0(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_C1[0x3];                                       // 0x00C1(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_2;         // 0x00C4(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_ComponentBoundEvent_UpdateCall_2;           // 0x00D4(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_D5[0x3];                                       // 0x00D5(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor_1;         // 0x00D8(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_ComponentBoundEvent_UpdateCall_1;           // 0x00E8(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_E9[0x3];                                       // 0x00E9(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FLinearColor                           K2Node_ComponentBoundEvent_ChangedColor;           // 0x00EC(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          K2Node_ComponentBoundEvent_UpdateCall;             // 0x00FC(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_FD[0x3];                                       // 0x00FD(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	double                                        CallFunc_Multiply_DoubleDouble_ReturnValue;        // 0x0100(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FLinearColor                           CallFunc_MakeColor_ReturnValue;                    // 0x0108(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	struct FLinearColor                           CallFunc_HSVToRGBLinear_ReturnValue;               // 0x0118(0x0010)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        CallFunc_Divide_DoubleDouble_A_ImplicitCast;       // 0x0128(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        CallFunc_SetSliderValue_Value_ImplicitCast;        // 0x0130(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        CallFunc_SetSliderValue_Value_ImplicitCast_1;      // 0x0138(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_MakeColor_B_ImplicitCast;                 // 0x0140(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_MakeColor_R_ImplicitCast;                 // 0x0144(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         CallFunc_MakeColor_G_ImplicitCast;                 // 0x0148(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_ExecuteUbergraph_WBP_ControllerColorPalet;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_S_K2Node_ComponentBoundEvent_1_UpdateValue__DelegateSignature;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_ControllerColorPalet_C_PreConstruct final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature
+// 0x0014 (0x0014 - 0x0000)
+struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature final
 {
 public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_PreConstruct;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_R_K2Node_ComponentBoundEvent_4_UpdateValue__DelegateSignature;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.SelectSlide
-// 0x0004 (0x0004 - 0x0000)
-struct WBP_ControllerColorPalet_C_SelectSlide final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature
+// 0x0014 (0x0014 - 0x0000)
+struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature final
 {
 public:
-	int32                                         AddValue;                                          // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_SelectSlide;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_M_K2Node_ComponentBoundEvent_3_UpdateValue__DelegateSignature;
 
-// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.UpdateDefaultValue
-// 0x0020 (0x0020 - 0x0000)
-struct WBP_ControllerColorPalet_C_UpdateDefaultValue final
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature
+// 0x0014 (0x0014 - 0x0000)
+struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature final
 {
 public:
-	struct FLinearColor                           DefaultColor_0;                                    // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        Metallic;                                          // 0x0010(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        Roughness;                                         // 0x0018(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
-DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_UpdateDefaultValue;
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_H_K2Node_ComponentBoundEvent_0_UpdateValue__DelegateSignature;
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_E_K2Node_ComponentBoundEvent_5_UpdateValue__DelegateSignature
+// 0x0014 (0x0014 - 0x0000)
+struct WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_E_K2Node_ComponentBoundEvent_5_UpdateValue__DelegateSignature final
+{
+public:
+	struct FLinearColor                           ChangedColor;                                      // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          UpdateCall;                                        // 0x0010(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_BndEvt__WBP_ControllerColorPalet_WBP_ControllerGradientSlider_E_K2Node_ComponentBoundEvent_5_UpdateValue__DelegateSignature;
+
+// Function WBP_ControllerColorPalet.WBP_ControllerColorPalet_C.AddSliderValue
+// 0x0008 (0x0008 - 0x0000)
+struct WBP_ControllerColorPalet_C_AddSliderValue final
+{
+public:
+	double                                        Value;                                             // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_ControllerColorPalet_C_AddSliderValue;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

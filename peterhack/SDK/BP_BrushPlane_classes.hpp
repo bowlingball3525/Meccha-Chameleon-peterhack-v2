@@ -34,9 +34,9 @@ public:
 	bool                                          Is_Brushing;                                       // 0x02F8(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ExecuteUbergraph_BP_BrushPlane(int32 EntryPoint);
+	void ReceiveTick(float DeltaSeconds_ReceiveTick);
 	void ReceiveBeginPlay();
-	void ReceiveTick(float DeltaSeconds);
+	void ExecuteUbergraph_BP_BrushPlane(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

@@ -25,6 +25,11 @@ extern Settings* cfg;
 
 extern std::atomic<DWORD> g_GameThreadId;
 
+namespace Process
+{
+	extern HWND Hwnd;
+}
+
 namespace
 {
 	constexpr int kBridgePort = 47654;
@@ -137,6 +142,124 @@ namespace
 		return true;
 	}
 
+	void LogPaintJobResult(CamoJobKind kind, bool ok, const std::string& response,
+	                       int fallbackWireByte = -1, int fallbackWireStrokeBytes = -1)
+	{
+		const char* jobLabel = "paint";
+		switch (kind)
+		{
+		case CamoJobKind::Preview: jobLabel = "preview"; break;
+		case CamoJobKind::UnPreview: jobLabel = "un-preview"; break;
+		default: break;
+		}
+
+		int applied = 0;
+		int serverStrokes = 0;
+		int localSynced = 0;
+		int wireByte = -1;
+		int wireStrokeBytes = -1;
+		int plannedWireByte = -1;
+		int actualWireByte = -1;
+		double metallic = 0.0;
+		double roughness = 0.0;
+		double emissive = 0.0;
+		double sentMetallic = 0.0;
+		double sentRoughness = 0.0;
+		double sentEmissive = 0.0;
+		double strokeMetallic = 0.0;
+		double strokeRoughness = 0.0;
+		double strokeEmissive = 0.0;
+		bool autoOk = false;
+		std::string stage;
+		std::string matSource;
+		std::string matFailure;
+		std::string localRoute;
+		JsonFindInt(response, "applied", applied);
+		JsonFindInt(response, "server_strokes_sent", serverStrokes);
+		JsonFindInt(response, "local_strokes_synced", localSynced);
+		JsonFindInt(response, "first_stroke_packed_wire_channel_byte", wireByte);
+		JsonFindInt(response, "packed_wire_stroke_byte_size", wireStrokeBytes);
+		JsonFindInt(response, "planned_first_stroke_packed_wire_channel_byte", plannedWireByte);
+		JsonFindInt(response, "actual_first_stroke_packed_wire_channel_byte", actualWireByte);
+		if (wireByte < 0)
+			wireByte = plannedWireByte;
+		if (wireByte < 0)
+			wireByte = actualWireByte;
+		if (wireByte < 0)
+			wireByte = fallbackWireByte;
+		if (wireStrokeBytes < 0)
+			wireStrokeBytes = fallbackWireStrokeBytes;
+		JsonFindDouble(response, "material_properties_metallic", metallic);
+		JsonFindDouble(response, "material_properties_roughness", roughness);
+		JsonFindDouble(response, "material_properties_emissive", emissive);
+		JsonFindDouble(response, "metallic", sentMetallic);
+		JsonFindDouble(response, "roughness", sentRoughness);
+		JsonFindDouble(response, "emissive", sentEmissive);
+		JsonFindDouble(response, "first_stroke_roughness", strokeRoughness);
+		JsonFindDouble(response, "first_stroke_emissive", strokeEmissive);
+		if (strokeRoughness <= 0.0)
+			JsonFindDouble(response, "first_stroke_channel_data_roughness", strokeRoughness);
+		if (strokeEmissive <= 0.0)
+			JsonFindDouble(response, "first_stroke_channel_data_emissive", strokeEmissive);
+		if (strokeMetallic <= 0.0)
+			JsonFindDouble(response, "first_stroke_channel_data_metallic", strokeMetallic);
+		JsonFindBool(response, "material_properties_auto_ok", autoOk);
+		JsonFindString(response, "stage", stage);
+		JsonFindString(response, "material_properties_source", matSource);
+		JsonFindString(response, "material_properties_failure", matFailure);
+		JsonFindString(response, "local_route_mode", localRoute);
+
+		if (ok)
+		{
+			PhLog("[peterhack] Camo %s finished: stage=%s applied=%d server_strokes=%d local_sync=%d"
+			      " wire=%d stroke_bytes=%d route=%s auto_material=%s"
+			      " detected(m=%.3f r=%.3f e=%.3f) sent(m=%.3f r=%.3f e=%.3f)"
+			      " stroke(m=%.3f r=%.3f e=%.3f)%s\n",
+			      jobLabel,
+			      stage.empty() ? "done" : stage.c_str(),
+			      applied,
+			      serverStrokes,
+			      localSynced,
+			      wireByte,
+			      wireStrokeBytes,
+			      localRoute.empty() ? "n/a" : localRoute.c_str(),
+			      matSource.empty() ? "unknown" : matSource.c_str(),
+			      metallic,
+			      roughness,
+			      emissive,
+			      sentMetallic,
+			      sentRoughness,
+			      sentEmissive,
+			      strokeMetallic,
+			      strokeRoughness,
+			      strokeEmissive,
+			      autoOk ? "" : " [auto detect failed]");
+			if (wireStrokeBytes == 27)
+				PhLog("[peterhack] WARNING: 27-byte wire records shift world radius into emissive — fully exit game and reinject bridge rev 6+\n");
+			if (wireByte == 4)
+				PhLog("[peterhack] WARNING: wire channel byte 4 (All) routes roughness into emissive — update bridge (AMR channel fix)\n");
+			if (wireByte == 6)
+				PhLog("[peterhack] WARNING: wire channel byte 6 = Emissive-only routing — restart game to load new bridge\n");
+			int wireEmissiveA = -1;
+			if (JsonFindInt(response, "first_stroke_wire_emissive_a", wireEmissiveA) && wireEmissiveA > 0)
+				PhLog("[peterhack] WARNING: wire emissive alpha=%d (expected 0) — reinject bridge\n", wireEmissiveA);
+			if (wireByte == 5 && strokeEmissive > 0.001)
+				PhLog("[peterhack] NOTE: wire channel 5 (AMR) with stroke emissive %.3f — emissive slider ignored on this channel\n",
+				      strokeEmissive);
+			if (!matFailure.empty() && matFailure != "ok" && !autoOk)
+				PhLog("[peterhack] Material detect failure: %s\n", matFailure.c_str());
+		}
+		else if (response.size() <= 4096)
+		{
+			PhLog("[peterhack] Camo %s failed: %s\n", jobLabel, response.c_str());
+		}
+		else
+		{
+			PhLog("[peterhack] Camo %s failed (response truncated): %.4096s...\n",
+			      jobLabel, response.c_str());
+		}
+	}
+
 	bool EnsureWinsockInitialized()
 	{
 		std::call_once(g_wsaOnce, []() {
@@ -146,52 +269,21 @@ namespace
 		return g_wsaReady;
 	}
 
-	bool IsGameFocused()
+	bool IsGameWindowFocused()
 	{
-		HWND fg = GetForegroundWindow();
+		const HWND fg = GetForegroundWindow();
 		if (!fg)
 			return false;
+		if (Process::Hwnd && (fg == Process::Hwnd || IsChild(Process::Hwnd, fg)))
+			return true;
 		DWORD pid = 0;
 		GetWindowThreadProcessId(fg, &pid);
 		return pid == GetCurrentProcessId();
 	}
 
-	bool IsBlockedCamoHotkey(int vk)
-	{
-		switch (vk)
-		{
-		case VK_LBUTTON:
-		case VK_RBUTTON:
-		case VK_MBUTTON:
-		case VK_XBUTTON1:
-		case VK_XBUTTON2:
-		case VK_INSERT:
-		case VK_F10: // menu toggle
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	bool HotkeyPressed(int bind)
 	{
-		// Controller binds: edge-detected off the per-frame Gamepad poll (inert
-		// while Controller Binds is off; the menu pad button is auto-blocked).
-		if (Binds::IsPadBind(bind))
-			return Gamepad::Pressed(Binds::PadMask(bind));
-		if (bind <= 0 || bind >= 256 || IsBlockedCamoHotkey(bind))
-			return false;
-		// Use the "pressed since last call" bit so quick taps are not missed between frames.
-		return (GetAsyncKeyState(bind) & 1) != 0;
-	}
-
-	void PrimeHotkeyEdge(int bind)
-	{
-		if (Binds::IsPadBind(bind))
-			return; // pad edges are per-frame, they don't latch and need no drain
-		if (bind <= 0 || bind >= 256 || IsBlockedCamoHotkey(bind))
-			return;
-		(void)GetAsyncKeyState(bind);
+		return Binds::Pressed(bind, true);
 	}
 
 	void ParseHexColor(const char* hex, int& r, int& g, int& b)
@@ -318,6 +410,30 @@ void CamoManager::UpdateDiagnostics(const std::string& response, CamoJobKind kin
 		d.materialMetallic = dv;
 	if (JsonFindDouble(response, "material_properties_roughness", dv))
 		d.materialRoughness = dv;
+	if (JsonFindDouble(response, "material_properties_emissive", dv))
+		d.materialEmissive = dv;
+	d.lastFailure.clear();
+	if (JsonFindInt(response, "server_strokes_sent", v))
+		d.serverStrokesSent = v;
+	JsonFindString(response, "paint_target_channel", d.paintTargetChannel);
+	if (JsonFindInt(response, "first_stroke_packed_wire_channel_byte", v))
+		d.packedWireChannelByte = v;
+	if (JsonFindInt(response, "packed_wire_stroke_byte_size", v))
+		d.packedWireStrokeBytes = v;
+	if (JsonFindInt(response, "wire_encoding_revision", v))
+		d.bridgeWireRevision = v;
+	else if (bridgeWireEncodingRevision_.load() >= 0)
+		d.bridgeWireRevision = bridgeWireEncodingRevision_.load();
+	JsonFindString(response, "local_route_mode", d.localRouteMode);
+	if (JsonFindBool(response, "local_visual_sync_degraded", b))
+		d.localVisualSyncDegraded = b ? 1 : 0;
+	JsonFindString(response, "first_failure", d.lastFailure);
+	if (d.lastFailure.empty())
+	{
+		std::string stage;
+		if (JsonFindString(response, "stage", stage))
+			d.lastFailure = stage;
+	}
 
 	std::lock_guard<std::mutex> lock(diagMutex_);
 	diag_ = d;
@@ -327,6 +443,59 @@ CamoManager::CamoDiagnostics CamoManager::Diagnostics() const
 {
 	std::lock_guard<std::mutex> lock(diagMutex_);
 	return diag_;
+}
+
+void CamoManager::SeedDiagnosticsForJob(CamoJobKind kind)
+{
+	std::lock_guard<std::mutex> lock(diagMutex_);
+	diag_.valid = true;
+	diag_.updatedMs = GetTickCount64();
+	diag_.lastJobOk = false;
+	diag_.configuredBatch = settings.batchLimit;
+	diag_.configuredPacingMs = settings.batchPacingMs;
+	diag_.batchRequested = settings.batchAutoAdapt ? -1 : settings.batchLimit;
+	diag_.batchResolved = -1;
+	diag_.localBatchLimit = -1;
+	diag_.serverStrokesSent = -1;
+	diag_.paintTargetChannel.clear();
+	diag_.packedWireChannelByte = -1;
+	diag_.packedWireStrokeBytes = -1;
+	diag_.lastFailure.clear();
+	diag_.autoMaterialRequested = settings.autoMaterial;
+	diag_.materialAutoOk = -1;
+	switch (kind)
+	{
+	case CamoJobKind::Preview: diag_.lastKind = "preview"; break;
+	case CamoJobKind::UnPreview: diag_.lastKind = "un-preview"; break;
+	default: diag_.lastKind = "paint"; break;
+	}
+}
+
+void CamoManager::RefreshDiagnosticsFromProgress()
+{
+	const CamoProgress pr = ReadProgress();
+	if (!pr.valid)
+		return;
+
+	std::lock_guard<std::mutex> lock(diagMutex_);
+	diag_.valid = true;
+	diag_.updatedMs = GetTickCount64();
+	if (pr.serverBatchLimit >= 0)
+		diag_.batchResolved = pr.serverBatchLimit;
+	if (pr.batchRequested >= 0)
+		diag_.batchRequested = pr.batchRequested;
+	if (pr.localBatchLimit >= 0)
+		diag_.localBatchLimit = pr.localBatchLimit;
+	if (pr.serverStrokesSent >= 0)
+		diag_.serverStrokesSent = pr.serverStrokesSent;
+	if (pr.wireChannelByte >= 0)
+		diag_.packedWireChannelByte = pr.wireChannelByte;
+	if (pr.wireStrokeBytes >= 0)
+		diag_.packedWireStrokeBytes = pr.wireStrokeBytes;
+	if (!pr.paintTargetChannel.empty())
+		diag_.paintTargetChannel = pr.paintTargetChannel;
+	else if (pr.paintTargetChannelValue == 4 && diag_.paintTargetChannel.empty())
+		diag_.paintTargetChannel = "all";
 }
 
 namespace
@@ -565,11 +734,28 @@ CamoManager::CamoProgress CamoManager::ReadProgress() const
 
 	double prog = 0.0, elapsed = 0.0;
 	int step = -1, total = -1;
-	std::string stage, message;
+	int wireChannelByte = -1;
+	int wireStrokeBytes = -1;
+	int serverBatchLimit = -1;
+	int serverStrokesSent = -1;
+	int localBatchLimit = -1;
+	int batchRequested = -1;
+	int paintTargetChannelValue = -1;
+	std::string stage, message, paintTargetChannel;
 	JsonFindDouble(text, "progress", prog);
 	JsonFindDouble(text, "elapsed_ms", elapsed);
 	JsonFindInt(text, "step", step);
 	JsonFindInt(text, "total_steps", total);
+	JsonFindInt(text, "first_stroke_packed_wire_channel_byte", wireChannelByte);
+	JsonFindInt(text, "packed_wire_stroke_byte_size", wireStrokeBytes);
+	JsonFindInt(text, "server_batch_limit", serverBatchLimit);
+	JsonFindInt(text, "server_strokes_sent", serverStrokesSent);
+	JsonFindInt(text, "local_batch_limit", localBatchLimit);
+	JsonFindInt(text, "replication_pacing_requested_batch_limit", batchRequested);
+	if (batchRequested < 0)
+		JsonFindInt(text, "server_batch_limit_requested", batchRequested);
+	JsonFindInt(text, "paint_target_channel_value", paintTargetChannelValue);
+	JsonFindString(text, "paint_target_channel", paintTargetChannel);
 	JsonFindString(text, "stage", stage);
 	JsonFindString(text, "message", message);
 
@@ -578,6 +764,14 @@ CamoManager::CamoProgress CamoManager::ReadProgress() const
 	out.elapsedMs = elapsed;
 	out.step = step;
 	out.totalSteps = total;
+	out.wireChannelByte = wireChannelByte;
+	out.wireStrokeBytes = wireStrokeBytes;
+	out.serverBatchLimit = serverBatchLimit;
+	out.serverStrokesSent = serverStrokesSent;
+	out.localBatchLimit = localBatchLimit;
+	out.batchRequested = batchRequested;
+	out.paintTargetChannelValue = paintTargetChannelValue;
+	out.paintTargetChannel = paintTargetChannel;
 	out.stage = stage;
 	out.message = message;
 	out.terminal = stage.find("done") != std::string::npos ||
@@ -589,6 +783,66 @@ CamoManager::CamoProgress CamoManager::ReadProgress() const
 bool CamoManager::BridgeModuleLoaded() const
 {
 	return GetBridgeModuleHandle() != nullptr;
+}
+
+bool CamoManager::TryReloadBridgeModuleIfDiskUpdated()
+{
+	HMODULE mod = GetBridgeModuleHandle();
+	if (!mod)
+		return false;
+
+	wchar_t loadedPath[MAX_PATH]{};
+	if (GetModuleFileNameW(mod, loadedPath, MAX_PATH) == 0)
+		return false;
+
+	const std::wstring diskPath = ResolveBridgeDllPath();
+	WIN32_FILE_ATTRIBUTE_DATA loadedInfo{};
+	WIN32_FILE_ATTRIBUTE_DATA diskInfo{};
+	if (!GetFileAttributesExW(loadedPath, GetFileExInfoStandard, &loadedInfo) ||
+		!GetFileAttributesExW(diskPath.c_str(), GetFileExInfoStandard, &diskInfo))
+	{
+		return false;
+	}
+
+	ULARGE_INTEGER loadedTime{};
+	ULARGE_INTEGER diskTime{};
+	loadedTime.LowPart = loadedInfo.ftLastWriteTime.dwLowDateTime;
+	loadedTime.HighPart = loadedInfo.ftLastWriteTime.dwHighDateTime;
+	diskTime.LowPart = diskInfo.ftLastWriteTime.dwLowDateTime;
+	diskTime.HighPart = diskInfo.ftLastWriteTime.dwHighDateTime;
+
+	// One second tolerance for filesystem timestamp granularity.
+	if (diskTime.QuadPart <= loadedTime.QuadPart + 10'000'000ULL)
+		return false;
+
+	PhLog("[peterhack] Bridge DLL on disk is newer than the loaded module — reloading\n");
+	PhLog("[peterhack]   loaded: %ls\n", loadedPath);
+	PhLog("[peterhack]   disk:   %ls\n", diskPath.c_str());
+
+	InvalidateBridgeConnection();
+	if (bridgePort_.load() > 0 && bridgeUsesHello_.load())
+		RequestBridgeShutdown(8000);
+	Sleep(500);
+
+	if (!FreeLibrary(mod))
+	{
+		PhLog("[peterhack] FreeLibrary(peterhack-bridge.dll) failed err=%lu — fully exit game and relaunch\n",
+		      static_cast<unsigned long>(GetLastError()));
+		return false;
+	}
+
+	ClearBridgeIdentity();
+	bridgeState_.store(CamoBridgeState::Unloaded);
+	bridgeWireEncodingRevision_.store(-1);
+
+	if (!LoadLibraryW(diskPath.c_str()))
+	{
+		PhLog("[peterhack] Reload LoadLibrary failed err=%lu\n", static_cast<unsigned long>(GetLastError()));
+		return false;
+	}
+
+	PhLog("[peterhack] Reloaded peterhack-bridge.dll from disk\n");
+	return true;
 }
 
 void CamoManager::ClearBridgeIdentity()
@@ -629,14 +883,26 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 {
 	responseOut.clear();
 	if (port <= 0 || port > 65535)
+	{
+		PhLog("[BRIDGE] TCP rejected — invalid port %d\n", port);
 		return false;
+	}
 
 	if (!EnsureWinsockInitialized())
+	{
+		PhLog("[BRIDGE] TCP rejected — Winsock unavailable\n");
 		return false;
+	}
+
+	const std::string reqType = PhJsonTypeField(requestJson);
+	PhLogJsonLine("BRIDGE", "->", requestJson);
 
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock == INVALID_SOCKET)
+	{
+		PhLog("[BRIDGE] socket() failed err=%d\n", WSAGetLastError());
 		return false;
+	}
 
 	DWORD connectTimeout = static_cast<DWORD>(timeoutMs > 1500 ? 1500 : timeoutMs);
 	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&connectTimeout), sizeof(connectTimeout));
@@ -649,6 +915,7 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 
 	if (connect(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
+		PhLog("[BRIDGE] connect 127.0.0.1:%d failed type=%s err=%d\n", port, reqType.c_str(), WSAGetLastError());
 		closesocket(sock);
 		return false;
 	}
@@ -689,12 +956,15 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 		std::string helloResponse;
 		if (!sendLine(BuildHelloJson()) || !recvLine(helloResponse))
 		{
+			PhLog("[BRIDGE] hello handshake failed type=%s port=%d\n", reqType.c_str(), port);
 			closesocket(sock);
 			return false;
 		}
+		PhLogJsonLine("BRIDGE", "<-hello", helloResponse, 2048);
 		if (helloResponse.find("\"success\":true") == std::string::npos ||
 			helloResponse.find("\"stage\":\"hello\"") == std::string::npos)
 		{
+			PhLog("[BRIDGE] hello rejected type=%s port=%d\n", reqType.c_str(), port);
 			closesocket(sock);
 			return false;
 		}
@@ -702,17 +972,23 @@ bool CamoManager::TcpRequestOnPort(int port, bool useHello, const std::string& r
 
 	if (!sendLine(requestJson))
 	{
+		PhLog("[BRIDGE] send failed type=%s port=%d err=%d\n", reqType.c_str(), port, WSAGetLastError());
 		closesocket(sock);
 		return false;
 	}
 
 	if (!recvLine(responseOut))
 	{
+		PhLog("[BRIDGE] recv failed type=%s port=%d err=%d timeout=%dms\n",
+		      reqType.c_str(), port, WSAGetLastError(), timeoutMs);
 		closesocket(sock);
 		return false;
 	}
 
 	closesocket(sock);
+	PhLogJsonLine("BRIDGE", "<-", responseOut);
+	if (!PhJsonSuccessField(responseOut))
+		PhLog("[BRIDGE] response success=false type=%s port=%d\n", reqType.c_str(), port);
 	return true;
 }
 
@@ -911,6 +1187,9 @@ bool CamoManager::EnsureBridge()
 	bridgeState_.store(CamoBridgeState::Loading);
 	SetStatus("Loading camouflage bridge...");
 
+	if (BridgeModuleLoaded())
+		TryReloadBridgeModuleIfDiskUpdated();
+
 	if (!BridgeModuleLoaded())
 	{
 		const std::wstring root = ResolveBridgeRoot();
@@ -956,6 +1235,29 @@ bool CamoManager::EnsureBridge()
 					PhLog("[peterhack] Bridge missing mesh_first_paint capability\n");
 					return false;
 				}
+				int wireRev = -1;
+				int wireStrokeBytes = -1;
+				int channelDataSize = 0;
+				if (JsonFindInt(caps, "wire_encoding_revision", wireRev))
+				{
+					bridgeWireEncodingRevision_.store(wireRev);
+					PhLog("[peterhack] Bridge wire_encoding_revision=%d\n", wireRev);
+				}
+				else
+				{
+					bridgeWireEncodingRevision_.store(0);
+					PhLog("[peterhack] Bridge missing wire_encoding_revision — fully restart game to load new bridge\n");
+				}
+				if (JsonFindInt(caps, "packed_wire_stroke_byte_size", wireStrokeBytes))
+					PhLog("[peterhack] Bridge packed_wire_stroke_byte_size=%d\n", wireStrokeBytes);
+				if (JsonFindInt(caps, "paint_channel_data_size", channelDataSize))
+					PhLog("[peterhack] Bridge paint_channel_data_size=0x%X\n", channelDataSize);
+				if (wireRev >= 0 && wireRev < 6)
+					PhLog("[peterhack] WARNING: bridge wire_encoding_revision=%d is outdated — restart game after rebuild\n", wireRev);
+				if (wireStrokeBytes == 27)
+					PhLog("[peterhack] WARNING: bridge reports 27-byte wire — emissive glow bug — restart game\n");
+				if (channelDataSize > 0 && channelDataSize != 0x24)
+					PhLog("[peterhack] WARNING: bridge paint_channel_data_size=0x%X expected 0x24 — restart game\n", channelDataSize);
 				PhLog("[peterhack] Bridge ready on 127.0.0.1:%d\n", bridgePort_.load());
 			}
 			MarkBridgeReady(bridgePort_.load());
@@ -1002,11 +1304,15 @@ void CamoManager::OnMenuOpened()
 
 std::string CamoManager::BuildPaintPayload(DWORD pid, CamoJobKind kind) const
 {
+	CamoSettings paintSettings = settings;
+	paintSettings.ClampLimits();
 	int r = 255, g = 255, b = 255;
-	ParseHexColor(settings.fillColorHex, r, g, b);
+	ParseHexColor(paintSettings.fillColorHex, r, g, b);
 	const double fr = r / 255.0;
 	const double fg = g / 255.0;
 	const double fb = b / 255.0;
+	const float strokeEmissive = paintSettings.emissive;
+	const float fillEmissiveSent = paintSettings.fillEmissive;
 
 	const bool preview = kind == CamoJobKind::Preview;
 	const bool unpreview = kind == CamoJobKind::UnPreview;
@@ -1023,10 +1329,11 @@ std::string CamoManager::BuildPaintPayload(DWORD pid, CamoJobKind kind) const
 		"\"research_artifacts\":false,"
 		"\"process\":{\"pid\":%lu,\"name\":\"%s\"},"
 		"\"tuning\":{"
+		"\"brush_1_enabled\":%s,"
 		"\"brush_1_size_texels\":%.3f,"
+		"\"brush_2_enabled\":%s,"
 		"\"brush_2_size_texels\":%.3f,"
-		"\"brush_pipeline_version\":2,"
-		"\"stroke_size_texels\":%.3f,"
+		"\"server_batch_auto_adapt\":%s,"
 		"\"server_batch_limit\":%d,"
 		"\"server_batch_pacing_ms\":%d,"
 		"\"coverage_step_texels\":%.3f,"
@@ -1035,6 +1342,7 @@ std::string CamoManager::BuildPaintPayload(DWORD pid, CamoJobKind kind) const
 		"\"auto_material\":%s,"
 		"\"metallic\":%.3f,"
 		"\"roughness\":%.3f,"
+		"\"emissive\":%.3f,"
 		"\"front_region_mode\":\"%s\","
 		"\"side_region_mode\":\"%s\","
 		"\"back_region_mode\":\"%s\","
@@ -1043,30 +1351,35 @@ std::string CamoManager::BuildPaintPayload(DWORD pid, CamoJobKind kind) const
 		"\"fill_color_g\":%.8f,"
 		"\"fill_color_b\":%.8f,"
 		"\"fill_metallic\":%.3f,"
-		"\"fill_roughness\":%.3f"
+		"\"fill_roughness\":%.3f,"
+		"\"fill_emissive\":%.3f"
 		"}}",
 		preview ? "true" : "false",
 		unpreview ? "true" : "false",
 		static_cast<unsigned long>(pid),
 		kProcessName,
-		settings.brush1Texels,
-		settings.brush2Texels,
-		settings.brush2Texels,
-		settings.batchLimit,
-		settings.batchPacingMs,
-		settings.brush2Texels,
-		settings.sideSourceMaxUv,
-		settings.frontBackSourceMaxUv,
-		settings.autoMaterial ? "true" : "false",
-		settings.metallic,
-		settings.roughness,
-		RegionModeJson(settings.frontRegionMode),
-		RegionModeJson(settings.sideRegionMode),
-		RegionModeJson(settings.backRegionMode),
-		settings.fillColorHex,
+		paintSettings.brush1Enabled ? "true" : "false",
+		paintSettings.brush1Texels,
+		paintSettings.brush2Enabled ? "true" : "false",
+		paintSettings.brush2Texels,
+		paintSettings.batchAutoAdapt ? "true" : "false",
+		paintSettings.batchLimit,
+		paintSettings.batchPacingMs,
+		paintSettings.CoverageStepTexels(),
+		paintSettings.sideSourceMaxUv,
+		paintSettings.frontBackSourceMaxUv,
+		paintSettings.autoMaterial ? "true" : "false",
+		paintSettings.metallic,
+		paintSettings.roughness,
+		strokeEmissive,
+		RegionModeJson(paintSettings.frontRegionMode),
+		RegionModeJson(paintSettings.sideRegionMode),
+		RegionModeJson(paintSettings.backRegionMode),
+		paintSettings.fillColorHex,
 		fr, fg, fb,
-		settings.fillMetallic,
-		settings.fillRoughness);
+		paintSettings.fillMetallic,
+		paintSettings.fillRoughness,
+		fillEmissiveSent);
 	return std::string(buf);
 }
 
@@ -1081,10 +1394,22 @@ bool CamoManager::RunJob(CamoJobKind kind)
 	}
 
 	if (!EnsureBridge())
+	{
+		PhLog("[CAMO] RunJob aborted — bridge unavailable (kind=%d)\n", static_cast<int>(kind));
 		return false;
+	}
 
 	const DWORD pid = GetCurrentProcessId();
 	const std::string payload = BuildPaintPayload(pid, kind);
+	PhLog("[CAMO] RunJob kind=%d pid=%lu autoMaterial=%d metallic=%.3f roughness=%.3f emissive=%.3f fillEmissive=%.3f payloadBytes=%zu\n",
+	      static_cast<int>(kind),
+	      static_cast<unsigned long>(pid),
+	      settings.autoMaterial ? 1 : 0,
+	      settings.metallic,
+	      settings.roughness,
+	      settings.emissive,
+	      settings.fillEmissive,
+	      payload.size());
 	std::string response;
 	const int timeoutMs = (kind == CamoJobKind::UnPreview || kind == CamoJobKind::Preview) ? 120000 : 600000;
 	if (!TcpRequest(payload, response, timeoutMs))
@@ -1096,15 +1421,26 @@ bool CamoManager::RunJob(CamoJobKind kind)
 	if (response.find("\"success\":true") == std::string::npos)
 	{
 		UpdateDiagnostics(response, kind, false);
-		if (response.find("\"stage\":\"planner_blocked\"") != std::string::npos)
+		RefreshDiagnosticsFromProgress();
+		{
+			const auto diag = Diagnostics();
+			LogPaintJobResult(kind, false, response, diag.packedWireChannelByte, diag.packedWireStrokeBytes);
+		}
+		if (response.find("\"stage\":\"mesh_paint_cancelled\"") != std::string::npos)
+			SetStatus("Paint stopped (partial apply may remain visible)");
+		else if (response.find("\"stage\":\"planner_blocked\"") != std::string::npos)
 			SetError("Camo blocked — pose too extreme (e.g. emote clipping into wall). Stand normally or use fill-only regions.");
 		else
 			SetError("Paint failed — see console");
-		PhLog("[peterhack] response: %s\n", response.c_str());
 		return false;
 	}
 
 	UpdateDiagnostics(response, kind, true);
+	RefreshDiagnosticsFromProgress();
+	{
+		const auto diag = Diagnostics();
+		LogPaintJobResult(kind, true, response, diag.packedWireChannelByte, diag.packedWireStrokeBytes);
+	}
 	switch (kind)
 	{
 	case CamoJobKind::Preview: SetStatus("Preview applied"); break;
@@ -1123,6 +1459,7 @@ void CamoManager::StartWorker(CamoJobKind kind)
 
 	busy_.store(true);
 	pendingKind_.store(kind);
+	SeedDiagnosticsForJob(kind);
 	// Drop any leftover sidecar from a previous run so the progress bar starts
 	// fresh at 0% instead of flashing the last job's final percentage.
 	ClearProgressSidecar();
@@ -1190,7 +1527,7 @@ void CamoManager::ClearHotkeyEdges()
 		settings.stopHotkey,
 	};
 	for (int vk : keys)
-		PrimeHotkeyEdge(vk);
+		Binds::SyncKeyState(vk);
 }
 
 void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
@@ -1198,7 +1535,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	if (menuOpen)
 		return;
 
-	if (!IsGameFocused())
+	if (!IsGameWindowFocused())
 		return;
 
 	static bool s_wasInMatch = false;
@@ -1207,8 +1544,8 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	if (inMatch && !s_wasInMatch)
 	{
 		ClearHotkeyEdges();
-		s_hotkeyArmTickMs = now + 500;
-		PhLog("[peterhack] Match entered — camo hotkeys armed in 0.5s (enable in Camo tab if needed)\n");
+		s_hotkeyArmTickMs = now + 100;
+		PhLog("[peterhack] Match entered — camo hotkeys armed in 0.1s (enable + save in Camo tab if needed)\n");
 		if (settings.hotkeysEnabled && bridgeState_.load() != CamoBridgeState::Ready)
 			StartBridgeLoadAsync();
 	}
@@ -1218,6 +1555,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 
 	if (busy_.load())
 	{
+		RefreshDiagnosticsFromProgress();
 		if (HotkeyPressed(settings.stopHotkey))
 			CancelActiveJob();
 		// Drain other bind edges so they don't fire the moment paint finishes.
@@ -1228,10 +1566,7 @@ void CamoManager::TickHotkeys(bool inMatch, bool menuOpen)
 	}
 
 	if (!settings.hotkeysEnabled || !inMatch || now < s_hotkeyArmTickMs)
-	{
-		ClearHotkeyEdges();
 		return;
-	}
 
 	if (HotkeyPressed(settings.startHotkey))
 	{
@@ -1264,13 +1599,24 @@ void CamoManager::DrawMenu()
 {
 	const bool busy = busy_.load();
 
-	ImGui::Text("Peterhack mesh_first_paint");
+	ImGui::Text("Peterhack mesh-first paint");
 	ImGui::Separator();
 
 	const auto state = bridgeState_.load();
 	const int shownPort = bridgePort_.load() > 0 ? bridgePort_.load() : kBridgePort;
 	if (state == CamoBridgeState::Ready)
+	{
 		ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.4f, 1.0f), "Bridge: ready (:%d)", shownPort);
+		const int wireRev = bridgeWireEncodingRevision_.load();
+		if (wireRev >= 6)
+			ImGui::TextDisabled("Wire encoding revision: %d (31-byte packed PBR)", wireRev);
+		else if (wireRev >= 1)
+			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
+				ICON_FA_TRIANGLE_EXCLAMATION " Wire rev %d outdated (27-byte emissive bug) — fully exit game and reinject", wireRev);
+		else if (wireRev == 0)
+			ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f),
+				ICON_FA_TRIANGLE_EXCLAMATION " Bridge stale — fully exit game, reinject, then UnPreview");
+	}
 	else if (state == CamoBridgeState::Loading)
 		ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.2f, 1.0f), "Bridge: loading...");
 	else if (state == CamoBridgeState::Error)
@@ -1301,12 +1647,17 @@ void CamoManager::DrawMenu()
 		if (frac < 0.0f) frac = 0.0f;
 		if (frac > 1.0f) frac = 1.0f;
 
-		char overlay[32];
-		snprintf(overlay, sizeof(overlay), "%.0f%%", frac * 100.0f);
+		char overlay[48];
+		if (streaming && pr.totalSteps > 0)
+			snprintf(overlay, sizeof(overlay), "%.0f%% (%d / %d)", frac * 100.0f, pr.step, pr.totalSteps);
+		else
+			snprintf(overlay, sizeof(overlay), "%.0f%%", frac * 100.0f);
 		ImGui::ProgressBar(frac, ImVec2(-1.0f, 0.0f), overlay);
 
 		if (pr.valid && !pr.message.empty())
 			ImGui::TextDisabled("%s", pr.message.c_str());
+		else if (streaming && pr.totalSteps > 0)
+			ImGui::TextDisabled("%d / %d strokes", pr.step, pr.totalSteps);
 
 		// ETA is only meaningful during the streamed server phase - that phase's
 		// completion is exactly when other players see the paint fully applied.
@@ -1329,30 +1680,46 @@ void CamoManager::DrawMenu()
 	}
 
 	ImGui::Separator();
-	ImGui::SliderFloat("Brush 1 (texels)", &settings.brush1Texels, 10.0f, 30.0f, "%.0f");
-	ImGui::SliderFloat("Brush 2 (texels)", &settings.brush2Texels, 2.0f, 10.0f, "%.0f");
-	ImGui::SliderInt("Batch size", &settings.batchLimit, 1, 32);
-	if (settings.batchLimit > 20)
-		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
-			ICON_FA_TRIANGLE_EXCLAMATION " Batch > 20 is experimental (net overflow risk)");
-	ImGui::SliderInt("Pacing (ms)", &settings.batchPacingMs, 25, 500);
-	if (settings.batchPacingMs < 50)
-		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
-			ICON_FA_TRIANGLE_EXCLAMATION " Pacing < 50ms is faster but may throttle or drop strokes online");
-	ImGui::SliderFloat("Side UV", &settings.sideSourceMaxUv, 0.001f, 0.08f, "%.3f");
-	ImGui::SliderFloat("Front/back UV", &settings.frontBackSourceMaxUv, 0.001f, 0.45f, "%.3f");
+	ImGui::Checkbox("Brush 1", &settings.brush1Enabled);
+	if (settings.brush1Enabled)
+		ImGui::SliderFloat("Brush 1 (texels)", &settings.brush1Texels, 10.0f, 50.0f, "%.0f");
+	ImGui::Checkbox("Brush 2", &settings.brush2Enabled);
+	if (settings.brush2Enabled)
+		ImGui::SliderFloat("Brush 2 (texels)", &settings.brush2Texels, 1.0f, 10.0f, "%.0f");
+	if (!settings.brush1Enabled && !settings.brush2Enabled)
+		ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "Enable at least one brush");
+	ImGui::TextDisabled("Coverage step: %.0f texels", settings.CoverageStepTexels());
+	ImGui::Checkbox("Auto adapt batch/pacing", &settings.batchAutoAdapt);
+	if (settings.batchAutoAdapt)
+		ImGui::TextDisabled("Bridge picks batch size and pacing from queue pressure");
+	else
+	{
+		ImGui::SliderInt("Batch size", &settings.batchLimit, 1, 500);
+		if (settings.batchLimit > 20)
+			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
+				ICON_FA_TRIANGLE_EXCLAMATION " Batch > 20 is experimental (net overflow risk)");
+		ImGui::SliderInt("Pacing (ms)", &settings.batchPacingMs, 1, 500);
+		if (settings.batchPacingMs < 50)
+			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
+				ICON_FA_TRIANGLE_EXCLAMATION " Pacing < 50ms is faster but may throttle or drop strokes online");
+	}
+	ImGui::SliderFloat("Side UV", &settings.sideSourceMaxUv, 0.001f, 0.50f, "%.3f");
+	ImGui::SliderFloat("Front/back UV", &settings.frontBackSourceMaxUv, 0.001f, 2.0f, "%.3f");
 
 	ImGui::Separator();
 	ImGui::Checkbox("Auto material", &settings.autoMaterial);
 	if (settings.autoMaterial)
 	{
-		ImGui::TextDisabled("Reads metallic/roughness from the target's existing paint (in-game match)");
+		ImGui::TextDisabled("Reads metallic, roughness, and emissive from the target's existing paint");
+		ImGui::TextDisabled("Manual values below are fallbacks if auto detect fails");
 	}
-	else
-	{
-		ImGui::SliderFloat("Metallic", &settings.metallic, 0.0f, 1.0f);
-		ImGui::SliderFloat("Roughness", &settings.roughness, 0.0f, 1.0f);
-	}
+	if (settings.autoMaterial)
+		ImGui::BeginDisabled();
+	ImGui::SliderFloat("Metallic", &settings.metallic, 0.0f, 1.0f);
+	ImGui::SliderFloat("Roughness", &settings.roughness, 0.0f, 1.0f);
+	ImGui::SliderFloat("Emissive", &settings.emissive, 0.0f, 1.0f);
+	if (settings.autoMaterial)
+		ImGui::EndDisabled();
 	if (ImGui::Button("Reset to in-game quality defaults"))
 	{
 		settings.ApplyDefaults();
@@ -1386,6 +1753,7 @@ void CamoManager::DrawMenu()
 		}
 		ImGui::SliderFloat("Fill metallic", &settings.fillMetallic, 0.0f, 1.0f);
 		ImGui::SliderFloat("Fill roughness", &settings.fillRoughness, 0.0f, 1.0f);
+		ImGui::SliderFloat("Fill emissive", &settings.fillEmissive, 0.0f, 1.0f);
 	}
 	else
 	{
@@ -1476,22 +1844,40 @@ void CamoManager::DrawMenu()
 	ImGui::EndDisabled();
 
 	ImGui::Separator();
-	ImGui::Checkbox("Enable camo hotkeys", &settings.hotkeysEnabled);
+	if (ImGui::Checkbox("Enable camo hotkeys", &settings.hotkeysEnabled))
+	{
+		settings.Save();
+		if (settings.hotkeysEnabled)
+		{
+			ClearHotkeyEdges();
+			if (bridgeState_.load() != CamoBridgeState::Ready)
+				StartBridgeLoadAsync();
+		}
+	}
 	if (settings.hotkeysEnabled)
 	{
 		// Custom keybind recorder: click a bind, then press any key — or any
 		// controller button when Controller Binds is enabled in the Misc tab.
 		const bool padAllowed = Gamepad::IsEnabled();
-		Binds::RecorderRow("Start", settings.startHotkey, padAllowed, false);
-		Binds::RecorderRow("Preview", settings.previewHotkey, padAllowed, false);
-		Binds::RecorderRow("UnPreview", settings.unpreviewHotkey, padAllowed, false);
-		Binds::RecorderRow("Stop", settings.stopHotkey, padAllowed, false);
+		bool bindChanged = false;
+		bindChanged |= Binds::RecorderRow("Start", settings.startHotkey, padAllowed, false);
+		bindChanged |= Binds::RecorderRow("Preview", settings.previewHotkey, padAllowed, false);
+		bindChanged |= Binds::RecorderRow("UnPreview", settings.unpreviewHotkey, padAllowed, false);
+		bindChanged |= Binds::RecorderRow("Stop", settings.stopHotkey, padAllowed, false);
+		if (bindChanged)
+			settings.Save();
 		if (!padAllowed)
 			ImGui::TextDisabled("Enable Controller Binds (Misc tab) to record pad buttons");
-		ImGui::TextDisabled("Active in match with the menu closed");
+		ImGui::TextDisabled("Active in match with the menu closed and game focused");
 	}
 	else
 		ImGui::TextDisabled("Hotkeys off — use buttons below, or enable above");
+
+	if (ImGui::Button(ICON_FA_FLOPPY_DISK " Save camo settings"))
+	{
+		settings.Save();
+		Notify::Success("Camo settings saved");
+	}
 
 	char startLabel[48], previewLabel[48], unpreviewLabel[48], stopLabel[48];
 	snprintf(startLabel, sizeof(startLabel), "Start (%s)", Binds::BindName(settings.startHotkey));
@@ -1525,7 +1911,10 @@ void CamoManager::DrawMenu()
 	ImGui::Separator();
 	ImGui::Checkbox(ICON_FA_CHART_LINE " Show net diagnostics", &settings.showDiagnostics);
 	if (settings.showDiagnostics)
+	{
+		RefreshDiagnosticsFromProgress();
 		DrawDiagnostics();
+	}
 }
 
 void CamoManager::DrawDiagnostics()
@@ -1537,6 +1926,8 @@ void CamoManager::DrawDiagnostics()
 	const CamoDiagnostics d = Diagnostics();
 
 	ImGui::TextDisabled(ICON_FA_GAUGE_HIGH " Replication / pacing diagnostics");
+	if (busy_.load())
+		ImGui::TextDisabled("Live — updates while paint runs (hotkey or button)");
 	if (!d.valid)
 	{
 		ImGui::TextDisabled("No paint run yet — Start or Preview to collect data.");
@@ -1572,6 +1963,17 @@ void CamoManager::DrawDiagnostics()
 	if (d.localBatchLimit >= 0)
 		ImGui::Text("Local batch limit: %d", d.localBatchLimit);
 
+	if (!d.localRouteMode.empty())
+	{
+		ImGui::Text("Local route: %s", d.localRouteMode.c_str());
+		if (d.localVisualSyncDegraded == 1)
+			ImGui::TextColored(kWarn, ICON_FA_TRIANGLE_EXCLAMATION
+				" Local texture mirror degraded — server paint still runs");
+	}
+
+	if (d.serverStrokesSent >= 0 && busy_.load())
+		ImGui::Text("Server strokes sent: %d", d.serverStrokesSent);
+
 	if (d.radiusUsedFallback == 1)
 		ImGui::TextColored(kWarn, ICON_FA_TRIANGLE_EXCLAMATION " Radius calibration used fallback");
 	else if (d.radiusWithinWindow == 0)
@@ -1579,16 +1981,72 @@ void CamoManager::DrawDiagnostics()
 	else if (d.radiusWithinWindow == 1)
 		ImGui::TextColored(kOk, ICON_FA_CIRCLE_CHECK " Radius calibration nominal");
 
+	if (!d.paintTargetChannel.empty() || d.packedWireChannelByte >= 0)
+	{
+		ImGui::Separator();
+		ImGui::TextDisabled("Paint channel");
+		if (!d.paintTargetChannel.empty())
+			ImGui::Text("Target: %s", d.paintTargetChannel.c_str());
+		if (d.packedWireChannelByte >= 0)
+		{
+			const int wireRev = d.bridgeWireRevision >= 0 ? d.bridgeWireRevision : bridgeWireEncodingRevision_.load();
+			const bool latestWire = d.packedWireStrokeBytes == 31 || wireRev >= 6;
+			if (d.packedWireChannelByte == 5 && latestWire)
+				ImGui::TextColored(kOk, ICON_FA_CIRCLE_CHECK
+					" Wire channel byte: %d (albedo + metallic + roughness)", d.packedWireChannelByte);
+			else if (d.packedWireChannelByte == 6 && latestWire)
+				ImGui::TextColored(kBad, ICON_FA_CIRCLE_XMARK
+					" Wire channel byte: %d (EMISSIVE enum — stale bridge)", d.packedWireChannelByte);
+			else if (d.packedWireStrokeBytes == 27 && latestWire)
+				ImGui::TextColored(kBad, ICON_FA_CIRCLE_XMARK
+					" Wire stroke bytes: 27 (world radius written into emissive slot — reinject)");
+			else if (d.packedWireChannelByte == 6 && d.packedWireStrokeBytes == 31)
+				ImGui::TextColored(kBad, ICON_FA_CIRCLE_XMARK
+					" Wire channel byte: %d (legacy emissive routing — fully restart game)", d.packedWireChannelByte);
+			else
+				ImGui::Text("Wire channel byte: %d", d.packedWireChannelByte);
+		}
+		if (d.packedWireStrokeBytes >= 0)
+			ImGui::Text("Wire stroke bytes: %d%s", d.packedWireStrokeBytes,
+				d.packedWireStrokeBytes == 31 ? " (correct)" :
+				d.packedWireStrokeBytes == 27 ? " (emissive slot bug — reinject)" : " (unexpected)");
+	}
+	else if (settings.showDiagnostics)
+	{
+		ImGui::Separator();
+		ImGui::TextDisabled("Paint channel");
+		const int wireRev = d.bridgeWireRevision >= 0 ? d.bridgeWireRevision : bridgeWireEncodingRevision_.load();
+		if (wireRev >= 0 && wireRev < 6)
+			ImGui::TextColored(kBad, ICON_FA_TRIANGLE_EXCLAMATION
+				" Stale bridge (rev %d) — fully exit game and reinject.", wireRev);
+		else
+			ImGui::TextDisabled("Waiting for paint channel data from bridge progress/response");
+	}
+
+	if (!d.lastFailure.empty())
+	{
+		if (d.lastFailure.find("mesh_paint_cancelled") != std::string::npos)
+		{
+			if (d.serverStrokesSent >= 0)
+				ImGui::TextColored(kWarn, ICON_FA_TRIANGLE_EXCLAMATION " You stopped early — %d server strokes were already sent",
+					d.serverStrokesSent);
+			else
+				ImGui::TextColored(kWarn, ICON_FA_TRIANGLE_EXCLAMATION " You stopped early (partial apply may show emissive until UnPreview)");
+		}
+		else if (!d.lastJobOk)
+			ImGui::TextColored(kBad, ICON_FA_CIRCLE_XMARK " Failure: %s", d.lastFailure.c_str());
+	}
+
 	ImGui::Separator();
 	ImGui::TextDisabled("Auto material");
 	if (!d.autoMaterialRequested)
 	{
-		ImGui::TextDisabled("Auto material off (using manual metallic/roughness)");
+		ImGui::TextDisabled("Auto material off (using manual metallic/roughness/emissive)");
 	}
 	else if (d.materialAutoOk == 1)
 	{
-		ImGui::TextColored(kOk, ICON_FA_CIRCLE_CHECK " Detected: metallic %.2f, roughness %.2f",
-			d.materialMetallic, d.materialRoughness);
+		ImGui::TextColored(kOk, ICON_FA_CIRCLE_CHECK " Detected: metallic %.2f, roughness %.2f, emissive %.2f",
+			d.materialMetallic, d.materialRoughness, d.materialEmissive);
 	}
 	else if (d.materialAutoOk == 0)
 	{
@@ -1607,6 +2065,8 @@ void CamoManager::DrawDiagnostics()
 
 	if (d.lastJobOk)
 		ImGui::TextColored(kOk, ICON_FA_CIRCLE_CHECK " Last %s OK", d.lastKind.c_str());
+	else if (!d.lastFailure.empty() && d.lastFailure.find("mesh_paint_cancelled") != std::string::npos)
+		ImGui::TextColored(kWarn, ICON_FA_TRIANGLE_EXCLAMATION " Last %s stopped (partial apply)", d.lastKind.c_str());
 	else
 		ImGui::TextColored(kBad, ICON_FA_CIRCLE_XMARK " Last %s failed", d.lastKind.c_str());
 

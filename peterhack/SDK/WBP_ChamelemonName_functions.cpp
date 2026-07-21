@@ -16,29 +16,35 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_ChamelemonName.WBP_ChamelemonName_C.CheckEvent
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ChamelemonName.WBP_ChamelemonName_C.PreConstruct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_ChamelemonName_C::CheckEvent()
+void UWBP_ChamelemonName_C::PreConstruct(bool IsDesignTime_PreConstruct)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChamelemonName_C", "CheckEvent");
+		Func = Class->GetFunction("WBP_ChamelemonName_C", "PreConstruct");
 
-	UObject::ProcessEvent(Func, nullptr);
+	Params::WBP_ChamelemonName_C_PreConstruct Parms{};
+
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
+
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 
-// Function WBP_ChamelemonName.WBP_ChamelemonName_C.Construct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Function WBP_ChamelemonName.WBP_ChamelemonName_C.NumUpdate
+// (BlueprintCallable, BlueprintEvent)
 
-void UWBP_ChamelemonName_C::Construct()
+void UWBP_ChamelemonName_C::NumUpdate()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChamelemonName_C", "Construct");
+		Func = Class->GetFunction("WBP_ChamelemonName_C", "NumUpdate");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -64,37 +70,31 @@ void UWBP_ChamelemonName_C::ExecuteUbergraph_WBP_ChamelemonName(int32 EntryPoint
 }
 
 
-// Function WBP_ChamelemonName.WBP_ChamelemonName_C.NumUpdate
-// (BlueprintCallable, BlueprintEvent)
+// Function WBP_ChamelemonName.WBP_ChamelemonName_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
 
-void UWBP_ChamelemonName_C::NumUpdate()
+void UWBP_ChamelemonName_C::Construct()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChamelemonName_C", "NumUpdate");
+		Func = Class->GetFunction("WBP_ChamelemonName_C", "Construct");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
 
 
-// Function WBP_ChamelemonName.WBP_ChamelemonName_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function WBP_ChamelemonName.WBP_ChamelemonName_C.CheckEvent
+// (BlueprintCallable, BlueprintEvent)
 
-void UWBP_ChamelemonName_C::PreConstruct(bool IsDesignTime)
+void UWBP_ChamelemonName_C::CheckEvent()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_ChamelemonName_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_ChamelemonName_C", "CheckEvent");
 
-	Params::WBP_ChamelemonName_C_PreConstruct Parms{};
-
-	Parms.IsDesignTime = IsDesignTime;
-
-	UObject::ProcessEvent(Func, &Parms);
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 

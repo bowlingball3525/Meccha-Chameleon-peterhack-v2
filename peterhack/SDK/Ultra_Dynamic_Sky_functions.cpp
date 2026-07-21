@@ -469,7 +469,7 @@ void AUltra_Dynamic_Sky_C::Apply_Volumetric_Mode(EUDS_VolRT_Mode Mode)
 // Function Ultra_Dynamic_Sky.Ultra_Dynamic_Sky_C.Approximate Real Sun Moon and Stars
 // (Protected, HasOutParams, BlueprintCallable, BlueprintEvent)
 // Parameters:
-// double                                  Time_of_Day_0                                          (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// double                                  Time_Of_Day_0                                          (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // bool                                    Only_Calculate_Sun                                     (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // struct FVector*                         Sun_Vector                                             (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // struct FVector*                         Moon_Vector                                            (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
@@ -478,7 +478,7 @@ void AUltra_Dynamic_Sky_C::Apply_Volumetric_Mode(EUDS_VolRT_Mode Mode)
 // struct FLinearColor*                    Celestial_Yaw                                          (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 // double*                                 Celestial_Orbit                                        (Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void AUltra_Dynamic_Sky_C::Approximate_Real_Sun_Moon_and_Stars(double Time_of_Day_0, bool Only_Calculate_Sun, struct FVector* Sun_Vector, struct FVector* Moon_Vector, double* Real_Phase, struct FVector* Phase_Alignment, struct FLinearColor* Celestial_Yaw, double* Celestial_Orbit)
+void AUltra_Dynamic_Sky_C::Approximate_Real_Sun_Moon_and_Stars(double Time_Of_Day_0, bool Only_Calculate_Sun, struct FVector* Sun_Vector, struct FVector* Moon_Vector, double* Real_Phase, struct FVector* Phase_Alignment, struct FLinearColor* Celestial_Yaw, double* Celestial_Orbit)
 {
 	static class UFunction* Func = nullptr;
 
@@ -487,7 +487,7 @@ void AUltra_Dynamic_Sky_C::Approximate_Real_Sun_Moon_and_Stars(double Time_of_Da
 
 	Params::Ultra_Dynamic_Sky_C_Approximate_Real_Sun_Moon_and_Stars Parms{};
 
-	Parms.Time_of_Day_0 = Time_of_Day_0;
+	Parms.Time_Of_Day_0 = Time_Of_Day_0;
 	Parms.Only_Calculate_Sun = Only_Calculate_Sun;
 
 	UObject::ProcessEvent(Func, &Parms);

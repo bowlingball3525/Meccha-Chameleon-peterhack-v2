@@ -15,17 +15,63 @@ namespace runtime_contract
     // ElementSize@0x34, PropertyFlags@0x38.
     constexpr std::size_t FPropertyElementSizeOffset = 0x34;
     constexpr int InternalNoResendMaxCallsPerTick = 6;
-    constexpr int MaximumNetworkBatchLimit = 32;
+    constexpr int DirectLocalImmediateRepostsPerDeferredWakeup = 1;
+    constexpr int MaximumNetworkBatchLimit = 500;
     constexpr int FastLocalCadenceMs = 17;
+    constexpr int IncrementalTextureImportPacingMs = 100;
+    constexpr int IncrementalTextureImportMinimumStrokes = 40;
     constexpr int FallbackOutgoingStrokesPerBatch = 20;
     constexpr int FallbackOutgoingBatchesPerSecond = 20;
     constexpr int FallbackReplicatedStrokesPerTick = 24;
     constexpr int FallbackRenderTargetWritesPerFrame = 6;
-    constexpr int MinimumNetworkPacingMs = 25;
-    constexpr int RecommendedNetworkPacingMs = 50;
+    constexpr int MinimumNetworkPacingMs = 1;
     constexpr int MaximumManualNetworkPacingMs = 500;
+    constexpr int ServerPackedFallbackBatchLimit = 20;
+    constexpr int ServerPackedFallbackPacingMs = 50;
     constexpr std::uint64_t LocalDispatchCpuBudgetUs = 4'000;
-    constexpr int SupportedBrushPipelineVersion = 2;
+
+    // MECCHA CHAMELEON 2.9.0 packed paint wire contract. Keep these values
+    // centralized so the encoder and native regression test cannot silently
+    // disagree about the format-2 layout.
+    constexpr std::uint8_t PackedPaintFormatVersion = 2;
+    constexpr std::size_t PackedPaintHeaderBytes = 21; // version + FGuid + count
+    constexpr std::size_t PackedPaintRecordBytes = 31;
+    constexpr std::size_t PackedPaintRecordAlbedoOffset = 12;
+    constexpr std::size_t PackedPaintRecordMetallicOffset = 16;
+    constexpr std::size_t PackedPaintRecordRoughnessOffset = 17;
+    constexpr std::size_t PackedPaintRecordEmissiveOffset = 18;
+    constexpr std::size_t PackedPaintRecordChannelOffset = 22;
+    constexpr std::size_t PackedPaintRecordWorldRadiusOffset = 23;
+    constexpr std::size_t PackedPaintRecordSubdivisionOffset = 27;
+
+    // UE 5.6 packs Metallic, Roughness, and Emissive into one material-properties
+    // render target (R/G/B).  Channel 7 updates that target atomically.  Splitting
+    // a sample into channels 5 and 6 doubles the packed work and allowed the
+    // separate local replication route to render a second visible pass.
+    constexpr std::array<std::uint8_t, 1> ProductionMaterialPaintChannels{7};
+
+    constexpr std::size_t packed_paint_payload_size(std::size_t stroke_count)
+    {
+        return PackedPaintHeaderBytes + stroke_count * PackedPaintRecordBytes;
+    }
+
+    constexpr std::size_t production_material_stroke_count(std::size_t sample_count)
+    {
+        return sample_count * ProductionMaterialPaintChannels.size();
+    }
+
+    constexpr std::size_t production_material_sample_index(std::size_t stroke_index)
+    {
+        return stroke_index / ProductionMaterialPaintChannels.size();
+    }
+
+    static_assert(PackedPaintRecordEmissiveOffset + 4 == PackedPaintRecordChannelOffset,
+                  "packed paint emissive layout mismatch");
+    static_assert(PackedPaintRecordWorldRadiusOffset + sizeof(float) ==
+                      PackedPaintRecordSubdivisionOffset,
+                  "packed paint world-radius layout mismatch");
+    static_assert(PackedPaintRecordSubdivisionOffset + 4 == PackedPaintRecordBytes,
+                  "packed paint record size mismatch");
 
     // Packed skeletal strokes carry both a UV-space brush radius and an optional
     // world-space radius.  In the supported Shipping build, compact-stroke
@@ -35,28 +81,15 @@ namespace runtime_contract
     // normalized UV radius here is not equivalent: it suppresses that conversion
     // and collapses otherwise large brushes to tiny world-space dots.
     constexpr float PackedMeshAnchorWorldRadiusAuto = 0.0f;
-    // The supported paint mesh's cached world geometry and TargetMesh bounds
-    // use different linear scales.  The native packed preflight multiplies the
-    // normalized brush radius by TargetMesh bounds diameter, which produced a
-    // 6--7 px footprint for a requested 10 texel radius.  Host RGBA A/B against
-    // the direct-UV route found 3.4 to be the closest conservative calibration;
-    // 4.0 and per-triangle maxima leaked onto non-Back atlas areas.
-    // World-sphere painting begins to cross nearby folded surfaces before it
-    // exactly matches a direct-UV circle.  Host mask A/B selected this
-    // conservative factor (3.4/4.0 outperformed both 4.0 and per-anchor max).
+    // Production preserves the configured UV radius on the wire. Each anchor's
+    // effective world radius is derived independently from that triangle's
+    // UV-to-world Jacobian; a uniform wire multiplier either leaves holes or
+    // expands one world-space stroke across adjacent mesh surfaces.
+    constexpr double PackedMeshAnchorProductionRadiusScale = 1.0;
+    constexpr bool PackedMeshAnchorProductionUsesTriangleWorldRadius = true;
+    // Research-only dynamic calibration retains the conservative fold/seam
+    // factor for controlled comparisons.
     constexpr double PackedMeshAnchorCoverageSafetyFactor = 0.91;
-    constexpr double PackedMeshAnchorExpectedRadiusCalibration = 3.5;
-    // The runtime radius calibration divides world-units-per-UV by the mesh
-    // bounds diameter that the native packed preflight also multiplies by, so
-    // the ratio stays correct even on maps that inflate the skeletal bounds
-    // sphere.  The expected window is the range observed on the maps the
-    // pipeline was developed against and is reported as metadata only; the
-    // plausible window is a pure garbage-read guard and the only range that
-    // hard-fails a paint.
-    constexpr double PackedMeshRadiusScaleExpectedWindowMin = 0.5;
-    constexpr double PackedMeshRadiusScaleExpectedWindowMax = 6.0;
-    constexpr double PackedMeshRadiusScalePlausibleMin = 1.0 / 64.0;
-    constexpr double PackedMeshRadiusScalePlausibleMax = 64.0;
     constexpr int PackedMeshAnchorSubdivisionLevelAuto = 0;
     constexpr float PackedMeshAnchorSubdivisionPixelSizeAuto = 0.0f;
     constexpr int PackedMeshAnchorTemplateResolutionAuto = 0;
@@ -80,6 +113,26 @@ namespace runtime_contract
                std::isfinite(brush_uv_radius) &&
                brush_uv_radius > 0.0f &&
                effective_world_radius > brush_uv_radius;
+    }
+
+    inline bool resolve_packed_triangle_world_radius(double world_units_per_uv,
+                                                     float brush_uv_radius,
+                                                     float& world_radius)
+    {
+        world_radius = 0.0f;
+        if (!std::isfinite(world_units_per_uv) || world_units_per_uv <= 0.0 ||
+            !std::isfinite(brush_uv_radius) || brush_uv_radius <= 0.0f ||
+            brush_uv_radius > 1.0f)
+        {
+            return false;
+        }
+        const double resolved = world_units_per_uv * static_cast<double>(brush_uv_radius);
+        if (!std::isfinite(resolved) || resolved <= static_cast<double>(brush_uv_radius))
+        {
+            return false;
+        }
+        world_radius = static_cast<float>(resolved);
+        return std::isfinite(world_radius) && world_radius > brush_uv_radius;
     }
 
     // BrushSettings.Radius is kept in planner/direct-UV units.  Only the packed
@@ -126,9 +179,10 @@ namespace runtime_contract
                effective_template_resolution <= 0;
     }
 
-    // Receiver order in packed record bytes 23..26 (decoded into compact-stroke
+    // Receiver order in packed record subdivision tail (decoded into compact-stroke
     // fields at later offsets): subdivision level u8, subdivision pixel size
-    // u8, template resolution u16 LE.
+    // u8, template resolution u16 LE.  Tail sits at bytes 23..26 on 27-byte
+    // records and 27..30 once the emissive FColor field is present.
     constexpr std::array<std::uint8_t, 4> packed_mesh_anchor_auto_subdivision_tail()
     {
         return {0, 0, 0, 0};
@@ -148,26 +202,6 @@ namespace runtime_contract
     constexpr bool uobject_flags_usable(std::uint32_t object_flags, std::uint32_t class_flags)
     {
         return (object_flags & ObjectRejectMask) == 0 && (class_flags & ClassRejectMask) == 0;
-    }
-
-    struct BrushPipelineVersionDecision
-    {
-        double requested_version;
-        int supported_version;
-        bool required;
-        bool supported;
-    };
-
-    constexpr BrushPipelineVersionDecision resolve_brush_pipeline_version(
-        double requested_version,
-        bool preview_only,
-        bool unpreview_only)
-    {
-        const bool required = !preview_only && !unpreview_only;
-        return {requested_version,
-                SupportedBrushPipelineVersion,
-                required,
-                !required || requested_version == static_cast<double>(SupportedBrushPipelineVersion)};
     }
 
     constexpr bool packed_manager_precommit_matches(std::uintptr_t captured_manager,
@@ -237,8 +271,9 @@ namespace runtime_contract
                                                 MinimumNetworkPacingMs,
                                                 MaximumManualNetworkPacingMs);
         const int automatic_remote_batch = min_value(requested_batch, min_value(outgoing_strokes, replicated_strokes));
-        // Honor user-requested pacing; bridge backoff raises delay under live pressure.
-        const int automatic_remote_delay = requested_delay;
+        const int automatic_remote_delay = max_value(requested_delay,
+                                                     max_value(MinimumNetworkPacingMs,
+                                                               ceil_div(1000, outgoing_batches)));
         const int local_batch = min_value(InternalNoResendMaxCallsPerTick, render_writes);
         return {automatic_remote_batch,
                 automatic_remote_delay,
@@ -247,12 +282,132 @@ namespace runtime_contract
                 fallback};
     }
 
-    // EPaintChannel: 0..3 address one render target, All addresses four, and
-    // AlbedoMetallicRoughness addresses three.  The game limit is expressed in
-    // render-target writes, not paint-stroke calls.
+    constexpr PacingDecision resolve_configured_pacing(
+        bool auto_adapt,
+        int requested_batch_limit,
+        int requested_pacing_ms,
+        int max_outgoing_strokes_per_batch,
+        int max_outgoing_network_batches_per_second,
+        int max_replicated_strokes_per_tick,
+        int max_render_target_writes_per_frame)
+    {
+        if (auto_adapt)
+        {
+            return resolve_pacing(MaximumNetworkBatchLimit,
+                                  MinimumNetworkPacingMs,
+                                  max_outgoing_strokes_per_batch,
+                                  max_outgoing_network_batches_per_second,
+                                  max_replicated_strokes_per_tick,
+                                  max_render_target_writes_per_frame);
+        }
+        const int manual_delay_ms = clamp_value(requested_pacing_ms,
+                                                MinimumNetworkPacingMs,
+                                                MaximumManualNetworkPacingMs);
+        return {clamp_value(requested_batch_limit, 1, MaximumNetworkBatchLimit),
+                manual_delay_ms,
+                min_value(InternalNoResendMaxCallsPerTick,
+                          positive_or(max_render_target_writes_per_frame, FallbackRenderTargetWritesPerFrame)),
+                min_value(FastLocalCadenceMs, manual_delay_ms),
+                false};
+    }
+
+    constexpr bool production_paint_uses_texture_import(bool auto_adapt,
+                                                        bool normal_paint_requires_packed,
+                                                        bool local_visual_sync_requested,
+                                                        bool research_artifacts)
+    {
+        (void)auto_adapt;
+        return normal_paint_requires_packed &&
+               local_visual_sync_requested &&
+               !research_artifacts;
+    }
+
+    constexpr int incremental_texture_import_chunk_limit(int server_batch_limit)
+    {
+        return max_value(IncrementalTextureImportMinimumStrokes,
+                         clamp_value(server_batch_limit, 1, MaximumNetworkBatchLimit));
+    }
+
+    constexpr std::size_t incremental_texture_import_count(std::size_t server_offset,
+                                                           std::size_t local_offset,
+                                                           std::size_t total_strokes,
+                                                           std::size_t max_strokes,
+                                                           std::size_t pass_boundary)
+    {
+        const std::size_t submitted = std::min(server_offset, total_strokes);
+        const std::size_t imported = std::min(local_offset, total_strokes);
+        if (submitted <= imported)
+        {
+            return 0;
+        }
+        const std::size_t available = submitted - imported;
+        const std::size_t bounded_max = std::max<std::size_t>(1, max_strokes);
+        const std::size_t boundary = std::min(pass_boundary, total_strokes);
+        const std::size_t before_boundary = boundary > imported
+                                                ? boundary - imported
+                                                : available;
+        return std::min(available, std::min(bounded_max, before_boundary));
+    }
+
+    constexpr bool server_only_replay_complete(bool local_visual_sync_enabled,
+                                               bool local_texture_import_started,
+                                               bool server_texture_sync_started,
+                                               bool server_packed_fallback,
+                                               int server_batch_failures,
+                                               int server_strokes_sent,
+                                               int total_strokes)
+    {
+        return !local_visual_sync_enabled &&
+               (server_packed_fallback ||
+                (!local_texture_import_started && !server_texture_sync_started)) &&
+               server_batch_failures == 0 &&
+               server_strokes_sent == total_strokes;
+    }
+
+    constexpr bool uses_fast_local_dispatch_wakeup(bool internal_no_resend_local_apply,
+                                                   bool local_packed_queue,
+                                                   bool local_work_remaining)
+    {
+        return internal_no_resend_local_apply &&
+               !local_packed_queue &&
+               local_work_remaining;
+    }
+
+    constexpr bool should_immediately_repost_direct_local(
+        bool fast_local_dispatch_wakeup,
+        int immediate_reposts_since_deferred_wakeup)
+    {
+        return fast_local_dispatch_wakeup &&
+               immediate_reposts_since_deferred_wakeup <
+                   DirectLocalImmediateRepostsPerDeferredWakeup;
+    }
+
+    constexpr double parallel_lane_eta_ms(double server_eta_ms, double local_eta_ms)
+    {
+        return server_eta_ms < 0.0 || local_eta_ms < 0.0
+                   ? -1.0
+                   : (server_eta_ms > local_eta_ms ? server_eta_ms : local_eta_ms);
+    }
+
+    // EPaintChannel: 0..3 address one render target, All addresses four,
+    // AlbedoMetallicRoughness addresses three, Emissive addresses one, and
+    // AlbedoMetallicRoughnessEmissive addresses four.  The game limit is
+    // expressed in render-target writes, not paint-stroke calls.
     constexpr int paint_channel_write_cost(int target_channel)
     {
-        return target_channel == 4 ? 4 : (target_channel == 5 ? 3 : 1);
+        if (target_channel == 4)
+        {
+            return 4;
+        }
+        if (target_channel == 5)
+        {
+            return 3;
+        }
+        if (target_channel == 7)
+        {
+            return 4;
+        }
+        return 1;
     }
 
     constexpr bool local_dispatch_can_append(int processed_calls,
@@ -281,25 +436,52 @@ namespace runtime_contract
         return max_value(1, requested_delay_ms);
     }
 
-    // The paired packed path must never place more than one configured batch
-    // ahead of the painter's exact component queue.  An unavailable queue
-    // observation is unsafe: do not submit another paired server/local batch.
+    // The paired packed path pipelines server/local batches while the exact
+    // component queue drains asynchronously.  Allow two configured batches of
+    // headroom so a full first batch (which may coalesce below the wire count)
+    // does not stall the stream until the receiver catches up.
+    constexpr int PairedLocalQueuePipelineBatchMultiplier = 2;
+
     constexpr int paired_local_queue_available_capacity(int configured_batch_limit,
-                                                        int queued_strokes)
+                                                        int queued_strokes,
+                                                        int strokes_submitted = 0,
+                                                        int drained_strokes = 0)
     {
         if (queued_strokes < 0)
         {
             return 0;
         }
-        return max_value(0, max_value(1, configured_batch_limit) - queued_strokes);
+        const int limit =
+            max_value(1, configured_batch_limit) * PairedLocalQueuePipelineBatchMultiplier;
+        const int queue_room = max_value(0, limit - queued_strokes);
+        if (strokes_submitted <= 0)
+        {
+            return queue_room;
+        }
+        const int in_flight =
+            max_value(0, strokes_submitted - max_value(0, drained_strokes));
+        const int logical_room = max_value(0, limit - in_flight);
+        return max_value(queue_room, logical_room);
     }
 
     constexpr int paired_local_queue_commit_count(int requested_strokes,
                                                   int configured_batch_limit,
-                                                  int queued_strokes)
+                                                  int queued_strokes,
+                                                  int strokes_submitted = 0,
+                                                  int drained_strokes = 0)
     {
         return min_value(max_value(0, requested_strokes),
-                         paired_local_queue_available_capacity(configured_batch_limit, queued_strokes));
+                         paired_local_queue_available_capacity(configured_batch_limit,
+                                                               queued_strokes,
+                                                               strokes_submitted,
+                                                               drained_strokes));
+    }
+
+    constexpr bool paired_local_queue_postcondition_ok(int observed_queue_delta,
+                                                       int submitted_stroke_count)
+    {
+        return observed_queue_delta > 0 &&
+               observed_queue_delta <= max_value(0, submitted_stroke_count);
     }
 
     constexpr bool paired_local_queue_cancel_needs_drain(bool cancel_requested,
@@ -431,9 +613,9 @@ namespace runtime_contract
         int uv_island;
         double u;
         double v;
-        bool has_reference_position;
-        double reference_z;
-        double fallback_z;
+        bool has_current_view_position;
+        double current_view_vertical;
+        double fallback_view_vertical;
         double horizontal;
         std::size_t original_ordinal;
     };
@@ -458,36 +640,45 @@ namespace runtime_contract
         std::size_t fill_deduplicated{0};
         std::size_t coarse_paint_candidates{0};
         std::size_t coarse_paint_deduplicated{0};
-        bool reference_position_fallback_used{false};
-        std::size_t reference_position_fallback_candidates{0};
+        bool current_view_projection_fallback_used{false};
+        std::size_t current_view_projection_fallback_candidates{0};
     };
 
     inline TwoBrushReplayPlan build_two_brush_replay_plan(
         const std::vector<TwoBrushReplayCandidate>& candidates,
         int texture_size,
+        bool brush_1_enabled,
         double brush_1_size_texels,
+        bool brush_2_enabled,
         double brush_2_size_texels,
         double fill_radius_texels)
     {
         TwoBrushReplayPlan plan{};
-        constexpr ReplayRegion region_order[]{ReplayRegion::Back,
-                                               ReplayRegion::Side,
-                                               ReplayRegion::Front};
         const double texture_size_double = static_cast<double>(max_value(1, texture_size));
-        const double fill_cell_uv = std::max(fill_radius_texels * 0.75, brush_2_size_texels) /
-                                    texture_size_double;
+        const double fill_cell_uv = fill_radius_texels * 0.75 / texture_size_double;
         const double coarse_cell_uv = brush_1_size_texels / texture_size_double;
+        bool fill_all_regions = false;
+        for (const auto& candidate : candidates)
+        {
+            if (candidate.mode == ReplayRegionMode::Fill)
+            {
+                fill_all_regions = true;
+                break;
+            }
+        }
         double vertical_top = 0.0;
         double vertical_bottom = 0.0;
         bool have_vertical_bounds = false;
         const auto selected_vertical = [](const TwoBrushReplayCandidate& candidate) {
-            return candidate.has_reference_position && std::isfinite(candidate.reference_z)
-                       ? candidate.reference_z
-                       : (std::isfinite(candidate.fallback_z) ? candidate.fallback_z : 0.0);
+            return candidate.has_current_view_position && std::isfinite(candidate.current_view_vertical)
+                       ? candidate.current_view_vertical
+                       : (std::isfinite(candidate.fallback_view_vertical)
+                              ? candidate.fallback_view_vertical
+                              : 0.0);
         };
         for (const auto& candidate : candidates)
         {
-            if (candidate.mode == ReplayRegionMode::Skip)
+            if (!fill_all_regions && candidate.mode == ReplayRegionMode::Skip)
             {
                 continue;
             }
@@ -503,93 +694,102 @@ namespace runtime_contract
                 vertical_top = std::max(vertical_top, vertical);
                 vertical_bottom = std::min(vertical_bottom, vertical);
             }
-            if (!candidate.has_reference_position || !std::isfinite(candidate.reference_z))
+            if (!candidate.has_current_view_position || !std::isfinite(candidate.current_view_vertical))
             {
-                ++plan.reference_position_fallback_candidates;
+                ++plan.current_view_projection_fallback_candidates;
             }
         }
-        plan.reference_position_fallback_used = plan.reference_position_fallback_candidates > 0;
+        plan.current_view_projection_fallback_used =
+            plan.current_view_projection_fallback_candidates > 0;
         const double vertical_span = std::max(0.001, vertical_top - vertical_bottom);
         auto append_pass = [&](ReplayPass pass,
                                ReplayRegionMode required_mode,
                                double dedupe_cell_uv,
-                               double row_size_texels) {
+                               double row_size_texels,
+                               bool include_all_regions = false) {
             std::set<std::tuple<int, int, int, int>> emitted_cells{};
+            std::vector<TwoBrushReplayEntry> pending{};
             const double row_height = std::max(
                 0.000001,
                 vertical_span * std::max(0.001, row_size_texels) / texture_size_double);
-            for (const auto region : region_order)
+            for (const auto& candidate : candidates)
             {
-                std::vector<TwoBrushReplayEntry> pending{};
-                for (const auto& candidate : candidates)
+                if (!include_all_regions && candidate.mode != required_mode)
                 {
-                    if (candidate.region != region || candidate.mode != required_mode)
+                    continue;
+                }
+                if (pass == ReplayPass::Fill)
+                {
+                    ++plan.fill_candidates;
+                }
+                else if (pass == ReplayPass::CoarsePaint)
+                {
+                    ++plan.coarse_paint_candidates;
+                }
+                if (dedupe_cell_uv > 0.000001)
+                {
+                    const auto cell_coordinate = [&](double value) {
+                        const double finite_value = std::isfinite(value) ? value : 0.0;
+                        return static_cast<int>(std::floor(
+                            std::max(0.0, std::min(1.0, finite_value)) / dedupe_cell_uv));
+                    };
+                    const auto cell = std::make_tuple(
+                        static_cast<int>(candidate.region),
+                        candidate.uv_island,
+                        cell_coordinate(candidate.u),
+                        cell_coordinate(candidate.v));
+                    if (!emitted_cells.insert(cell).second)
                     {
+                        if (pass == ReplayPass::Fill)
+                        {
+                            ++plan.fill_deduplicated;
+                        }
+                        else if (pass == ReplayPass::CoarsePaint)
+                        {
+                            ++plan.coarse_paint_deduplicated;
+                        }
                         continue;
                     }
-                    if (pass == ReplayPass::Fill)
-                    {
-                        ++plan.fill_candidates;
-                    }
-                    else if (pass == ReplayPass::CoarsePaint)
-                    {
-                        ++plan.coarse_paint_candidates;
-                    }
-                    if (dedupe_cell_uv > 0.000001)
-                    {
-                        const auto cell_coordinate = [&](double value) {
-                            const double finite_value = std::isfinite(value) ? value : 0.0;
-                            return static_cast<int>(std::floor(
-                                std::max(0.0, std::min(1.0, finite_value)) / dedupe_cell_uv));
-                        };
-                        const auto cell = std::make_tuple(
-                            static_cast<int>(candidate.region),
-                            candidate.uv_island,
-                            cell_coordinate(candidate.u),
-                            cell_coordinate(candidate.v));
-                        if (!emitted_cells.insert(cell).second)
-                        {
-                            if (pass == ReplayPass::Fill)
-                            {
-                                ++plan.fill_deduplicated;
-                            }
-                            else if (pass == ReplayPass::CoarsePaint)
-                            {
-                                ++plan.coarse_paint_deduplicated;
-                            }
-                            continue;
-                        }
-                    }
-                    pending.push_back(
-                        {candidate.sample_index,
-                         pass,
-                         candidate.region,
-                         {spatial_scanline_row(vertical_top,
-                                               selected_vertical(candidate),
-                                               row_height),
-                          candidate.horizontal,
-                          candidate.original_ordinal}});
                 }
-                std::stable_sort(pending.begin(), pending.end(), [](const auto& left, const auto& right) {
-                    return spatial_scanline_less(left.spatial_key, right.spatial_key);
-                });
-                plan.entries.insert(plan.entries.end(), pending.begin(), pending.end());
+                pending.push_back(
+                    {candidate.sample_index,
+                     pass,
+                     candidate.region,
+                     {spatial_scanline_row(vertical_top,
+                                           selected_vertical(candidate),
+                                           row_height),
+                      candidate.horizontal,
+                      candidate.original_ordinal}});
             }
+            std::stable_sort(pending.begin(), pending.end(), [](const auto& left, const auto& right) {
+                return spatial_scanline_less(left.spatial_key, right.spatial_key);
+            });
+            plan.entries.insert(plan.entries.end(), pending.begin(), pending.end());
         };
 
-        append_pass(ReplayPass::Fill, ReplayRegionMode::Fill, fill_cell_uv, fill_radius_texels);
+        append_pass(ReplayPass::Fill,
+                    ReplayRegionMode::Fill,
+                    fill_cell_uv,
+                    fill_radius_texels,
+                    fill_all_regions);
         plan.fill_end = plan.entries.size();
         plan.fill_count = plan.fill_end;
-        append_pass(ReplayPass::CoarsePaint,
-                    ReplayRegionMode::Paint,
-                    coarse_cell_uv,
-                    brush_1_size_texels);
+        if (brush_1_enabled)
+        {
+            append_pass(ReplayPass::CoarsePaint,
+                        ReplayRegionMode::Paint,
+                        coarse_cell_uv,
+                        brush_1_size_texels);
+        }
         plan.coarse_end = plan.entries.size();
         plan.coarse_paint_count = plan.coarse_end - plan.fill_end;
-        append_pass(ReplayPass::FinePaint,
-                    ReplayRegionMode::Paint,
-                    0.0,
-                    brush_2_size_texels);
+        if (brush_2_enabled)
+        {
+            append_pass(ReplayPass::FinePaint,
+                        ReplayRegionMode::Paint,
+                        0.0,
+                        brush_2_size_texels);
+        }
         plan.fine_paint_count = plan.entries.size() - plan.coarse_end;
         return plan;
     }
@@ -603,11 +803,12 @@ namespace runtime_contract
 
     constexpr bool requires_internal_no_resend(bool preview_only,
                                                 bool unpreview_only,
-                                                bool research_local_only,
-                                                bool research_packed_only)
+                                                bool research_artifacts,
+                                                bool research_combined_no_resend)
     {
-        const bool packed_server_route = !preview_only && !unpreview_only && !research_local_only;
-        const bool local_visual_apply = !preview_only && !unpreview_only && !research_packed_only;
-        return packed_server_route && local_visual_apply;
+        return !preview_only &&
+               !unpreview_only &&
+               research_artifacts &&
+               research_combined_no_resend;
     }
 }

@@ -22,73 +22,73 @@ SDK_NAMESPACE_START
 class ABP_FirstPersonCharacter_cLeon_Character_Hunter_C final : public ABP_FirstPersonCharacter_cLeon_Character_C
 {
 public:
-	struct FPointerToUberGraphFrame               UberGraphFrame_BP_FirstPersonCharacter_cLeon_Character_Hunter_C; // 0x0CD8(0x0008)(ZeroConstructor, Transient, DuplicateTransient)
-	class USceneComponent*                        GunTop1;                                           // 0x0CE0(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class UStaticMeshComponent*                   StaticMesh;                                        // 0x0CE8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class USkeletalMeshComponent*                 LocalViewBody;                                     // 0x0CF0(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class UStaticMeshComponent*                   crown;                                             // 0x0CF8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class USceneComponent*                        GunTop;                                            // 0x0D00(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class UStaticMeshComponent*                   Gun1;                                              // 0x0D08(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	class UStaticMeshComponent*                   gun;                                               // 0x0D10(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
-	struct FVector                                StandRelativeCameraLocation;                       // 0x0D18(0x0018)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	double                                        GunCoolTime;                                       // 0x0D30(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	TArray<class ABP_FirstPersonPlayerState_C*>   FoundTargetPlayerState;                            // 0x0D38(0x0010)(Edit, BlueprintVisible, Net, DisableEditOnTemplate, DisableEditOnInstance, RepNotify)
-	TMap<class ABP_FirstPersonPlayerState_Online_cLeon_C*, int32> SendTargetInView;                  // 0x0D48(0x0050)(Edit, BlueprintVisible, DisableEditOnTemplate, DisableEditOnInstance)
-	class UMaterialInstanceDynamic*               LocalTarget;                                       // 0x0D98(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
-	int32                                         CurrentBullet;                                     // 0x0DA0(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          InfinityBullet;                                    // 0x0DA4(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_DA5[0x3];                                      // 0x0DA5(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	double                                        Gun_Cool_TimeDefault;                              // 0x0DA8(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	bool                                          IsChater;                                          // 0x0DB0(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	uint8                                         Pad_DB1[0x3];                                      // 0x0DB1(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	int32                                         CheatCheck;                                        // 0x0DB4(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	struct FPointerToUberGraphFrame               UberGraphFrame_BP_FirstPersonCharacter_cLeon_Character_Hunter_C; // 0x0CE0(0x0008)(ZeroConstructor, Transient, DuplicateTransient)
+	class USceneComponent*                        GunTop1;                                           // 0x0CE8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class UStaticMeshComponent*                   StaticMesh;                                        // 0x0CF0(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class USkeletalMeshComponent*                 LocalViewBody;                                     // 0x0CF8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class UStaticMeshComponent*                   crown;                                             // 0x0D00(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class USceneComponent*                        GunTop;                                            // 0x0D08(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class UStaticMeshComponent*                   Gun1;                                              // 0x0D10(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	class UStaticMeshComponent*                   gun;                                               // 0x0D18(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
+	struct FVector                                StandRelativeCameraLocation;                       // 0x0D20(0x0018)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        GunCoolTime;                                       // 0x0D38(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	TArray<class ABP_FirstPersonPlayerState_C*>   FoundTargetPlayerState;                            // 0x0D40(0x0010)(Edit, BlueprintVisible, Net, DisableEditOnTemplate, DisableEditOnInstance, RepNotify)
+	TMap<class ABP_FirstPersonPlayerState_Online_cLeon_C*, int32> SendTargetInView;                  // 0x0D50(0x0050)(Edit, BlueprintVisible, DisableEditOnTemplate, DisableEditOnInstance)
+	class UMaterialInstanceDynamic*               LocalTarget;                                       // 0x0DA0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
+	int32                                         CurrentBullet;                                     // 0x0DA8(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          InfinityBullet;                                    // 0x0DAC(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_DAD[0x3];                                      // 0x0DAD(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	double                                        Gun_Cool_TimeDefault;                              // 0x0DB0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	bool                                          IsChater;                                          // 0x0DB8(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	uint8                                         Pad_DB9[0x3];                                      // 0x0DB9(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         CheatCheck;                                        // 0x0DBC(0x0004)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void AddtoViewDatas_Server_(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points);
-	void AntiChatTrace(const struct FVector& End, class ABP_FirstPersonCharacter_cLeon_Character_C* Target);
-	void ChangeViewEnd();
-	void ChangeViewMode(class FName ModeName, bool Quick);
-	void CheckViewInPlayers(class AActor* TargetActor, bool UseBoundCentor, int32* Rezult);
-	void CheckViewInSurvivor();
-	void ExecuteUbergraph_BP_FirstPersonCharacter_cLeon_Character_Hunter(int32 EntryPoint);
-	void HitSuccess(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter);
-	void InfinityBulletEnd();
-	void InpActEvt_IA_Crouch_K2Node_EnhancedInputActionEvent_2(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
-	void InpActEvt_IA_Jump_K2Node_EnhancedInputActionEvent_1(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
-	void InpActEvt_IA_KeepRotation_K2Node_EnhancedInputActionEvent_0(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
-	void InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
-	void KillPlayer(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState);
-	void OnBlendOut_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
-	void OnBlendOut_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
-	void OnBlendOut_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
-	void OnBlendOut_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
-	void OnCompleted_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
-	void OnCompleted_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
-	void OnCompleted_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
-	void OnCompleted_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
-	void OnInterrupted_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
-	void OnInterrupted_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
-	void OnInterrupted_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
-	void OnInterrupted_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
-	void OnNotifyBegin_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
-	void OnNotifyBegin_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
-	void OnNotifyBegin_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
-	void OnNotifyBegin_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
-	void OnNotifyEnd_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
-	void OnNotifyEnd_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
-	void OnNotifyEnd_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
-	void OnNotifyEnd_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
-	void OnRep_CurrentBullet();
-	void OnRep_FoundTargetPlayerState();
-	void PlayerControllerSetup();
-	void ReceiveBeginPlay();
-	void ReceiveTick(float DeltaSeconds);
-	void SendToView();
-	void ShowCrown();
-	void SpawnShotEffect_Client_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
-	void SpawnShotEffect_Local_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
-	void SpawnShotEffect_Server_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
 	void UpdateRemainBullet(int32 BulletNum);
+	void SpawnShotEffect_Server_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
+	void SpawnShotEffect_Local_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
+	void SpawnShotEffect_Client_(const struct FVector& Endpoint, bool IsHit, const struct FRotator& HitRotation, int32 Seed);
+	void ShowCrown();
+	void SendToView();
+	void ReceiveTick(float DeltaSeconds_ReceiveTick);
+	void ReceiveBeginPlay();
+	void PlayerControllerSetup();
+	void OnRep_FoundTargetPlayerState();
+	void OnRep_CurrentBullet();
+	void OnNotifyEnd_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
+	void OnNotifyEnd_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
+	void OnNotifyEnd_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
+	void OnNotifyEnd_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
+	void OnNotifyBegin_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
+	void OnNotifyBegin_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
+	void OnNotifyBegin_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
+	void OnNotifyBegin_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
+	void OnInterrupted_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
+	void OnInterrupted_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
+	void OnInterrupted_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
+	void OnInterrupted_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
+	void OnCompleted_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
+	void OnCompleted_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
+	void OnCompleted_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
+	void OnCompleted_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
+	void OnBlendOut_B6C494744BD8085F199D4791408CEB6E(class FName NotifyName);
+	void OnBlendOut_85995EF044945821EC08CDAD261FDD89(class FName NotifyName);
+	void OnBlendOut_53A71DDF483CC968C1A61DAF788E875A(class FName NotifyName);
+	void OnBlendOut_12AC243E438FB95C3F7F978927A1E9CD(class FName NotifyName);
+	void KillPlayer(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayerState);
+	void InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3(const struct FInputActionValue& ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3, float ElapsedTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3, float TriggeredTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3, const class UInputAction* SourceAction_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3);
+	void InpActEvt_IA_KeepRotation_K2Node_EnhancedInputActionEvent_0(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
+	void InpActEvt_IA_Jump_K2Node_EnhancedInputActionEvent_1(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
+	void InpActEvt_IA_Crouch_K2Node_EnhancedInputActionEvent_2(const struct FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const class UInputAction* SourceAction);
+	void InfinityBulletEnd();
+	void HitSuccess(class ABP_FirstPersonCharacter_cLeon_Character_C* FirstpersonCharacter);
+	void ExecuteUbergraph_BP_FirstPersonCharacter_cLeon_Character_Hunter(int32 EntryPoint);
+	void CheckViewInSurvivor();
+	void CheckViewInPlayers(class AActor* TargetActor, bool UseBoundCentor, int32* Rezult);
+	void ChangeViewMode(class FName ModeName_ChangeViewMode, bool Quick_ChangeViewMode);
+	void ChangeViewEnd();
+	void AntiChatTrace(const struct FVector& End, class ABP_FirstPersonCharacter_cLeon_Character_C* Target);
+	void AddtoViewDatas_Server_(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points);
 
 public:
 	static class UClass* StaticClass()

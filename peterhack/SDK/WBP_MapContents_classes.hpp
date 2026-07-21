@@ -10,8 +10,8 @@
 
 #include "Basic.hpp"
 
-#include "ST_cLeonMapData_structs.hpp"
 #include "Engine_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 #include "SlateCore_structs.hpp"
 #include "UINavigation_classes.hpp"
 
@@ -34,14 +34,14 @@ public:
 	struct FSlateColor                            TextColor;                                         // 0x0978(0x0014)(Edit, BlueprintVisible, ExposeOnSpawn)
 
 public:
-	void BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature();
-	void Construct();
-	void ExecuteUbergraph_WBP_MapContents(int32 EntryPoint);
-	void OnFailure_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage);
-	void OnSuccess_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage);
-	void PreConstruct(bool IsDesignTime);
-	void ReUpdate();
 	void SelectUpdate(bool State);
+	void ReUpdate();
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	void OnSuccess_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage);
+	void OnFailure_F47348424771535C48E222B9B9CA8A4E(const class FString& ItemId, const struct FSteamWorkshopItemDetails& Details, const class FString& ErrorMessage);
+	void ExecuteUbergraph_WBP_MapContents(int32 EntryPoint);
+	void Construct();
+	void BndEvt__WBP_MapContents_NavButton_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature();
 
 public:
 	static class UClass* StaticClass()

@@ -43,16 +43,16 @@ public:
 	bool                                          IsFreeCamera;                                      // 0x03C8(0x0001)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void ChangeBackType(bool IsBackType_0);
-	void Construct();
-	void ConstructGameState();
-	void EmptyCheck();
-	void ExecuteUbergraph_WBP_Spectate_cLeon(int32 EntryPoint);
-	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> GetSpectateTarget(TArray<class APawn*>* ReturnPawn);
-	void PreConstruct(bool IsDesignTime);
-	void SelectChange(int32 AddValue);
-	void SwitchFreeCamera(bool ToggleState);
 	void UpdatePlayers();
+	void SwitchFreeCamera(bool ToggleState);
+	void SelectChange(int32 AddValue);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*> GetSpectateTarget(TArray<class APawn*>* ReturnPawn);
+	void ExecuteUbergraph_WBP_Spectate_cLeon(int32 EntryPoint);
+	void EmptyCheck();
+	void ConstructGameState();
+	void Construct();
+	void ChangeBackType(bool IsBackType);
 
 public:
 	static class UClass* StaticClass()

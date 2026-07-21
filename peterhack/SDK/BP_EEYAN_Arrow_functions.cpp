@@ -16,15 +16,15 @@
 
 SDK_NAMESPACE_START
 
-// Function BP_EEYAN_Arrow.BP_EEYAN_Arrow_C.DeleteCall
-// (BlueprintCallable, BlueprintEvent)
+// Function BP_EEYAN_Arrow.BP_EEYAN_Arrow_C.ReceiveBeginPlay
+// (Event, Protected, BlueprintEvent)
 
-void ABP_EEYAN_Arrow_C::DeleteCall()
+void ABP_EEYAN_Arrow_C::ReceiveBeginPlay()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_EEYAN_Arrow_C", "DeleteCall");
+		Func = Class->GetFunction("BP_EEYAN_Arrow_C", "ReceiveBeginPlay");
 
 	UObject::ProcessEvent(Func, nullptr);
 }
@@ -50,15 +50,15 @@ void ABP_EEYAN_Arrow_C::ExecuteUbergraph_BP_EEYAN_Arrow(int32 EntryPoint)
 }
 
 
-// Function BP_EEYAN_Arrow.BP_EEYAN_Arrow_C.ReceiveBeginPlay
-// (Event, Protected, BlueprintEvent)
+// Function BP_EEYAN_Arrow.BP_EEYAN_Arrow_C.DeleteCall
+// (BlueprintCallable, BlueprintEvent)
 
-void ABP_EEYAN_Arrow_C::ReceiveBeginPlay()
+void ABP_EEYAN_Arrow_C::DeleteCall()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("BP_EEYAN_Arrow_C", "ReceiveBeginPlay");
+		Func = Class->GetFunction("BP_EEYAN_Arrow_C", "DeleteCall");
 
 	UObject::ProcessEvent(Func, nullptr);
 }

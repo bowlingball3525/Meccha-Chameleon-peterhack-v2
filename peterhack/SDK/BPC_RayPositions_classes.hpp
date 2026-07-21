@@ -27,10 +27,10 @@ public:
 	class AActor*                                 OwnerActor;                                        // 0x00D0(0x0008)(Edit, BlueprintVisible, ZeroConstructor, DisableEditOnTemplate, DisableEditOnInstance, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void SetUpTransforms();
-	void ReceiveBeginPlay();
-	void GetRayPositions(TArray<struct FVector>* VectorArray);
 	void ExecuteUbergraph_BPC_RayPositions(int32 EntryPoint);
+	void GetRayPositions(TArray<struct FVector>* VectorArray);
+	void ReceiveBeginPlay();
+	void SetUpTransforms();
 
 public:
 	static class UClass* StaticClass()

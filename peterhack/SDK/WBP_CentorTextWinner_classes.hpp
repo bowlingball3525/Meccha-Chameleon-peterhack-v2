@@ -27,10 +27,10 @@ public:
 	class FString                                 Text;                                              // 0x0358(0x0010)(Edit, BlueprintVisible, ZeroConstructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void Construct();
-	void ExecuteUbergraph_WBP_CentorTextWinner(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void Finish();
-	void PreConstruct(bool IsDesignTime);
+	void ExecuteUbergraph_WBP_CentorTextWinner(int32 EntryPoint);
+	void Construct();
 
 public:
 	static class UClass* StaticClass()

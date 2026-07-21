@@ -137,35 +137,35 @@ public:
 	TArray<class UWBP_DecoyCoolTimeIcon_C*>       CoolTimeWidgets;                                   // 0x06A0(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
 
 public:
-	void AddPointpopup(class ABP_FirstPersonPlayerState_Online_C* TargetPlayer, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayer, int32 PointValue);
-	void BulletUpdate(int32 max_0, int32 Current);
-	void CanPenterationUpdate(bool IsCanPenteration);
-	void CantStandPopup();
-	void ClimbingState(bool State);
-	void Construct();
-	void eeyan(const class FString& Name_0);
-	void ExecuteUbergraph_WBP_cLeonMain(int32 EntryPoint);
-	void GameModeIndexUpdate(int32 Index_0);
-	void GamePhaseChange(EN_cLeonMainGamePhase MainGamePhase);
-	void HunterNumChange(int32 HunterNum);
-	void InitDecoyWidget(int32 Num);
-	void IsHunter(bool Hunter);
-	void MapDataUpdate(const struct FST_cLeonMapData& Mapdata);
-	void NamePlateVisibilityChange(bool Visibility_0);
-	void PlayerNumUpdate(int32 Current, int32 max_0);
-	void PreConstruct(bool IsDesignTime);
-	void RemainCountChange(int32 RemainCount);
-	void Set();
-	void SetPlayerPinImage(int32 ImageNum, bool IsHunter, class UPanelWidget* WrapBox);
-	void SetWaitWidgetText(int32 TextIndex, int32 AreaInPlayerNum, int32 PlayerNum);
-	void SetWatchRankingVisibility(bool Visibility_0);
-	void ShowFilledWidget();
-	void TimerNumberChange(int32 Number);
-	void TimerTextChange(int32 TextIndex);
-	void TimerTextUpdate(int32 Time);
-	void UpdateDecoyCoolTime(const TArray<double>& CoolTimes);
-	void UpdateWatchRanking(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime);
 	void VisibilityReset();
+	void UpdateWatchRanking(const TArray<class ABP_FirstPersonPlayerState_Online_cLeon_C*>& PlayerStates, const TArray<int32>& Points, int32 UpdateTime);
+	void UpdateDecoyCoolTime(const TArray<double>& CoolTimes);
+	void TimerTextUpdate(int32 Time);
+	void TimerTextChange(int32 TextIndex);
+	void TimerNumberChange(int32 Number);
+	void ShowFilledWidget();
+	void SetWatchRankingVisibility(bool Visibility);
+	void SetWaitWidgetText(int32 TextIndex, int32 AreaInPlayerNum, int32 PlayerNum);
+	void SetPlayerPinImage(int32 ImageNum, bool IsHunter, class UPanelWidget* WrapBox);
+	void Set();
+	void RemainCountChange(int32 RemainCount);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	void PlayerNumUpdate(int32 Current, int32 max_0);
+	void NamePlateVisibilityChange(bool Visibility);
+	void MapDataUpdate(const struct FST_cLeonMapData& Mapdata);
+	void IsHunter(bool Hunter);
+	void InitDecoyWidget(int32 Num);
+	void HunterNumChange(int32 HunterNum);
+	void GamePhaseChange(EN_cLeonMainGamePhase MainGamePhase);
+	void GameModeIndexUpdate(int32 Index_0);
+	void ExecuteUbergraph_WBP_cLeonMain(int32 EntryPoint);
+	void eeyan(const class FString& Name_0);
+	void Construct();
+	void ClimbingState(bool State);
+	void CantStandPopup();
+	void CanPenterationUpdate(bool IsCanPenteration);
+	void BulletUpdate(int32 max_0, int32 Current);
+	void AddPointpopup(class ABP_FirstPersonPlayerState_Online_C* TargetPlayer, class ABP_FirstPersonPlayerState_Online_cLeon_C* SourcePlayer, int32 PointValue);
 
 public:
 	static class UClass* StaticClass()

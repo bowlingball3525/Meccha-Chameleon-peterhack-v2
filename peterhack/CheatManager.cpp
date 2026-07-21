@@ -8,7 +8,13 @@
 
 #include "SDK/PenguinHotel_classes.hpp"
 #include "SDK/PenguinHotel_parameters.hpp"
-#include "SDK/BP_SpectatePawn_cLeon_classes.hpp"
+#include "SDK/BP_FirstPersonCharacter_cLeon_Character_classes.hpp"
+#include "SDK/BP_FirstPersonCharacter_cLeon_Character_Hunter_classes.hpp"
+#include "SDK/BP_FirstPersonCharacter_cLeon_Character_Hunter_parameters.hpp"
+#include "SDK/BP_FirstPersonCharacter_cLeon_Character_Survivor_classes.hpp"
+#include "SDK/BP_cLeonDecoy_Base_classes.hpp"
+#include "SDK/BP_FirstPersonPlayerState_Online_cLeon_classes.hpp"
+#include "SDK/BP_FirstPersonPlayerState_Online_cLeon_parameters.hpp"
 #include "SDK/Engine_parameters.hpp"
 #include "SDK/UMG_classes.hpp"
 #include "SDK/UMG_parameters.hpp"
@@ -16,11 +22,45 @@
 
 namespace
 {
-void ApplyMovementExploits(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+SDK::UClass* SafeLeonCharacterClass()
+{
+	__try
+	{
+		return SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return nullptr;
+	}
+}
+
+SDK::UClass* SafeDecoyClass()
+{
+	__try
+	{
+		return SDK::ABP_cLeonDecoy_Base_C::StaticClass();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return nullptr;
+	}
+}
+
+SDK::ABP_FirstPersonCharacter_cLeon_Character_C* AsLeonCharacter(SDK::ABP_FirstPersonCharacter_Main_C* main)
+{
+	if (!main)
+		return nullptr;
+	SDK::UClass* leonCls = SafeLeonCharacterClass();
+	if (!leonCls || !main->IsA(leonCls))
+		return nullptr;
+	return static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(main);
+}
+
+void ApplyMovementExploits(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
 }
 
 #include "SDK/Mover_classes.hpp"
-#include "SDK/BP_FirstPersonPlayerState_Online_cLeon_parameters.hpp"
+#include "SDK/BP_FirstPersonPlayerState_Online_parameters.hpp"
 
 // Game window handle, owned by Main.cpp. Used to gate raw-keystate reads
 // (manual flight, aim/trigger keys) to when the game is actually focused.
@@ -454,9 +494,6 @@ void CheatManager::ResetSpawnTransition()
 	playerNameCache.clear();
 	inMatchStableFrames_ = 0;
 	espScansCompleted_ = 0;
-
-	if (g_camo)
-		g_camo->ClearHotkeyEdges();
 }
 
 void CheatManager::Init()
@@ -554,7 +591,7 @@ void CheatManager::Init()
 
 	lastLocalPawn_ = ctx.MyPlayer;
 	if (IsObjectValid(ctx.MyPlayer) &&
-		ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 	{
 		lastGodmodeCharacter_ = ctx.MyPlayer;
 	}
@@ -605,9 +642,9 @@ void CheatManager::Init()
 	if (!needActorScan)
 	{
 		if (IsObjectValid(ctx.MyPlayer) &&
-			ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+			ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 		{
-			auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(ctx.MyPlayer);
+			auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(ctx.MyPlayer);
 			if (localChar && IsObjectValid(localChar))
 			{
 				ApplyLocalPlayerExploits(ctx, localChar);
@@ -653,16 +690,16 @@ void CheatManager::Init()
 	// team checks and filtering ourselves out of ESP.
 	SDK::APawn* espLocalPawn = ctx.MyPlayer;
 	if (lastGodmodeCharacter_ && IsObjectValid(lastGodmodeCharacter_) &&
-		lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()) &&
+		lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()) &&
 		(!ctx.MyPlayer ||
-			!ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass())))
+			!ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass())))
 	{
 		espLocalPawn = lastGodmodeCharacter_;
 	}
 
 	// get players
 	SDK::TArray<SDK::AActor*> Players;
-	if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass(), &Players))
+	if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_FirstPersonCharacter_Main_C::StaticClass(), &Players))
 	{
 		if (TeleportTarget || TeleportHasFallback)
 			HandleTeleport(ctx.MyPlayer, {});
@@ -672,50 +709,6 @@ void CheatManager::Init()
 			pendingSnapshot = std::move(snap);
 		}
 		return;
-	}
-
-	// Decoys ride the same entries/draw path as players (role 3). They have no
-	// team, so Enemy Only never hides them - the toggle is the only gate.
-	if (cfg->bDecoys)
-	{
-		SDK::TArray<SDK::AActor*> Decoys;
-		if (!SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, SDK::ABP_cLeonDecoy_Base_C::StaticClass(), &Decoys))
-		{
-			if (cfg->bInitHooks)
-			{
-				std::lock_guard<std::mutex> lock(snapshotMutex);
-				pendingSnapshot = std::move(snap);
-			}
-			return;
-		}
-		for (int i = 0; i < Decoys.Num(); i++)
-		{
-			if (!Decoys.IsValidIndex(i))
-				continue;
-
-			SDK::AActor* actor = Decoys[i];
-			if (!actor || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
-				continue;
-			auto* decoy = static_cast<SDK::ABP_cLeonDecoy_Base_C*>(actor);
-			if (!decoy)
-				continue;
-
-			// Skip decoys whose body is hidden - the game toggles the PoseableMesh's
-			// visibility off when the decoy isn't actually showing, and an invisible
-			// decoy shouldn't draw in ESP.
-			if (!decoy->PoseableMesh || !IsObjectValid(decoy->PoseableMesh))
-				continue;
-			if (!SafeDecoyMeshVisible(decoy))
-				continue;
-
-			SDK::FVector Location{};
-			if (!SafeGetActorLocation(decoy, Location))
-				continue;
-
-			EspEntry entry;
-			BuildDecoyEntry(ctx.PlayerController, decoy, entry, Location, MyLocation, espFullyWarm);
-			snap.entries.push_back(std::move(entry));
-		}
 	}
 
 	// Track which actors exist this frame so we can drop stale entries from the
@@ -742,9 +735,9 @@ void CheatManager::Init()
 		SDK::AActor* actor = Players[i];
 		if (!actor || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
 			continue;
-		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 			continue;
-		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(actor);
 		if (!baseClass)
 			continue;
 
@@ -791,6 +784,49 @@ void CheatManager::Init()
 		snap.entries.push_back(std::move(entry));
 	}
 
+	// Decoys ride the same entries/draw path as players (role 3). They have no
+	// team, so Enemy Only never hides them - the toggle is the only gate.
+	// Never abort the player scan above when decoy lookup fails.
+	if (cfg->bDecoys)
+	{
+		SDK::UClass* decoyCls = SafeDecoyClass();
+		if (decoyCls)
+		{
+			SDK::TArray<SDK::AActor*> Decoys;
+			if (SafeGetAllActorsOfClass(ctx.GStatics, ctx.World, decoyCls, &Decoys))
+			{
+				for (int i = 0; i < Decoys.Num(); i++)
+				{
+					if (!Decoys.IsValidIndex(i))
+						continue;
+
+					SDK::AActor* actor = Decoys[i];
+					if (!actor || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
+						continue;
+					auto* decoy = static_cast<SDK::ABP_cLeonDecoy_Base_C*>(actor);
+					if (!decoy)
+						continue;
+
+					// Skip decoys whose body is hidden - the game toggles the PoseableMesh's
+					// visibility off when the decoy isn't actually showing, and an invisible
+					// decoy shouldn't draw in ESP.
+					if (!decoy->PoseableMesh || !IsObjectValid(decoy->PoseableMesh))
+						continue;
+					if (!SafeDecoyMeshVisible(decoy))
+						continue;
+
+					SDK::FVector Location{};
+					if (!SafeGetActorLocation(decoy, Location))
+						continue;
+
+					EspEntry entry;
+					BuildDecoyEntry(ctx.PlayerController, decoy, entry, Location, MyLocation, espFullyWarm);
+					snap.entries.push_back(std::move(entry));
+				}
+			}
+		}
+	}
+
 	if (cfg->bDumpDeath)
 	{
 		cfg->bDumpDeath = false;
@@ -798,9 +834,9 @@ void CheatManager::Init()
 	}
 
 	if (IsObjectValid(ctx.MyPlayer) &&
-		ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		ctx.MyPlayer->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 	{
-		auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(ctx.MyPlayer);
+		auto* localChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(ctx.MyPlayer);
 		if (localChar && IsObjectValid(localChar))
 		{
 			const bool needMovementExploits = cfg->bGodmode || cfg->bSpeedhack || cfg->bFly || cfg->bNoclip ||
@@ -821,11 +857,11 @@ void CheatManager::Init()
 	// While spectating, MyPlayer is the spectate pawn but death RPCs still hit the
 	// cLeon body — keep that corpse alive/recovered when godmode is on.
 	if (cfg->bGodmode && lastGodmodeCharacter_ && IsObjectValid(lastGodmodeCharacter_) &&
-		lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()) &&
+		lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()) &&
 		ctx.MyPlayer != lastGodmodeCharacter_)
 	{
 		ApplyMovementExploits(
-			static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(lastGodmodeCharacter_));
+			static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(lastGodmodeCharacter_));
 	}
 
 	// Drop dead-latch entries for actors that no longer exist (round restart,
@@ -958,7 +994,7 @@ bool CheatManager::ResolveContext(FrameContext& ctx)
 // last-known cached name.
 std::string CheatManager::ResolvePlayerName(
 	SDK::AActor* actor,
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	// PlayerState replicates as its own actor, independently of the pawn, so on
 	// clients its pointer routinely blips to null for a frame or two even while
@@ -996,46 +1032,11 @@ std::string CheatManager::ResolvePlayerName(
 // they can be restored.
 void CheatManager::UpdateForcedVisibility(
 	SDK::AActor* actor,
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
-	if (cfg->bForceCharacterVisibility && !baseClass->BodyVisibility)
-	{
-		if (IsObjectValid(baseClass))
-		{
-			SDK::UFunction* fn = baseClass->Class->GetFunction("BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
-			if (fn)
-			{
-				__try
-				{
-					baseClass->BodyVisibility = true;
-					baseClass->ProcessEvent(fn, nullptr);
-				}
-				__except (EXCEPTION_EXECUTE_HANDLER)
-				{
-				}
-			}
-		}
-		forcedVisibleActors.insert(actor);
-	}
-	else if (!cfg->bForceCharacterVisibility && forcedVisibleActors.count(actor))
-	{
-		if (IsObjectValid(baseClass))
-		{
-			SDK::UFunction* fn = baseClass->Class->GetFunction("BP_FirstPersonCharacter_cLeon_Character_C", "OnRep_BodyVisibility");
-			if (fn)
-			{
-				__try
-				{
-					baseClass->BodyVisibility = false;
-					baseClass->ProcessEvent(fn, nullptr);
-				}
-				__except (EXCEPTION_EXECUTE_HANDLER)
-				{
-				}
-			}
-		}
-		forcedVisibleActors.erase(actor);
-	}
+	(void)actor;
+	(void)baseClass;
+	// BodyVisibility/OnRep_BodyVisibility were removed from Main on current Shipping.
 }
 
 // True when the current actor (obj/BaseClass) should be treated as a dead
@@ -1061,7 +1062,7 @@ bool CheatManager::IsDead(SDK::AActor* actor)
 {
 	if (!actor)
 		return false;
-	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(actor);
 	if (!baseClass || !baseClass->Mesh)
 		return false;
 
@@ -1075,13 +1076,13 @@ bool CheatManager::IsSurvivor(SDK::AActor* actor)
 {
 	if (!actor)
 		return false;
-	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(actor);
 	if (!baseClass)
 		return false;
 	return baseClass->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_Survivor_C::StaticClass());
 }
 
-bool CheatManager::IsSurvivor(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+bool CheatManager::IsSurvivor(SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	if (!baseClass)
 		return false;
@@ -1092,13 +1093,13 @@ bool CheatManager::IsHunter(SDK::AActor* actor)
 {
 	if (!actor)
 		return false;
-	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+	auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(actor);
 	if (!baseClass)
 		return false;
 	return baseClass->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass());
 }
 
-bool CheatManager::IsHunter(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+bool CheatManager::IsHunter(SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	if (!baseClass)
 		return false;
@@ -1107,12 +1108,16 @@ bool CheatManager::IsHunter(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* bas
 
 // True when the given actor is on the opposing team (survivor vs. hunter) from
 // us.
-bool CheatManager::IsEnemy(SDK::APawn* myPlayer, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+bool CheatManager::IsEnemy(SDK::APawn* myPlayer, SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
-	if (!myPlayer->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+	if (!myPlayer->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 		return false;
-	auto* MyChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(myPlayer);
-	return MyChar->IsHunter != baseClass->IsHunter;
+	auto* MyChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(myPlayer);
+	auto* myLeon = AsLeonCharacter(MyChar);
+	auto* theirLeon = AsLeonCharacter(baseClass);
+	if (!myLeon || !theirLeon)
+		return false;
+	return myLeon->IsHunter != theirLeon->IsHunter;
 }
 
 // GAME THREAD: project the current actor's skeleton (bone-pair segments) into
@@ -1182,7 +1187,7 @@ bool CheatManager::ComputeBoundingBox(
 // for one player's overlay lives here.
 void CheatManager::BuildEspEntry(
 	SDK::APlayerController* pc,
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass,
+	SDK::ABP_FirstPersonCharacter_Main_C* baseClass,
 	EspEntry& entry,
 	const std::string& PlayerName,
 	SDK::FVector Location,
@@ -1201,7 +1206,10 @@ void CheatManager::BuildEspEntry(
 	entry.distanceMeters = MyLocation.GetDistanceToInMeters(Location);
 
 	if (entry.role == 1 && IsHunter(baseClass) && IsObjectValid(baseClass))
-		entry.ammo = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*>(baseClass)->CurrentBullet;
+	{
+		if (baseClass->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C::StaticClass()))
+			entry.ammo = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C*>(baseClass)->CurrentBullet;
+	}
 
 	if (fullMeshDetail && baseClass && baseClass->Mesh && MeshReadyForSkeleton(baseClass->Mesh))
 	{
@@ -1233,12 +1241,17 @@ void CheatManager::BuildEspEntry(
 // lookup, role test or visibility; it's always drawn in the "visible" colour
 // and labelled "Decoy".
 void CheatManager::BuildDecoyEntry(SDK::APlayerController* pc,
-	SDK::ABP_cLeonDecoy_Base_C* decoy,
+	SDK::AActor* decoyActor,
 	EspEntry& entry,
 	SDK::FVector Location,
 	SDK::FVector MyLocation,
 	bool fullMeshDetail)
 {
+	auto* decoy = decoyActor ? decoyActor->IsA(SDK::ABP_cLeonDecoy_Base_C::StaticClass())
+		? static_cast<SDK::ABP_cLeonDecoy_Base_C*>(decoyActor)
+		: nullptr : nullptr;
+	if (!decoy)
+		return;
 	entry.name = "Decoy";
 	entry.isVisible = true;
 	entry.role = 3;
@@ -1450,7 +1463,7 @@ void CheatManager::HandleMagnet(
 		if (!otherActor || otherActor == selfActor)
 			continue;
 
-		SDK::ABP_FirstPersonCharacter_cLeon_Character_C* otherBaseClass = (SDK::ABP_FirstPersonCharacter_cLeon_Character_C*)otherActor;
+		SDK::ABP_FirstPersonCharacter_Main_C* otherBaseClass = (SDK::ABP_FirstPersonCharacter_Main_C*)otherActor;
 		if (!otherBaseClass)
 			continue;
 
@@ -1496,7 +1509,6 @@ void CheatManager::KillSurvivor(SDK::APawn* myPlayer, SDK::AActor* actor)
 
 	SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_KillPlayer parms{};
 	parms.FirstpersonCharacter = survivor;
-	//parms.SourcePlayerState = hunter->MyPlayerState;
 	parms.SourcePlayerState = hunter->LastMyPlayerState;
 	hunter->ProcessEvent(fn, &parms);
 }
@@ -1628,7 +1640,7 @@ void CheatManager::HandleChangeName(SDK::APawn* myPlayer)
 	if (name.empty() || !myPlayer || !IsObjectValid(myPlayer))
 		return;
 
-	auto* myChar = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(myPlayer);
+	auto* myChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(myPlayer);
 	if (!myChar)
 		return;
 
@@ -1662,7 +1674,7 @@ void CheatManager::HandleChangeName(SDK::APawn* myPlayer)
 
 // GAME THREAD: push custom likes (EEYAN) and kills (ME) through the replicated
 // PlayerState server RPCs so the floating nameplate updates for everyone.
-void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	static int s_lastWantLikes = INT32_MIN;
 	static int s_lastWantKills = INT32_MIN;
@@ -1714,7 +1726,7 @@ void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Char
 				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateEEYANPoint(Server)"))
 		{
 			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateEEYANPoint_Server_ parms{};
-			parms.CurrentEEYAN_Point_0 = wantLikes;
+			parms.CurrentEEYAN_Point = wantLikes;
 			leonPs->ProcessEvent(fn, &parms);
 		}
 
@@ -1722,18 +1734,10 @@ void CheatManager::HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Char
 				"BP_FirstPersonPlayerState_Online_cLeon_C", "UpdateMEPoint(Server)"))
 		{
 			SDK::Params::BP_FirstPersonPlayerState_Online_cLeon_C_UpdateMEPoint_Server_ parms{};
-			parms.CurrentME_Point_0 = wantKills;
+			parms.CurrentME_Point = wantKills;
 			leonPs->ProcessEvent(fn, &parms);
 		}
 
-		// Local mirror + widget refresh without Update*Point(Local) — those blueprints
-		// fault when invoked from our gather thread every frame.
-		leonPs->CurrentEEYAN_Point = wantLikes;
-		leonPs->CurrentME_Point = wantKills;
-		leonPs->OnRep_CurrentEEYAN_Point();
-		leonPs->OnRep_CurrentME_Point();
-		baseClass->EEYANChange();
-		baseClass->MEChange();
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -1753,7 +1757,7 @@ bool CheatManager::IsObjectValid(SDK::UObject* Obj)
 }
 
 void CheatManager::DumpBones(
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	// Guard the whole pointer chain - any of these can be null on
 	// proxies/streaming actors.
@@ -1787,7 +1791,7 @@ void CheatManager::DumpBones(
 // at the offending body, then read C:\death.txt to see which flag distinguishes
 // a corpse from a live player.
 void CheatManager::DumpDeathFlags(
-	SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	if (!baseClass)
 		return;
@@ -1800,12 +1804,11 @@ void CheatManager::DumpDeathFlags(
 	const bool ragdoll = baseClass->Mesh && IsObjectValid(baseClass->Mesh) &&
 		SafeIsAnySimulatingPhysics(baseClass->Mesh);
 	const bool dead = baseClass->Dead;
-	const bool bodyVis = baseClass->BodyVisibility;
-	const bool liveSelf = baseClass->IsLiveSelf;
+	const bool spectating = baseClass->IsSpectating;
 	const bool latched = deadActors.count(static_cast<SDK::AActor*>(baseClass)) > 0;
 
-	fprintf(f, "role=%d Dead=%d ragdoll=%d BodyVisibility=%d IsLiveSelf=%d latchedDead=%d\n",
-		role, (int)dead, (int)ragdoll, (int)bodyVis, (int)liveSelf, (int)latched);
+	fprintf(f, "role=%d Dead=%d ragdoll=%d IsSpectating=%d latchedDead=%d\n",
+		role, (int)dead, (int)ragdoll, (int)spectating, (int)latched);
 	fclose(f);
 }
 
@@ -1909,8 +1912,9 @@ bool CheatManager::IsLocalPlayerSpectating(SDK::APlayerController* playerControl
 		if (!pawn || !IsObjectValid(pawn))
 			return false;
 
-		return pawn->IsA(SDK::ABP_SpectatePawn_cLeon_C::StaticClass()) ||
-			pawn->IsA(SDK::ASpectatorPawn::StaticClass());
+		return pawn->IsA(SDK::ASpectatorPawn::StaticClass()) ||
+			(pawn->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()) &&
+				static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(pawn)->IsSpectating);
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -1929,7 +1933,7 @@ bool CheatManager::IsLocalPlayerInMatch(SDK::APlayerController* playerController
 		if (!pawn || !IsObjectValid(pawn))
 			return false;
 
-		return pawn->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass());
+		return pawn->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass());
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -1941,14 +1945,13 @@ bool CheatManager::IsLiveCharacterBody(SDK::AActor* body)
 {
 	if (!body || !IsObjectValid(body))
 		return false;
-	if (!body->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+	if (!body->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 		return false;
 
-	auto* cLeon = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(body);
 	auto* mainChar = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(body);
 	__try
 	{
-		return cLeon->IsLiveSelf && !mainChar->Dead;
+		return !mainChar->Dead && !mainChar->IsSpectating;
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -2011,9 +2014,10 @@ bool CheatManager::NeedsGameThreadTick() const
 	return false;
 }
 
-void CheatManager::SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
+void CheatManager::SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_Main_C* character)
 {
-	if (!character || !cfg || !DecoyExploitsReady())
+	auto* leon = AsLeonCharacter(character);
+	if (!leon || !cfg || !DecoyExploitsReady())
 		return;
 	if (!cfg->bNoDecoyCooldown && !cfg->bSetDecoyNum)
 		return;
@@ -2028,9 +2032,9 @@ void CheatManager::SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Ch
 
 	__try
 	{
-		character->DecoyCoolTimeDefault = 0.0;
+		leon->DecoyCoolTimeDefault = 0.0;
 
-		int desiredSlots = character->DecoyCoolTimes.Num();
+		int desiredSlots = leon->DecoyCoolTimes.Num();
 		if (cfg->bSetDecoyNum)
 		{
 			desiredSlots = cfg->iDecoyCount;
@@ -2039,27 +2043,24 @@ void CheatManager::SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Ch
 			if (desiredSlots > 99)
 				desiredSlots = 99;
 		}
-		else if (character->RuntimePaintable && IsObjectUsable(character->RuntimePaintable))
+		else if (leon->RuntimePaintable && IsObjectUsable(leon->RuntimePaintable))
 		{
-			const int maxSpawn = character->RuntimePaintable->MaxDecoySpawnCount;
-			if (maxSpawn > desiredSlots)
-				desiredSlots = maxSpawn;
+			if (lastDecoyCountApplied > desiredSlots)
+				desiredSlots = lastDecoyCountApplied;
 		}
 
-		// Grow only within UE-preallocated slack — never reallocate the TArray.
-		while (character->DecoyCoolTimes.Num() < desiredSlots)
+		while (leon->DecoyCoolTimes.Num() < desiredSlots)
 		{
-			if (!character->DecoyCoolTimes.Add(1.0))
+			if (!leon->DecoyCoolTimes.Add(1.0))
 				break;
 		}
 
-		const int slotCount = character->DecoyCoolTimes.Num();
+		const int slotCount = leon->DecoyCoolTimes.Num();
 		for (int j = 0; j < slotCount; ++j)
 		{
-			if (!character->DecoyCoolTimes.IsValidIndex(j))
+			if (!leon->DecoyCoolTimes.IsValidIndex(j))
 				continue;
-			// 1.0 = ready (UseDecoy checks GreaterEqual against threshold).
-			character->DecoyCoolTimes[j] = 1.0;
+			leon->DecoyCoolTimes[j] = 1.0;
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
@@ -2072,30 +2073,8 @@ void CheatManager::TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintabl
 {
 	if (!paintable || !IsObjectValid(paintable))
 		return;
-
-	int spawnedCount = -1;
-	__try
-	{
-		spawnedCount = paintable->SpawnedDecoyActors.Num();
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-		return;
-	}
-
-	const ULONGLONG now = GetTickCount64();
-	// Only quiesce paintable count writes on a full wipe (round end / mass teardown),
-	// not when the player destroys a single clone mid-round — that was causing random
-	// grey cooldown icons because SyncDecoyCooldownState shared this pause window.
-	if (lastSpawnedDecoyCount_ > 0 && spawnedCount == 0)
-	{
-		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
-		PhLog("[EXPLOITS:DECOY] all clones cleared — pausing paintable writes for %ums\n",
-			static_cast<unsigned>(kDecoyQuiesceMs));
-	}
-
-	if (spawnedCount >= 0)
-		lastSpawnedDecoyCount_ = spawnedCount;
+	// SpawnedDecoyActors removed from the current RuntimePaintableComponent SDK layout.
+	(void)paintable;
 }
 
 namespace
@@ -2337,7 +2316,7 @@ namespace
 		SafeReplicateVelocity(mainChar, vel);
 	}
 
-	void ApplyMovementExploits(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+	void ApplyMovementExploits(SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 	{
 		if (!baseClass || !CheatManager::IsObjectValid(baseClass) || !cfg)
 			return;
@@ -2366,14 +2345,7 @@ namespace
 				// Clear any death state that slipped through before the RPC block
 				// caught it, so a momentary hit can't leave us ragdolled/dead.
 				mainChar->Dead = false;
-				baseClass->IsLiveSelf = true;
 				CallSetSpectatingState(mainChar, false);
-
-				if (baseClass->Mesh && CheatManager::IsObjectValid(baseClass->Mesh) &&
-					SafeIsAnySimulatingPhysics(baseClass->Mesh))
-				{
-					baseClass->ResetRagdoll();
-				}
 			}
 
 			if (wantsSpeed)
@@ -2491,7 +2463,14 @@ void CheatManager::ArmCombatShotRedirect(SDK::AActor* target, const SDK::FVector
 	g_combatRedirect.active = true;
 	g_combatRedirect.target = target;
 	g_combatRedirect.hitLocation = hitLocation;
-	g_combatRedirect.expireMs = GetTickCount64() + 750;
+	g_combatRedirect.expireMs = GetTickCount64() + 250;
+}
+
+void CheatManager::DisarmCombatShotRedirect()
+{
+	g_combatRedirect.active = false;
+	g_combatRedirect.target = nullptr;
+	g_combatRedirect.expireMs = 0;
 }
 
 void CheatManager::CacheSilentAimTarget(SDK::AActor* target, const SDK::FVector& hitLocation)
@@ -2507,12 +2486,19 @@ void CheatManager::CacheSilentAimTarget(SDK::AActor* target, const SDK::FVector&
 	g_combatRedirect.silentReady = true;
 }
 
-void CheatManager::RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C* hunter)
+void CheatManager::RequestHunterShot(SDK::ABP_FirstPersonCharacter_Main_C* hunter)
 {
 	if (!hunter || !IsObjectValid(hunter) || !hunter->Class)
 		return;
 
 	SDK::UFunction* fn = g_fnHunterInpActShot;
+	if (!fn)
+	{
+		fn = hunter->Class->GetFunction(
+			"BP_FirstPersonCharacter_Main_C", "InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_18");
+		if (fn)
+			g_fnHunterInpActShot = fn;
+	}
 	if (!fn)
 	{
 		fn = hunter->Class->GetFunction(
@@ -2527,10 +2513,10 @@ void CheatManager::RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 		1.0, 0.0, 0.0, SDK::EInputActionValueType::Boolean);
 
 	SDK::Params::BP_FirstPersonCharacter_cLeon_Character_Hunter_C_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 parms{};
-	parms.ActionValue = actionValue;
-	parms.ElapsedTime = 0.0f;
-	parms.TriggeredTime = 0.0f;
-	parms.SourceAction = nullptr;
+	parms.ActionValue_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = actionValue;
+	parms.ElapsedTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
+	parms.TriggeredTime_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = 0.0f;
+	parms.SourceAction_InpActEvt_IA_Shot_K2Node_EnhancedInputActionEvent_3 = nullptr;
 	hunter->ProcessEvent(fn, &parms);
 }
 
@@ -2579,9 +2565,9 @@ void CheatManager::HandleCombat(FrameContext& ctx, SDK::TArray<SDK::AActor*>& Pl
 		SDK::AActor* actor = Players[i];
 		if (!actor || actor == ctx.MyPlayer || !IsObjectValid(actor) || SafeActorBeingDestroyed(actor))
 			continue;
-		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		if (!actor->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 			continue;
-		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(actor);
+		auto* baseClass = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(actor);
 		if (!baseClass || IsDead(actor))
 			continue;
 		if (!IsEnemy(ctx.MyPlayer, baseClass))
@@ -2681,14 +2667,14 @@ void CheatManager::HandleGodmodeRecovery(FrameContext& ctx)
 	if (!cfg || !cfg->bGodmode)
 		return;
 	if (!lastGodmodeCharacter_ || !IsObjectValid(lastGodmodeCharacter_) ||
-		!lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_cLeon_Character_C::StaticClass()))
+		!lastGodmodeCharacter_->IsA(SDK::ABP_FirstPersonCharacter_Main_C::StaticClass()))
 	{
 		return;
 	}
 	if (!ctx.PlayerController || !IsObjectValid(ctx.PlayerController))
 		return;
 
-	auto* body = static_cast<SDK::ABP_FirstPersonCharacter_cLeon_Character_C*>(lastGodmodeCharacter_);
+	auto* body = static_cast<SDK::ABP_FirstPersonCharacter_Main_C*>(lastGodmodeCharacter_);
 	ApplyMovementExploits(body);
 
 	SDK::APawn* currentPawn = ctx.MyPlayer;
@@ -2704,7 +2690,7 @@ void CheatManager::HandleGodmodeRecovery(FrameContext& ctx)
 	}
 }
 
-void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass)
+void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_Main_C* baseClass)
 {
 	if (!baseClass || !IsObjectValid(baseClass))
 		return;
@@ -2736,8 +2722,9 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 				survivor->OverlapCheckCapsules.Clear();
 		}
 
-		if (baseClass->RuntimePaintable && IsObjectValid(baseClass->RuntimePaintable))
-			TrackDecoyLifecycle(baseClass->RuntimePaintable);
+		auto* leonBody = AsLeonCharacter(baseClass);
+		if (leonBody && leonBody->RuntimePaintable && IsObjectValid(leonBody->RuntimePaintable))
+			TrackDecoyLifecycle(leonBody->RuntimePaintable);
 
 		if (cfg->bNoDecoyCooldown || cfg->bSetDecoyNum)
 			SyncDecoyCooldownState(baseClass);
@@ -2755,7 +2742,7 @@ void CheatManager::ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPer
 	(void)ctx;
 }
 
-void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character)
+void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_Main_C* character)
 {
 	if (!cfg->bSetDecoyNum || !character || !DecoyExploitsReady())
 		return;
@@ -2780,7 +2767,11 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 			return;
 	}
 
-	SDK::URuntimePaintableComponent* paintable = character->RuntimePaintable;
+	auto* leon = AsLeonCharacter(character);
+	if (!leon)
+		return;
+
+	SDK::URuntimePaintableComponent* paintable = leon->RuntimePaintable;
 	if (!paintable || !IsObjectUsable(paintable))
 	{
 		lastDecoyPaintable = nullptr;
@@ -2810,16 +2801,10 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 		lastDecoyCountApplied = -1;
 	}
 
-	int current = 0;
-	__try
-	{
-		current = paintable->MaxDecoySpawnCount;
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
-		return;
-	}
+	int current = (lastDecoyCountApplied >= 0) ? lastDecoyCountApplied : 0;
+
+	// MaxDecoySpawnCount field removed from the current RuntimePaintableComponent layout;
+	// rely on SetMaxDecoySpawnCount ProcessEvent and our cached apply state.
 
 	// Game overwrote our value (replication / teardown). Do NOT fire ProcessEvent to
 	// fight it — that is the crash path from the console logs (was 2 -> re-apply).
@@ -2843,29 +2828,15 @@ void CheatManager::HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Charact
 		return;
 
 	const int oldCount = current;
-
-	__try
-	{
-		paintable->MaxDecoySpawnCount = target;
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-		PhLog("[EXPLOITS:DECOY-NUM] field write fault — skipped\n");
-		decoyQuiesceUntilMs_ = now + kDecoyQuiesceMs;
-		decoyProcessEventDisabled_ = true;
-		return;
-	}
-
-	// ProcessEvent only on the first apply for this paintable/target. Never call the
-	// ServerSet* net RPC. After any fault, stay field-write-only for the rest of the session.
 	const bool firstApply = (lastDecoyCountApplied != target);
+
 	if (firstApply && !decoyProcessEventDisabled_ && !gameOverwrote)
 	{
 		if (!CallSetMaxDecoySpawnCountLocal(paintable, target))
 		{
 			decoyProcessEventDisabled_ = true;
-			decoyQuiesceUntilMs_ = now + (kDecoyQuiesceMs * 6); // ~30s after a fault
-			PhLog("[EXPLOITS:DECOY-NUM] ProcessEvent disabled for this session (field-write only)\n");
+			decoyQuiesceUntilMs_ = now + (kDecoyQuiesceMs * 6);
+			PhLog("[EXPLOITS:DECOY-NUM] ProcessEvent disabled for this session\n");
 			return;
 		}
 	}

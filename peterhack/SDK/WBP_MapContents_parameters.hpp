@@ -10,13 +10,53 @@
 
 #include "Basic.hpp"
 
-#include "ST_cLeonMapData_structs.hpp"
 #include "SteamWorkshopMaps_structs.hpp"
 #include "CoreUObject_structs.hpp"
+#include "ST_cLeonMapData_structs.hpp"
 
 
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
+
+// Function WBP_MapContents.WBP_MapContents_C.SelectUpdate
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_MapContents_C_SelectUpdate final
+{
+public:
+	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_MapContents_C_SelectUpdate;
+
+// Function WBP_MapContents.WBP_MapContents_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_MapContents_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_MapContents_C_PreConstruct;
+
+// Function WBP_MapContents.WBP_MapContents_C.OnSuccess_F47348424771535C48E222B9B9CA8A4E
+// 0x00B8 (0x00B8 - 0x0000)
+struct WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E final
+{
+public:
+	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
+	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E;
+
+// Function WBP_MapContents.WBP_MapContents_C.OnFailure_F47348424771535C48E222B9B9CA8A4E
+// 0x00B8 (0x00B8 - 0x0000)
+struct WBP_MapContents_C_OnFailure_F47348424771535C48E222B9B9CA8A4E final
+{
+public:
+	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
+	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_MapContents_C_OnFailure_F47348424771535C48E222B9B9CA8A4E;
 
 // Function WBP_MapContents.WBP_MapContents_C.ExecuteUbergraph_WBP_MapContents
 // 0x02A8 (0x02A8 - 0x0000)
@@ -51,46 +91,6 @@ public:
 	bool                                          CallFunc_IsValid_ReturnValue_1;                    // 0x02A0(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_MapContents_C_ExecuteUbergraph_WBP_MapContents;
-
-// Function WBP_MapContents.WBP_MapContents_C.OnFailure_F47348424771535C48E222B9B9CA8A4E
-// 0x00B8 (0x00B8 - 0x0000)
-struct WBP_MapContents_C_OnFailure_F47348424771535C48E222B9B9CA8A4E final
-{
-public:
-	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
-	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_MapContents_C_OnFailure_F47348424771535C48E222B9B9CA8A4E;
-
-// Function WBP_MapContents.WBP_MapContents_C.OnSuccess_F47348424771535C48E222B9B9CA8A4E
-// 0x00B8 (0x00B8 - 0x0000)
-struct WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E final
-{
-public:
-	class FString                                 ItemId;                                            // 0x0000(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-	struct FSteamWorkshopItemDetails              Details;                                           // 0x0010(0x0098)(BlueprintVisible, BlueprintReadOnly, Parm)
-	class FString                                 ErrorMessage;                                      // 0x00A8(0x0010)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_MapContents_C_OnSuccess_F47348424771535C48E222B9B9CA8A4E;
-
-// Function WBP_MapContents.WBP_MapContents_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_MapContents_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_MapContents_C_PreConstruct;
-
-// Function WBP_MapContents.WBP_MapContents_C.SelectUpdate
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_MapContents_C_SelectUpdate final
-{
-public:
-	bool                                          State;                                             // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_MapContents_C_SelectUpdate;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

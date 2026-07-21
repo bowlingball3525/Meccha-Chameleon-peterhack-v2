@@ -15,16 +15,19 @@ namespace Binds
 	// range. Used to sanitize persisted config values.
 	bool IsValidBind(int code);
 
-	// Edge-detected press for either bind kind. Keyboard binds use the
-	// GetAsyncKeyState "pressed since last call" bit; pad binds use the
-	// per-frame Gamepad poll (and are inert while controller support is off).
+	// Edge-detected press for either bind kind. Keyboard binds track down/up
+	// transitions from the high bit so other GetAsyncKeyState callers cannot
+	// steal presses; pad binds use the per-frame Gamepad poll.
 	bool Pressed(int code, bool allowReservedPad = false);
 
 	// Human-readable bind name ("F1", "Mouse 4", "Pad A", ...). Static buffer.
 	const char* BindName(int code);
 
-	// Drain the GetAsyncKeyState "pressed since last call" bits so a capture
-	// only sees presses that happen after it starts.
+	// Mark keyboard binds as already held/released so the next Pressed() does
+	// not fire until the physical key changes (used when re-arming hotkeys).
+	void SyncKeyState(int code);
+
+	// Re-sync every tracked keyboard bind from hardware (menu close, capture).
 	void ClearKeyEdges();
 
 	// ImGui row: "<label>: [current bind]". Clicking the button starts

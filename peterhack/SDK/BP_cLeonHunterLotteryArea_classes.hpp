@@ -23,8 +23,8 @@ public:
 	class UStaticMeshComponent*                   StaticMesh;                                        // 0x02A8(0x0008)(BlueprintVisible, ZeroConstructor, InstancedReference, NonTransactional, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void GetLotteryedControllers(int32 MaxNum, TArray<class ABP_PlayerController_cLeon_C*>* Controllers);
 	void GetOverlapCharacters(TArray<class ABP_FirstPersonCharacter_cLeon_Character_C*>* ReturnCharacters);
+	void GetLotteryedControllers(int32 MaxNum, TArray<class ABP_PlayerController_cLeon_C*>* Controllers);
 
 public:
 	static class UClass* StaticClass()

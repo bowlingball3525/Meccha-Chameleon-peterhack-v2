@@ -10,8 +10,8 @@
 
 #include "Basic.hpp"
 
-#include "Engine_structs.hpp"
 #include "ST_InputDeviceImage_structs.hpp"
+#include "Engine_structs.hpp"
 #include "UMG_structs.hpp"
 #include "UMG_classes.hpp"
 
@@ -36,10 +36,10 @@ public:
 	bool                                          Auto_Switch;                                       // 0x03E1(0x0001)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
 public:
-	void Construct();
+	void SetToggleState(bool ToggleState);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void ExecuteUbergraph_WBP_cLeonToggleSwitch(int32 EntryPoint);
-	void PreConstruct(bool IsDesignTime);
-	void SetToggleState(bool ToggleState_0);
+	void Construct();
 
 public:
 	static class UClass* StaticClass()

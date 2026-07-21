@@ -14,6 +14,15 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_cLeon_RankingContents.WBP_cLeon_RankingContents_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_cLeon_RankingContents_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_cLeon_RankingContents_C_PreConstruct;
+
 // Function WBP_cLeon_RankingContents.WBP_cLeon_RankingContents_C.ExecuteUbergraph_WBP_cLeon_RankingContents
 // 0x0040 (0x0040 - 0x0000)
 struct WBP_cLeon_RankingContents_C_ExecuteUbergraph_WBP_cLeon_RankingContents final
@@ -28,15 +37,6 @@ public:
 	class FText                                   CallFunc_Conv_StringToText_ReturnValue_2;          // 0x0030(0x0010)()
 };
 DUMPER7_ASSERTS_WBP_cLeon_RankingContents_C_ExecuteUbergraph_WBP_cLeon_RankingContents;
-
-// Function WBP_cLeon_RankingContents.WBP_cLeon_RankingContents_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_cLeon_RankingContents_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_cLeon_RankingContents_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

@@ -18,7 +18,16 @@
 SDK_NAMESPACE_START
 uintptr_t InSDKUtils::GetImageBase()
 {
-	return reinterpret_cast<uintptr_t>(GetModuleHandle(0));
+	static uintptr_t imageBase = 0;
+	if (imageBase != 0)
+		return imageBase;
+
+	HMODULE gameModule = GetModuleHandleW(L"PenguinHotel-Win64-Shipping.exe");
+	if (!gameModule)
+		gameModule = GetModuleHandleW(nullptr);
+
+	imageBase = reinterpret_cast<uintptr_t>(gameModule);
+	return imageBase;
 }
 
 class UClass* BasicFilesImplUtils::FindClassByName(const std::string& Name, bool bByFullName)

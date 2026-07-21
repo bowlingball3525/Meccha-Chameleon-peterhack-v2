@@ -10,20 +10,20 @@
 
 #include "Basic.hpp"
 
-#include "UDS_Modifier_Color_Property_structs.hpp"
-#include "CoreUObject_structs.hpp"
-#include "UDS_Modifier_Float_Property_structs.hpp"
-#include "UDS_RenderingFeatureLevel_structs.hpp"
-#include "Engine_structs.hpp"
-#include "UDS_DateAndTime_structs.hpp"
-#include "UDS_CachedProperties_structs.hpp"
-#include "UDS_FogColorMode_structs.hpp"
-#include "UDS_RunContext_structs.hpp"
 #include "UDS_SkyMode_structs.hpp"
+#include "CoreUObject_structs.hpp"
+#include "Engine_structs.hpp"
+#include "UDS_FogColorMode_structs.hpp"
+#include "UDS_RenderingFeatureLevel_structs.hpp"
+#include "UDS_Modifier_Color_Property_structs.hpp"
+#include "UDS_RunContext_structs.hpp"
+#include "UDS_DateAndTime_structs.hpp"
+#include "UDS_Modifier_Float_Property_structs.hpp"
+#include "UDS_CachedProperties_structs.hpp"
 #include "UDS_Cache_Group_structs.hpp"
 #include "RadialStorm_CoverageBrush_structs.hpp"
-#include "UDS_Space_Planet_structs.hpp"
 #include "UDS_Planet_Lightsource_structs.hpp"
+#include "UDS_Space_Planet_structs.hpp"
 #include "UDS_Space_Parent_structs.hpp"
 #include "UDS_Post_Process_Stage_structs.hpp"
 #include "UDS_CityPresets_structs.hpp"
@@ -782,7 +782,7 @@ DUMPER7_ASSERTS_Ultra_Dynamic_Sky_C_Apply_Volumetric_Mode;
 struct Ultra_Dynamic_Sky_C_Approximate_Real_Sun_Moon_and_Stars final
 {
 public:
-	double                                        Time_of_Day_0;                                     // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Time_Of_Day_0;                                     // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	bool                                          Only_Calculate_Sun;                                // 0x0008(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_9[0x7];                                        // 0x0009(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
 	struct FVector                                Sun_Vector;                                        // 0x0010(0x0018)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)

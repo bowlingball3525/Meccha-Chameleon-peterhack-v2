@@ -16,6 +16,20 @@
 
 SDK_NAMESPACE_START
 
+// Function BP_PopupDecal.BP_PopupDecal_C.ReceiveBeginPlay
+// (Event, Protected, BlueprintEvent)
+
+void ABP_PopupDecal_C::ReceiveBeginPlay()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("BP_PopupDecal_C", "ReceiveBeginPlay");
+
+	UObject::ProcessEvent(Func, nullptr);
+}
+
+
 // Function BP_PopupDecal.BP_PopupDecal_C.ExecuteUbergraph_BP_PopupDecal
 // (Final, UbergraphFunction)
 // Parameters:
@@ -33,20 +47,6 @@ void ABP_PopupDecal_C::ExecuteUbergraph_BP_PopupDecal(int32 EntryPoint)
 	Parms.EntryPoint = EntryPoint;
 
 	UObject::ProcessEvent(Func, &Parms);
-}
-
-
-// Function BP_PopupDecal.BP_PopupDecal_C.ReceiveBeginPlay
-// (Event, Protected, BlueprintEvent)
-
-void ABP_PopupDecal_C::ReceiveBeginPlay()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("BP_PopupDecal_C", "ReceiveBeginPlay");
-
-	UObject::ProcessEvent(Func, nullptr);
 }
 
 

@@ -15,6 +15,19 @@
 
 SDK_NAMESPACE_START
 
+// ScriptStruct ABP_MainCharacter_PaintMan.ABP_MainCharacter_PaintMan_C.AnimBlueprintGeneratedMutableData
+// 0x0013 (0x0014 - 0x0001)
+struct ABP_MainCharacter_PaintMan::FAnimBlueprintGeneratedMutableData final : public FAnimBlueprintMutableData
+{
+public:
+	uint8                                         Pad_1[0x3];                                        // 0x0001(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	float                                         __FloatProperty;                                   // 0x0004(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         __FloatProperty_0;                                 // 0x0008(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         __FloatProperty_1;                                 // 0x000C(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	float                                         __FloatProperty_2;                                 // 0x0010(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan__FAnimBlueprintGeneratedMutableData;
+
 // ScriptStruct ABP_MainCharacter_PaintMan.ABP_MainCharacter_PaintMan_C.AnimBlueprintGeneratedConstantData
 // 0x0BEF (0x0BF0 - 0x0001)
 struct ABP_MainCharacter_PaintMan::FAnimBlueprintGeneratedConstantData final : public FAnimBlueprintConstantData
@@ -109,18 +122,5 @@ public:
 	struct FAnimNodeExposedValueHandler_PropertyAccess AnimGraphNode_Root;                           // 0x0BC0(0x0030)()
 };
 DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan__FAnimBlueprintGeneratedConstantData;
-
-// ScriptStruct ABP_MainCharacter_PaintMan.ABP_MainCharacter_PaintMan_C.AnimBlueprintGeneratedMutableData
-// 0x0013 (0x0014 - 0x0001)
-struct ABP_MainCharacter_PaintMan::FAnimBlueprintGeneratedMutableData final : public FAnimBlueprintMutableData
-{
-public:
-	uint8                                         Pad_1[0x3];                                        // 0x0001(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	float                                         __FloatProperty;                                   // 0x0004(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         __FloatProperty_0;                                 // 0x0008(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         __FloatProperty_1;                                 // 0x000C(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-	float                                         __FloatProperty_2;                                 // 0x0010(0x0004)(BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_ABP_MainCharacter_PaintMan__FAnimBlueprintGeneratedMutableData;
 
 SDK_NAMESPACE_END

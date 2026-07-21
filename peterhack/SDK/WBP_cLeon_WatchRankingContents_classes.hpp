@@ -34,8 +34,8 @@ public:
 	struct FSlateColor                            NameColor;                                         // 0x0394(0x0014)(Edit, BlueprintVisible, ExposeOnSpawn)
 
 public:
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void ExecuteUbergraph_WBP_cLeon_WatchRankingContents(int32 EntryPoint);
-	void PreConstruct(bool IsDesignTime);
 
 public:
 	static class UClass* StaticClass()

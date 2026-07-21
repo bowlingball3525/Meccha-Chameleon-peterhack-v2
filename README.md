@@ -1,9 +1,10 @@
 # peterhack
 
-Internal overlay and tools for **Meccha Chameleon** (DirectX 12). Currently targets game version **2.6.0**.
+Internal overlay and tools for **Meccha Chameleon** (DirectX 12). Targets game version **2.9.0**.
 
 **Full setup and usage:** [docs/USAGE.md](docs/USAGE.md)  
-**Camouflage / bridge details:** [docs/CAMOUFLAGE.md](docs/CAMOUFLAGE.md)
+**Camouflage / bridge details:** [docs/CAMOUFLAGE.md](docs/CAMOUFLAGE.md)  
+**Latest release:** [RELEASE_v2.7.3_NOTES.md](RELEASE_v2.7.3_NOTES.md)
 
 ## Quick start
 
@@ -26,9 +27,10 @@ After `build.bat`, `%USERPROFILE%\Desktop\peterhack\` contains:
 
 ## Features
 
-- **ESP** — box, skeleton, lines, distance, names, roles, decoys
+- **ESP** — box, skeleton, lines, distance, names, roles, outlines, decoys
 - **Tools** — survivor/hunter exploits, magnet, kill helpers, FOV, anti-kick, name change
-- **Camouflage** — mesh-first-paint camo (F10 / F2 / F3 / F4 hotkeys)
+- **Combat** — aimbot, silent aim, triggerbot, no recoil
+- **Camouflage** — mesh-first-paint camo with packed PBR sync (F1–F4 hotkeys)
 - **Loader** — single deploy folder, `--local --wait` workflow
 
 ## Build requirements

@@ -60,20 +60,20 @@ private:
 	bool ResolveContext(FrameContext& ctx);
 	// Per-player helpers. The actor being processed (actor and its BaseClass cast) is passed in
 	// explicitly rather than stashed on the object, so nothing here depends on shared mutable state.
-	std::string ResolvePlayerName(SDK::AActor* actor, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	void UpdateForcedVisibility(SDK::AActor* actor, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+	std::string ResolvePlayerName(SDK::AActor* actor, SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
+	void UpdateForcedVisibility(SDK::AActor* actor, SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
 	bool IsDead(SDK::AActor* actor);
 	bool IsSurvivor(SDK::AActor* actor);
-	bool IsSurvivor(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+	bool IsSurvivor(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
 	bool IsHunter(SDK::AActor* actor);
-	bool IsHunter(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	bool IsEnemy(SDK::APawn* myPlayer, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+	bool IsHunter(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
+	bool IsEnemy(SDK::APawn* myPlayer, SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
 
 	// Game-thread builders: project the given actor's world state into a render-ready EspEntry.
 	void BuildSkeletonLines(SDK::APlayerController* pc, SDK::USkinnedMeshComponent* mesh, std::vector<std::pair<SDK::FVector2D, SDK::FVector2D>>& out);
 	bool ComputeBoundingBox(SDK::APlayerController* pc, SDK::USkinnedMeshComponent* mesh, SDK::FVector2D& BoxMin, SDK::FVector2D& BoxMax);
-	void BuildEspEntry(SDK::APlayerController* pc, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass, EspEntry& entry, const std::string& PlayerName, SDK::FVector Location, SDK::FVector MyLocation, bool IsVisible, bool fullMeshDetail);
-	void BuildDecoyEntry(SDK::APlayerController* pc, SDK::ABP_cLeonDecoy_Base_C* decoy, EspEntry& entry, SDK::FVector Location, SDK::FVector MyLocation, bool fullMeshDetail);
+	void BuildEspEntry(SDK::APlayerController* pc, SDK::ABP_FirstPersonCharacter_Main_C* baseClass, EspEntry& entry, const std::string& PlayerName, SDK::FVector Location, SDK::FVector MyLocation, bool IsVisible, bool fullMeshDetail);
+	void BuildDecoyEntry(SDK::APlayerController* pc, SDK::AActor* decoy, EspEntry& entry, SDK::FVector Location, SDK::FVector MyLocation, bool fullMeshDetail);
 	// Render-thread draw of a single prebuilt entry (ImGui only, no SDK/UObject access).
 	void DrawEntry(const EspEntry& entry);
 
@@ -86,10 +86,10 @@ private:
 	void HandleKillTarget(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors);
 	void HandleKillAllSurvivors(SDK::APawn* myPlayer, const std::unordered_set<SDK::AActor*>& currentActors, SDK::UGameplayStatics* gStatics, SDK::UWorld* world);
 	void HandleChangeName(SDK::APawn* myPlayer);
-	void HandleNameplateStats(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	void ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	void SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
-	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* character);
+	void HandleNameplateStats(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
+	void ApplyLocalPlayerExploits(FrameContext& ctx, SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
+	void SyncDecoyCooldownState(SDK::ABP_FirstPersonCharacter_Main_C* character);
+	void HandleSetDecoyNum(SDK::ABP_FirstPersonCharacter_Main_C* character);
 	void TrackDecoyLifecycle(SDK::URuntimePaintableComponent* paintable);
 	void HandleReturnToMainLobby(SDK::APlayerController* playerController);
 	void HandleGodmodeRecovery(FrameContext& ctx);
@@ -166,8 +166,8 @@ public:
 	void Init();																										// GAME THREAD: scan the world and publish a fresh snapshot
 	void RenderEsp();																								// RENDER THREAD: draw the latest published snapshot
 	void ApplyMenuInputLock(bool menuOpen);																			// GAME THREAD: block camera look while the menu is open
-	void DumpBones(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
-	void DumpDeathFlags(SDK::ABP_FirstPersonCharacter_cLeon_Character_C* baseClass);
+	void DumpBones(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
+	void DumpDeathFlags(SDK::ABP_FirstPersonCharacter_Main_C* baseClass);
 
 	// True if Obj is still the live object at its GObjects slot. The scan mutates game state inline on
 	// the game thread, but an SDK call earlier in the same scan can destroy/GC an actor - calling into
@@ -176,7 +176,8 @@ public:
 	// GAME THREAD: combat trace redirect helpers (called from HandleCombat + hkProcessEvent).
 	static void CacheSilentAimTarget(SDK::AActor* target, const SDK::FVector& hitLocation);
 	static void ArmCombatShotRedirect(SDK::AActor* target, const SDK::FVector& hitLocation);
-	static void RequestHunterShot(SDK::ABP_FirstPersonCharacter_cLeon_Character_Hunter_C* hunter);
+	static void DisarmCombatShotRedirect();
+	static void RequestHunterShot(SDK::ABP_FirstPersonCharacter_Main_C* hunter);
 	static bool IsLocalPlayerSpectating(SDK::APlayerController* playerController);
 	static bool IsLocalPlayerInMatch(SDK::APlayerController* playerController);
 	static bool IsLiveCharacterBody(SDK::AActor* body);

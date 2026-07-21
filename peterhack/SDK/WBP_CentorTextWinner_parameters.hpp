@@ -16,6 +16,15 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
+// Function WBP_CentorTextWinner.WBP_CentorTextWinner_C.PreConstruct
+// 0x0001 (0x0001 - 0x0000)
+struct WBP_CentorTextWinner_C_PreConstruct final
+{
+public:
+	bool                                          IsDesignTime_PreConstruct;                         // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_WBP_CentorTextWinner_C_PreConstruct;
+
 // Function WBP_CentorTextWinner.WBP_CentorTextWinner_C.ExecuteUbergraph_WBP_CentorTextWinner
 // 0x0040 (0x0040 - 0x0000)
 struct WBP_CentorTextWinner_C_ExecuteUbergraph_WBP_CentorTextWinner final
@@ -30,15 +39,6 @@ public:
 	struct FWidgetAnimationHandle                 CallFunc_PlayAnimation_ReturnValue;                // 0x002C(0x0010)(NoDestructor, ContainsInstancedReference, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_WBP_CentorTextWinner_C_ExecuteUbergraph_WBP_CentorTextWinner;
-
-// Function WBP_CentorTextWinner.WBP_CentorTextWinner_C.PreConstruct
-// 0x0001 (0x0001 - 0x0000)
-struct WBP_CentorTextWinner_C_PreConstruct final
-{
-public:
-	bool                                          IsDesignTime;                                      // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_WBP_CentorTextWinner_C_PreConstruct;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END

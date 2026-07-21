@@ -27,9 +27,9 @@ public:
 	TArray<class UWBP_BodySelect_C*>              BodySelects;                                       // 0x0508(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
 
 public:
-	void ExecuteUbergraph_WBP_ChooseBody(int32 EntryPoint);
+	void PreConstruct(bool IsDesignTime_PreConstruct);
 	void OnClickWithClass(class UWBP_BodySelect_C* SelfObject, class UClass* BodyClass);
-	void PreConstruct(bool IsDesignTime);
+	void ExecuteUbergraph_WBP_ChooseBody(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

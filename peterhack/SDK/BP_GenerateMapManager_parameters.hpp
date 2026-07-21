@@ -12,8 +12,8 @@
 
 #include "ST_SpawnData_structs.hpp"
 #include "CoreUObject_structs.hpp"
-#include "ST_PriorityGenerateComonents_structs.hpp"
 #include "Engine_structs.hpp"
+#include "ST_PriorityGenerateComonents_structs.hpp"
 #include "ST_GenerateBoxLocation_structs.hpp"
 
 

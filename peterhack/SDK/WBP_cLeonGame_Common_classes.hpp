@@ -27,9 +27,9 @@ public:
 	TArray<class UWBP_ChamelemonName_C*>          Names;                                             // 0x0358(0x0010)(Edit, BlueprintVisible, DisableEditOnInstance, ContainsInstancedReference)
 
 public:
-	void ExecuteUbergraph_WBP_cLeonGame_Common(int32 EntryPoint);
-	void PreConstruct(bool IsDesignTime);
 	void UpdateNamePlates();
+	void PreConstruct(bool IsDesignTime_PreConstruct);
+	void ExecuteUbergraph_WBP_cLeonGame_Common(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

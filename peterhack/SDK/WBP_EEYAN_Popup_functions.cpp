@@ -16,31 +16,23 @@
 
 SDK_NAMESPACE_START
 
-// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.Construct
+// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.PreConstruct
 // (BlueprintCosmetic, Event, Public, BlueprintEvent)
+// Parameters:
+// bool                                    IsDesignTime_PreConstruct                              (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 
-void UWBP_EEYAN_Popup_C::Construct()
+void UWBP_EEYAN_Popup_C::PreConstruct(bool IsDesignTime_PreConstruct)
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "Construct");
+		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "PreConstruct");
 
-	UObject::ProcessEvent(Func, nullptr);
-}
+	Params::WBP_EEYAN_Popup_C_PreConstruct Parms{};
 
+	Parms.IsDesignTime_PreConstruct = IsDesignTime_PreConstruct;
 
-// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.End
-// (BlueprintCallable, BlueprintEvent)
-
-void UWBP_EEYAN_Popup_C::End()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "End");
-
-	UObject::ProcessEvent(Func, nullptr);
+	UObject::ProcessEvent(Func, &Parms);
 }
 
 
@@ -64,23 +56,31 @@ void UWBP_EEYAN_Popup_C::ExecuteUbergraph_WBP_EEYAN_Popup(int32 EntryPoint)
 }
 
 
-// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.PreConstruct
-// (BlueprintCosmetic, Event, Public, BlueprintEvent)
-// Parameters:
-// bool                                    IsDesignTime                                           (BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.End
+// (BlueprintCallable, BlueprintEvent)
 
-void UWBP_EEYAN_Popup_C::PreConstruct(bool IsDesignTime)
+void UWBP_EEYAN_Popup_C::End()
 {
 	static class UFunction* Func = nullptr;
 
 	if (Func == nullptr)
-		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "PreConstruct");
+		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "End");
 
-	Params::WBP_EEYAN_Popup_C_PreConstruct Parms{};
+	UObject::ProcessEvent(Func, nullptr);
+}
 
-	Parms.IsDesignTime = IsDesignTime;
 
-	UObject::ProcessEvent(Func, &Parms);
+// Function WBP_EEYAN_Popup.WBP_EEYAN_Popup_C.Construct
+// (BlueprintCosmetic, Event, Public, BlueprintEvent)
+
+void UWBP_EEYAN_Popup_C::Construct()
+{
+	static class UFunction* Func = nullptr;
+
+	if (Func == nullptr)
+		Func = Class->GetFunction("WBP_EEYAN_Popup_C", "Construct");
+
+	UObject::ProcessEvent(Func, nullptr);
 }
 
 

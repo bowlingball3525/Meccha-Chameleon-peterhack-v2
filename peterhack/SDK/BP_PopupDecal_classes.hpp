@@ -27,8 +27,8 @@ public:
 	int32                                         DecalIndex;                                        // 0x02C0(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, ExposeOnSpawn, HasGetValueTypeHash)
 
 public:
-	void ExecuteUbergraph_BP_PopupDecal(int32 EntryPoint);
 	void ReceiveBeginPlay();
+	void ExecuteUbergraph_BP_PopupDecal(int32 EntryPoint);
 
 public:
 	static class UClass* StaticClass()

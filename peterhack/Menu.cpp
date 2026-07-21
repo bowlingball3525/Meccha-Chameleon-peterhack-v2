@@ -37,45 +37,24 @@ void Menu::Init()
 			}
 
 			ImGui::Separator();
-			ImGui::Text("Triggerbot (hunter only)");
-			ImGui::Separator();
-			ImGui::Checkbox("Triggerbot", &cfg->bTriggerbot);
-			if (cfg->bTriggerbot)
-			{
-				ImGui::TextDisabled("Auto-fires when your crosshair is on an enemy");
-				if (cfg->iTriggerKey == 0)
-					ImGui::TextDisabled("No hold key set — always active");
-				Binds::RecorderRow("Trigger Key (hold)", cfg->iTriggerKey, false, true);
-				if (cfg->iTriggerKey != 0)
-				{
-					ImGui::SameLine();
-					if (ImGui::SmallButton("Clear (always on)"))
-						cfg->iTriggerKey = 0;
-				}
-			}
-
-			ImGui::Separator();
 			ImGui::Text("Silent Aim (hunter only)");
 			ImGui::Separator();
 			ImGui::Checkbox("Silent Aim", &cfg->bSilentAim);
 			if (cfg->bSilentAim)
 				ImGui::TextDisabled("Locks the nearest enemy in the FOV circle and redirects\nyour shot traces / KillPlayer RPC without moving the camera.");
 
-			ImGui::Text("Target selection (aimbot / silent / trigger)");
-			if (cfg->bAimbot || cfg->bSilentAim || cfg->bTriggerbot)
+			ImGui::Text("Target selection (aimbot / silent)");
+			if (cfg->bAimbot || cfg->bSilentAim)
 			{
 				ImGui::SliderFloat("FOV (px)", &cfg->fAimFov, 10.0f, 500.0f, "%.0f");
 				ImGui::Combo("Aim bone", &cfg->iAimBone, "Head\0Chest\0");
-				ImGui::Checkbox("Visible targets only", &cfg->bAimVisibleOnly);
+				bool wallbang = !cfg->bAimVisibleOnly;
+				if (ImGui::Checkbox("Wallbang (shoot through walls)", &wallbang))
+					cfg->bAimVisibleOnly = !wallbang;
 				ImGui::Checkbox("Draw FOV circle", &cfg->bAimDrawFov);
 			}
 			else
-				ImGui::TextDisabled("Enable aimbot, silent aim, or triggerbot to configure FOV");
-
-			ImGui::Separator();
-			ImGui::Text("Recoil");
-			ImGui::Separator();
-			ImGui::Checkbox("No Recoil / No Shake", &cfg->bNoRecoil);
+				ImGui::TextDisabled("Enable aimbot or silent aim to configure FOV");
 
 			ImGui::EndChild();
 			ImGui::EndTabItem();
@@ -458,6 +437,23 @@ void Menu::Init()
 				cheat->RequestReturnToMainLobby();
 
 			ImGui::Separator();
+			ImGui::Text(ICON_FA_CHART_LINE " Nameplate stats");
+			ImGui::Separator();
+			if (ImGui::Checkbox("Override likes & kills (server sync)", &cfg->bOverrideNameplateStats))
+			{
+				if (cfg->bOverrideNameplateStats)
+					Notify::Info("Nameplate stat override enabled");
+			}
+			if (cfg->bOverrideNameplateStats)
+			{
+				ImGui::InputInt("Likes (thumbs up)", &cfg->iCustomLikes);
+				ImGui::InputInt("Kills", &cfg->iCustomKills);
+				if (cfg->iCustomLikes < 0) cfg->iCustomLikes = 0;
+				if (cfg->iCustomKills < 0) cfg->iCustomKills = 0;
+				ImGui::TextDisabled("Synced via server RPC — other players should see these values");
+			}
+
+			ImGui::Separator();
 
 			if (ImGui::Button("Dump Bones (Debugging)"))
 				cfg->bDumpBones = true;
@@ -559,23 +555,6 @@ void Menu::Init()
 			if (ImGui::Checkbox("Streamproof menu", &cfg->bStreamproof))
 				Notify::Info(cfg->bStreamproof ? "Streamproof on (cheat UI hidden from capture)" : "Streamproof off");
 			ImGui::TextDisabled("Hides ESP/menu from OBS/Discord; gameplay still shows");
-
-			ImGui::Separator();
-			ImGui::Text(ICON_FA_CHART_LINE " Nameplate stats");
-			ImGui::Separator();
-			if (ImGui::Checkbox("Override likes & kills (server sync)", &cfg->bOverrideNameplateStats))
-			{
-				if (cfg->bOverrideNameplateStats)
-					Notify::Info("Nameplate stat override enabled");
-			}
-			if (cfg->bOverrideNameplateStats)
-			{
-				ImGui::InputInt("Likes (thumbs up)", &cfg->iCustomLikes);
-				ImGui::InputInt("Kills", &cfg->iCustomKills);
-				if (cfg->iCustomLikes < 0) cfg->iCustomLikes = 0;
-				if (cfg->iCustomKills < 0) cfg->iCustomKills = 0;
-				ImGui::TextDisabled("Synced via server RPC — other players should see these values");
-			}
 
 			ImGui::EndChild();
 			ImGui::EndTabItem();
@@ -755,12 +734,8 @@ void Menu::DrawHud()
 		lines.push_back("Noclip");
 	if (on(HudSection::Combat) && cfg->bAimbot)
 		lines.push_back(std::string(ICON_FA_CROSSHAIRS " Aimbot [") + Binds::BindName(cfg->iAimKey) + "]");
-	if (on(HudSection::Combat) && cfg->bTriggerbot)
-		lines.push_back("Triggerbot");
 	if (on(HudSection::Combat) && cfg->bSilentAim)
 		lines.push_back("Silent Aim");
-	if (on(HudSection::Combat) && cfg->bNoRecoil)
-		lines.push_back("No Recoil");
 	if (on(HudSection::Misc) && cfg->bPreventKick)
 		lines.push_back("Anti Kick");
 	if (on(HudSection::Misc) && cfg->bStreamproof)

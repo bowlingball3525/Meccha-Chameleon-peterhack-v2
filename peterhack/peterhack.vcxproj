@@ -194,9 +194,6 @@
     <ClCompile Include="minhook\src\hook.c" />
     <ClCompile Include="minhook\src\trampoline.c" />
     <ClCompile Include="SDK\Basic.cpp" />
-    <ClCompile Include="SDK\BP_FirstPersonCharacter_cLeon_Character_functions.cpp" />
-    <ClCompile Include="SDK\BP_FirstPersonCharacter_cLeon_Character_Hunter_functions.cpp" />
-    <ClCompile Include="SDK\BP_FirstPersonPlayerState_Online_cLeon_functions.cpp" />
     <ClCompile Include="SDK\BPC_CameraShake_functions.cpp" />
     <ClCompile Include="SDK\EnhancedInput_functions.cpp" />
     <ClCompile Include="SDK\CoreUObject_functions.cpp" />

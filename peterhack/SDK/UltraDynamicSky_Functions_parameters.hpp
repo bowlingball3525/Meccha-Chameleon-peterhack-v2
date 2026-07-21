@@ -81,7 +81,7 @@ struct UltraDynamicSky_Functions_C_Get_Time_of_Day_·_𝖴𝖣𝖲 final
 {
 public:
 	class UObject*                                __WorldContext;                                    // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
-	double                                        Time_of_Day;                                       // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Time_Of_Day;                                       // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	class AUltra_Dynamic_Sky_C*                   CallFunc_Get_Ultra_Dynamic_Sky_UDS;                // 0x0010(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	bool                                          CallFunc_Get_Ultra_Dynamic_Sky_Valid;              // 0x0018(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	uint8                                         Pad_19[0x7];                                       // 0x0019(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
@@ -163,7 +163,7 @@ DUMPER7_ASSERTS_UltraDynamicSky_Functions_C_Set_Date_and_Time_·_𝖴𝖣𝖲;
 struct UltraDynamicSky_Functions_C_Set_Time_of_Day_·_𝖴𝖣𝖲 final
 {
 public:
-	double                                        Time_of_Day;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+	double                                        Time_Of_Day;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 	class UObject*                                __WorldContext;                                    // 0x0008(0x0008)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	class AUltra_Dynamic_Sky_C*                   CallFunc_Get_Ultra_Dynamic_Sky_UDS;                // 0x0010(0x0008)(ZeroConstructor, NoDestructor, HasGetValueTypeHash)
 	bool                                          CallFunc_Get_Ultra_Dynamic_Sky_Valid;              // 0x0018(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)

@@ -14,15 +14,6 @@
 SDK_NAMESPACE_START
 SDK_PARAM_NAMESPACE_START
 
-// Function BP_cLeonDecoy_Base.BP_cLeonDecoy_Base_C.ReceiveTick
-// 0x0004 (0x0004 - 0x0000)
-struct BP_cLeonDecoy_Base_C_ReceiveTick final
-{
-public:
-	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
-};
-DUMPER7_ASSERTS_BP_cLeonDecoy_Base_C_ReceiveTick;
-
 // Function BP_cLeonDecoy_Base.BP_cLeonDecoy_Base_C.ExecuteUbergraph_BP_cLeonDecoy_Base
 // 0x0028 (0x0028 - 0x0000)
 struct BP_cLeonDecoy_Base_C_ExecuteUbergraph_BP_cLeonDecoy_Base final
@@ -40,6 +31,15 @@ public:
 	float                                         K2Node_Event_DeltaSeconds;                         // 0x0024(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
 };
 DUMPER7_ASSERTS_BP_cLeonDecoy_Base_C_ExecuteUbergraph_BP_cLeonDecoy_Base;
+
+// Function BP_cLeonDecoy_Base.BP_cLeonDecoy_Base_C.ReceiveTick
+// 0x0004 (0x0004 - 0x0000)
+struct BP_cLeonDecoy_Base_C_ReceiveTick final
+{
+public:
+	float                                         DeltaSeconds;                                      // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash)
+};
+DUMPER7_ASSERTS_BP_cLeonDecoy_Base_C_ReceiveTick;
 
 SDK_PARAM_NAMESPACE_END
 SDK_NAMESPACE_END
